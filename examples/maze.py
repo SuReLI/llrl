@@ -1,31 +1,26 @@
 import numpy as np
-import llrl.agents.random as ra
-import llrl.agents.asynchronous_dp as asyndp
+import llrl.envs.gridworld as gridworld
+import llrl.agents.random as rd
 
 #np.random.seed(1993)
 
 ### Parameters
-#env = gym.make('RandomNSMDP-v0')
-#env = gym.make('NSFrozenLake-v0')
-#env = gym.make('NSCliff-v0')
-env = gym.make('NSBridge-v0')
+timeout = 100
 
-#agent = ra.MyRandomAgent(env.action_space)
-agent = asyndp.AsynDP(env.action_space, gamma=0.9, max_depth=4, is_model_dynamic=False)
+env = gridworld(map_name='maze', nT=timeout)
 
+agent = rd.RandomAgent(env.action_space)
 agent.display()
 
 ### Run
 done = False
 env.render()
-timeout = 20
-undiscounted_return, total_time, discounted_return = 0.0, 0, 0.0
+discounted_return, undiscounted_return, total_time = 0.0, 0.0, 0
 for t in range(timeout):
-    action = agent.act(env,done)
+    action = agent.act(env, done)
     _, reward, done, _ = env.step(action)
     undiscounted_return += reward
     discounted_return += (agent.gamma**t) * reward
-    print()
     env.render()
     if (t + 1 == timeout) or done:
         total_time = t + 1
