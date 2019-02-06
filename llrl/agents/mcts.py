@@ -4,15 +4,12 @@ MCTS Algorithm
 Required features of the environment:
 env.state
 env.action_space
-env.transition(s ,a)
+env.transition(s, a)
 env.equality_operator(s1, s2)
 """
 
 import random
-import itertools
 import llrl.utils.utils as utils
-from math import sqrt, log
-from copy import copy
 
 
 def chance_node_value(node):
