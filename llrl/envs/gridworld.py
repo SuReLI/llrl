@@ -22,9 +22,9 @@ MAPS = {
         "FFS"
     ],
     "maze2": [
-        "FGF",
+        "HFF",
         "FFF",
-        "FFS"
+        "FSG"
     ]
 }
 
@@ -205,6 +205,8 @@ class GridWorld(object):
         letter_p = self.desc[row_p, col_p]
         if letter_p == b'G':
             return 1.0
+        elif letter_p == b'H':
+            return -1.0
         else:
             return 0.0
 
