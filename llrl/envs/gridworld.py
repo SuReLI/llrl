@@ -1,10 +1,9 @@
 import numpy as np
 import sys
-import dyna_gym.utils.distribution as distribution
-from random import randint
+import llrl.utils.distribution as distribution
+import llrl.utils.colorize as colorize
+from llrl.spaces.discrete import Discrete as Discrete
 from six import StringIO, b
-from gym import Env, spaces, utils
-from gym.envs.toy_text import discrete
 
 UP = 0
 RIGHT = 1
@@ -26,13 +25,15 @@ MAPS = {
     ]
 }
 
+
 class State:
     """
     State class
     """
-    def __init__(self, index, time):
+
+    def __init__(self, index):
         self.index = index
-        self.time = time
+
 
 def categorical_sample(prob_n, np_random):
     """
@@ -42,6 +43,7 @@ def categorical_sample(prob_n, np_random):
     prob_n = np.asarray(prob_n)
     csprob_n = np.cumsum(prob_n)
     return (csprob_n > np_random.rand()).argmax()
+
 
 class Gridworld():
     """
@@ -60,16 +62,16 @@ class Gridworld():
         self.desc = desc = np.asarray(desc, dtype='c')
         self.nrow, self.ncol = desc.shape
 
-        self.nS = self.nrow * self.ncol # n states
-        self.nA = 4 # n actions
-        self.action_space = range(self.nA)
-        self.nT = nT # timeout
+        self.nS = self.nrow * self.ncol  # n states
+        self.nA = 4  # n actions
+        self.action_space = Discrete(self.nA)
+        self.nT = nT  # timeout
         self.is_slippery = is_slippery
-        self.tau = 1 # timestep duration
-        isd = np.array(self.desc == b'S').astype('float64').ravel() # Initial state distribution
+        self.tau = 1  # timestep duration
+        isd = np.array(self.desc == b'S').astype('float64').ravel()  # Initial state distribution
         self.isd = isd / isd.sum()
 
-        reachable_states(State(0),0)#TRM
+        self.reachable_states(State(0), 0)  # TRM
 
         # Seed
         self.np_random = np.random.RandomState()
@@ -81,7 +83,7 @@ class Gridworld():
         IMPORTANT: Does not create a new environment.
         """
         self.state = State(categorical_sample(self.isd, self.np_random))
-        self.lastaction = None # for rendering
+        self.lastaction = None  # for rendering
         return self.state
 
     def display(self):
@@ -96,14 +98,14 @@ class Gridworld():
         """
         Given a position (row, col) and an action a, return the resulting position (row, col).
         """
-        if a==LEFT:
-            col = max(col-1,0)
-        elif a==DOWN:
-            row = min(row+1, self.nrow-1)
-        elif a==RIGHT:
-            col = min(col+1,self.ncol-1)
-        elif a==UP:
-            row = max(row-1,0)
+        if a == LEFT:
+            col = max(col - 1, 0)
+        elif a == DOWN:
+            row = min(row + 1, self.nrow - 1)
+        elif a == RIGHT:
+            col = min(col + 1, self.ncol - 1)
+        elif a == UP:
+            row = max(row - 1, 0)
         return (row, col)
 
     def to_s(self, row, col):
@@ -121,19 +123,6 @@ class Gridworld():
         return row, col
 
     def distance(self, s1, s2):
-        """
-        Return the Manhattan distance between the positions of states s1 and s2.
-        """
-        ''' # outdated
-        if (type(s1) == State) and (type(s2) == State):
-            row1, col1 = self.to_m(s1.index)
-            row2, col2 = self.to_m(s2.index)
-        else:
-            assert (type(s1) == int), 'Error: input state has wrong type: type={}'.format(type(s1))
-            assert (type(s2) == int), 'Error: input state has wrong type: type={}'.format(type(s2))
-            row1, col1 = self.to_m(s1)
-            row2, col2 = self.to_m(s2)
-        '''
         row1, col1 = self.to_m(s1.index)
         row2, col2 = self.to_m(s2.index)
         return abs(row1 - row2) + abs(col1 - col2)
@@ -142,18 +131,22 @@ class Gridworld():
         """
         Return True if the input states have the same indexes.
         """
-        return (s1.index == s2.index)
+        return s1.index == s2.index
 
     def reachable_states(self, s, a):
         row, col = self.to_m(s.index)
         rs = np.zeros(shape=self.nS, dtype=int)
         if self.is_slippery:
-            for b in [(a-1)%4, a, (a+1)%4]:
-                newrow, newcol = self.inc(row, col, b)
-                rs[self.to_s(newrow, newcol)] = 1
+            for b in [(a - 1) % 4, a, (a + 1) % 4]:
+                nr, nc = self.inc(row, col, b)
+                letter = self.desc[nr, nc]
+                if not(bytes(letter) in b'W'):
+                    rs[self.to_s(nr, nc)] = 1
         else:
-            newrow, newcol = self.inc(row, col, a)
-            rs[self.to_s(newrow, newcol)] = 1
+            nr, nc = self.inc(row, col, b)
+            letter = self.desc[nr, nc]
+            if not(bytes(letter) in b'W'):
+                rs[self.to_s(nr, nc)] = 1
         return rs
 
     def distances_matrix(self, states):
@@ -164,11 +157,12 @@ class Gridworld():
         n = len(states)
         D = np.zeros(shape=(n, n))
         for i in range(n):
-            for j in range(i+1, n):
+            for j in range(i + 1, n):
                 dij = self.distance(states[i], states[j])
-                D[i,j] = dij
-                D[j,i] = dij
+                D[i, j] = dij
+                D[j, i] = dij
         return D
+        # TODO here
 
     def generate_transition_matrix(self):
         T = np.zeros(shape=(self.nS, self.nA, self.nT, self.nS), dtype=float)
@@ -179,22 +173,22 @@ class Gridworld():
                 nrs = np.sum(rs)
                 w = distribution.random_tabular(size=nrs)
                 wcopy = list(w.copy())
-                T[s,a,0,:] = np.asarray([0 if x == 0 else wcopy.pop() for x in rs], dtype=float)
+                T[s, a, 0, :] = np.asarray([0 if x == 0 else wcopy.pop() for x in rs], dtype=float)
                 row, col = self.to_m(s)
                 row_p, col_p = self.inc(row, col, a)
                 s_p = self.to_s(row_p, col_p)
-                T[s,a,0,s_p] += 1.0 # Increase weight on normally reached state
-                T[s,a,0,:] /= sum(T[s,a,0,:])
+                T[s, a, 0, s_p] += 1.0  # Increase weight on normally reached state
+                T[s, a, 0, :] /= sum(T[s, a, 0, :])
                 states = []
                 for k in range(len(rs)):
                     if rs[k] == 1:
-                        states.append(State(k,0))
+                        states.append(State(k, 0))
                 D = self.distances_matrix(states)
                 # Build subsequent distributions st LC constraint is respected
-                for t in range(1, self.nT): # t
+                for t in range(1, self.nT):  # t
                     w = distribution.random_constrained(w, D, self.L_p * self.tau)
                     wcopy = list(w.copy())
-                    T[s,a,t,:] = np.asarray([0 if x == 0 else wcopy.pop() for x in rs], dtype=float)
+                    T[s, a, t, :] = np.asarray([0 if x == 0 else wcopy.pop() for x in rs], dtype=float)
         return T
 
     def transition_probability_distribution(self, s, t, a):
@@ -288,7 +282,7 @@ class Gridworld():
         row, col = self.to_m(s.index)
         letter = self.desc[row, col]
         done = bytes(letter) in b'GH'
-        if s.time + self.tau >= self.nT: # Timeout
+        if s.time + self.tau >= self.nT:  # Timeout
             done = True
         return done
 
@@ -306,12 +300,12 @@ class Gridworld():
         row, col = self.state.index // self.ncol, self.state.index % self.ncol
         desc = self.desc.tolist()
         desc = [[c.decode('utf-8') for c in line] for line in desc]
-        desc[row][col] = utils.colorize(desc[row][col], "red", highlight=True)
+        desc[row][col] = colorize.colorize(desc[row][col], "red", highlight=True)
         if self.lastaction is not None:
-            outfile.write("  ({})\n".format(["Left","Down","Right","Up"][self.lastaction]))
+            outfile.write("  ({})\n".format(["Left", "Down", "Right", "Up"][self.lastaction]))
         else:
             outfile.write("\n")
-        outfile.write("\n".join(''.join(line) for line in desc)+"\n")
+        outfile.write("\n".join(''.join(line) for line in desc) + "\n")
 
         if mode != 'human':
             return outfile
