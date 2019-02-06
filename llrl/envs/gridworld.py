@@ -45,7 +45,7 @@ def categorical_sample(prob_n, np_random):
     return (csprob_n > np_random.rand()).argmax()
 
 
-class Gridworld():
+class GridWorld():
     """
     S : starting point
     F : floor
@@ -70,12 +70,12 @@ class Gridworld():
         self.tau = 1  # timestep duration
         isd = np.array(self.desc == b'S').astype('float64').ravel()  # Initial state distribution
         self.isd = isd / isd.sum()
+        self.T = self.generate_transition_matrix()
 
-        self.reachable_states(State(0), 0)  # TRM
-
-        # Seed
         self.np_random = np.random.RandomState()
-        self.reset()
+        self.state = State(categorical_sample(self.isd, self.np_random))
+        self.last_action = None  # for rendering
+        # self.reset()
 
     def reset(self):
         """
@@ -83,16 +83,20 @@ class Gridworld():
         IMPORTANT: Does not create a new environment.
         """
         self.state = State(categorical_sample(self.isd, self.np_random))
-        self.lastaction = None  # for rendering
+        self.last_action = None  # for rendering
         return self.state
 
     def display(self):
-        print('Displaying Gridworld')
+        print('Displaying GridWorld')
         print('map       :')
         print(self.desc)
         print('n states  :', self.nS)
         print('n actions :', self.nA)
         print('timeout   :', self.nT)
+
+    def display_to_m(self, v):
+        for i in range(self.nrow):
+            print(v[i * self.ncol:(i+1) * self.ncol])
 
     def inc(self, row, col, a):
         """
@@ -162,118 +166,64 @@ class Gridworld():
                 D[i, j] = dij
                 D[j, i] = dij
         return D
-        # TODO here
 
     def generate_transition_matrix(self):
-        T = np.zeros(shape=(self.nS, self.nA, self.nT, self.nS), dtype=float)
+        T = np.zeros(shape=(self.nS, self.nA, self.nS), dtype=float)
         for s in range(self.nS):
             for a in range(self.nA):
-                # Generate distribution for t=0
-                rs = self.reachable_states(s, a)
-                nrs = np.sum(rs)
-                w = distribution.random_tabular(size=nrs)
-                wcopy = list(w.copy())
-                T[s, a, 0, :] = np.asarray([0 if x == 0 else wcopy.pop() for x in rs], dtype=float)
+                rs = self.reachable_states(State(s), a)
+                w_slip = 0.1
+                w_norm = 1.0 - float(np.sum(rs)) * w_slip
+                T[s, a, :] = np.asarray([0 if x == 0 else w_slip for x in rs], dtype=float)
                 row, col = self.to_m(s)
                 row_p, col_p = self.inc(row, col, a)
                 s_p = self.to_s(row_p, col_p)
-                T[s, a, 0, s_p] += 1.0  # Increase weight on normally reached state
-                T[s, a, 0, :] /= sum(T[s, a, 0, :])
-                states = []
-                for k in range(len(rs)):
-                    if rs[k] == 1:
-                        states.append(State(k, 0))
-                D = self.distances_matrix(states)
-                # Build subsequent distributions st LC constraint is respected
-                for t in range(1, self.nT):  # t
-                    w = distribution.random_constrained(w, D, self.L_p * self.tau)
-                    wcopy = list(w.copy())
-                    T[s, a, t, :] = np.asarray([0 if x == 0 else wcopy.pop() for x in rs], dtype=float)
+                T[s, a, s_p] += w_norm
         return T
 
-    def transition_probability_distribution(self, s, t, a):
-        assert s.index < self.nS, 'Error: index bigger than nS: s.index={} nS={}'.format(s.index, nS)
-        assert t < self.nT, 'Error: time bigger than nT: t={} nT={}'.format(t, self.nT)
-        assert a < self.nA, 'Error: action bigger than nA: a={} nA={}'.format(a, nA)
-        return self.T[s.index, a, t]
+    def transition_probability_distribution(self, s, a):
+        assert s.index < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s.index, nS)
+        assert a < self.nA, 'Error: action out of range: a={} nA={}'.format(a, nA)
+        return self.T[s.index, a]
 
-    def transition_probability(self, s_p, s, t, a):
-        assert s_p.index < self.nS, 'Error: position bigger than nS: s_p.index={} nS={}'.format(s_p.index, nS)
-        assert s.index < self.nS, 'Error: position bigger than nS: s.index={} nS={}'.format(s.index, nS)
-        assert t < self.nT, 'Error: time bigger than nT: t={} nT={}'.format(t, self.nT)
-        assert a < self.nA, 'Error: action bigger than nA: a={} nA={}'.format(a, nA)
-        return self.T[s.index, a, t, s_p.index]
+    def transition_probability(self, s_p, s, a):
+        assert s.index < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s.index, nS)
+        assert a < self.nA, 'Error: action out of range: a={} nA={}'.format(a, nA)
+        assert s_p.index < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s_p.index, nS)
+        return self.T[s.index, a, s_p.index]
 
-    def get_time(self):
-        return self.state.time
-
-    def dynamic_reachable_states(self, s, a):
-        """
-        Return a numpy array of the reachable states.
-        Dynamic means that time increment is performed.
-        """
-        rs = self.reachable_states(s, a)
-        srs = []
-        for i in range(len(rs)):
-            if rs[i] == 1:
-                srs.append(State(i, s.time + self.tau))
-        assert (len(srs) == sum(rs))
-        return np.array(srs)
-
-    def static_reachable_states(self, s, a):
-        """
-        Return a numpy array of the reachable states.
-        Static means that no time increment is performed.
-        """
-        rs = self.reachable_states(s, a)
-        srs = []
-        for i in range(len(rs)):
-            if rs[i] == 1:
-                srs.append(State(i, s.time))
-        assert (len(srs) == sum(rs))
-        return np.array(srs)
-
-    def transition(self, s, a, is_model_dynamic=True):
+    def transition(self, s, a):
         """
         Transition operator, return the resulting state, reward and a boolean indicating
         whether the termination criterion is reached or not.
-        The boolean is_model_dynamic indicates whether the temporal transition is applied
-        to the state vector or not.
         """
-        d = self.transition_probability_distribution(s, s.time, a)
-        p_p = categorical_sample(d, self.np_random)
-        if is_model_dynamic:
-            s_p = State(p_p, s.time + self.tau)
-        else:
-            s_p = State(p_p, s.time)
-        r = self.instant_reward(s, s.time, a, s_p)
+        d = self.transition_probability_distribution(s, a)
+        s_p = State(categorical_sample(d, self.np_random))
+        r = self.instant_reward(s, a, s_p)
         done = self.is_terminal(s_p)
         return s_p, r, done
 
-    def instant_reward(self, s, t, a, s_p):
+    def instant_reward(self, s, a, s_p):
         """
         Return the instant reward for transition s, t, a, s_p
         """
-        newrow, newcol = self.to_m(s_p.index)
-        newletter = self.desc[newrow, newcol]
+        row_p, col_p = self.to_m(s_p.index)
+        letter_p = self.desc[row_p, col_p]
         if newletter == b'G':
-            return +1.0
-        elif newletter == b'H':
-            return -1.0
+            return 1.0
         else:
             return 0.0
 
-    def expected_reward(self, s, t, a):
+    def expected_reward(self, s, a):
         """
         Return the expected reward function at s, t, a
         """
-        R = 0.0
-        d = self.transition_probability_distribution(s, t, a)
+        r = 0.0
+        d = self.transition_probability_distribution(s, a)
         for i in range(len(d)):
-            s_p = State(i, s.time + self.tau)
-            r_i = self.instant_reward(s, t, a, s_p)
-            R += r_i * d[i]
-        return R
+            r_i = self.instant_reward(s, a, State(i))
+            r += r_i * d[i]
+        return r
 
     def is_terminal(self, s):
         """
@@ -287,10 +237,10 @@ class Gridworld():
         return done
 
     def step(self, a):
-        s, r, done = self.transition(self.state, a, True)
+        s, r, done = self.transition(self.state, a)
         self.state = s
-        self.lastaction = a
-        return (s, r, done, {})
+        self.last_action = a
+        return s, r, done
 
     def render(self, mode='human', close=False):
         if close:
@@ -301,8 +251,8 @@ class Gridworld():
         desc = self.desc.tolist()
         desc = [[c.decode('utf-8') for c in line] for line in desc]
         desc[row][col] = colorize.colorize(desc[row][col], "red", highlight=True)
-        if self.lastaction is not None:
-            outfile.write("  ({})\n".format(["Left", "Down", "Right", "Up"][self.lastaction]))
+        if self.last_action is not None:
+            outfile.write("  ({})\n".format(["Left", "Down", "Right", "Up"][self.last_action]))
         else:
             outfile.write("\n")
         outfile.write("\n".join(''.join(line) for line in desc) + "\n")
