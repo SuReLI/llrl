@@ -10,6 +10,7 @@ env.equality_operator(s1, s2)
 
 import random
 import llrl.utils.utils as utils
+import llrl.spaces.discrete as discrete
 
 
 def chance_node_value(node):
@@ -45,7 +46,7 @@ def mcts_procedure(ag, tree_policy, env, done):
         # Selection
         select = True
         while select:
-            if (type(node) == DecisionNode):  # DecisionNode
+            if type(node) == DecisionNode:  # DecisionNode
                 if node.is_terminal:
                     select = False  # Selected a terminal DecisionNode
                 else:
@@ -56,7 +57,7 @@ def mcts_procedure(ag, tree_policy, env, done):
             else:  # ChanceNode
                 state_p, reward, terminal = env.transition(node.parent.state, node.action)
                 rewards.append(reward)
-                if (len(node.children) == 0):
+                if len(node.children) == 0:
                     select = False  # Selected a ChanceNode
                 else:
                     new_state = True
@@ -70,7 +71,7 @@ def mcts_procedure(ag, tree_policy, env, done):
 
         # Expansion
         if (type(node) == ChanceNode) or ((type(node) == DecisionNode) and not node.is_terminal):
-            if (type(node) == DecisionNode):
+            if type(node) == DecisionNode:
                 node.children.append(ChanceNode(node, node.possible_actions.pop()))
                 node = node.children[-1]
                 state_p, reward, terminal = env.transition(node.parent.state, node.action)
@@ -90,7 +91,7 @@ def mcts_procedure(ag, tree_policy, env, done):
             estimate += reward * (ag.gamma ** t)
             t += 1
 
-        # Backpropagation
+        # Back-propagation
         node.visits += 1
         node = node.parent
         assert (type(node) == ChanceNode)
@@ -156,15 +157,15 @@ class MCTS(object):
         Expect to receive them in the same order as init.
         p : list of parameters
         """
-        if p == None:
+        if p is None:
             self.__init__(self.action_space)
         else:
-            utils.assert_types(p, [spaces.discrete.Discrete, int, int, float, bool])
-            self.__init__(p[0], p[1], p[2], p[3], p[4])
+            utils.assert_types(p, [discrete.Discrete, int, int, float])
+            self.__init__(p[0], p[1], p[2], p[3])
 
     def display(self):
         """
-        Display infos about the attributes.
+        Display info about the attributes.
         """
         print('Displaying MCTS agent:')
         print('Action space       :', self.action_space)
