@@ -17,16 +17,14 @@ MAPS = {
         "HFFG"
     ],
     "maze1": [
-        "GFFF",
-        "FFFF",
-        "FFFF",
-        "FFFS"
+        "GFF",
+        "FFF",
+        "FFS"
     ],
     "maze2": [
-        "FGFF",
-        "FFFF",
-        "FFFF",
-        "FFFS"
+        "FGF",
+        "FFF",
+        "FFS"
     ]
 }
 

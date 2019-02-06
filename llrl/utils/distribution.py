@@ -6,7 +6,6 @@ import numpy as np
 import llrl.utils.utils as utils
 from itertools import combinations
 from scipy.optimize import linprog
-from math import sqrt
 
 def marginal_matrices(n):
     A = np.zeros(shape=(n, n**2))
