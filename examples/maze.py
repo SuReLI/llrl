@@ -2,9 +2,9 @@ import numpy as np
 import llrl.envs.gridworld as gridworld
 import llrl.agents.random as rd
 
-#np.random.seed(1993)
+# np.random.seed(1993)
 
-### Parameters
+# Parameters
 timeout = 100
 
 env = gridworld(map_name='maze', nT=timeout)
@@ -12,7 +12,7 @@ env = gridworld(map_name='maze', nT=timeout)
 agent = rd.RandomAgent(env.action_space)
 agent.display()
 
-### Run
+# Run
 done = False
 env.render()
 discounted_return, undiscounted_return, total_time = 0.0, 0.0, 0
