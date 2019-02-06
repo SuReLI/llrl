@@ -1,9 +1,8 @@
 import numpy as np
 import sys
-import llrl.utils.distribution as distribution
 import llrl.utils.colorize as colorize
 from llrl.spaces.discrete import Discrete as Discrete
-from six import StringIO, b
+from six import StringIO
 
 UP = 0
 RIGHT = 1
@@ -17,22 +16,19 @@ MAPS = {
         "FFFH",
         "HFFG"
     ],
-    "maze": [
+    "maze1": [
         "GFFF",
+        "FFFF",
+        "FFFF",
+        "FFFS"
+    ],
+    "maze2": [
+        "FGFF",
         "FFFF",
         "FFFF",
         "FFFS"
     ]
 }
-
-
-class State:
-    """
-    State class
-    """
-
-    def __init__(self, index):
-        self.index = index
 
 
 def categorical_sample(prob_n, np_random):
@@ -45,7 +41,7 @@ def categorical_sample(prob_n, np_random):
     return (csprob_n > np_random.rand()).argmax()
 
 
-class GridWorld():
+class GridWorld(object):
     """
     S : starting point
     F : floor
@@ -65,7 +61,7 @@ class GridWorld():
         self.nS = self.nrow * self.ncol  # n states
         self.nA = 4  # n actions
         self.action_space = Discrete(self.nA)
-        #self.nT = nT
+        # self.nT = nT
         self.is_slippery = is_slippery
         self.tau = 1  # timestep duration
         isd = np.array(self.desc == b'S').astype('float64').ravel()  # Initial state distribution
@@ -73,7 +69,7 @@ class GridWorld():
         self.T = self.generate_transition_matrix()
 
         self.np_random = np.random.RandomState()
-        self.state = State(categorical_sample(self.isd, self.np_random))
+        self.state = categorical_sample(self.isd, self.np_random)
         self.last_action = None  # for rendering
         # self.reset()
 
@@ -82,7 +78,7 @@ class GridWorld():
         Reset the environment.
         IMPORTANT: Does not create a new environment.
         """
-        self.state = State(categorical_sample(self.isd, self.np_random))
+        self.state = categorical_sample(self.isd, self.np_random)
         self.last_action = None  # for rendering
         return self.state
 
@@ -96,7 +92,7 @@ class GridWorld():
 
     def display_to_m(self, v):
         for i in range(self.nrow):
-            print(v[i * self.ncol:(i+1) * self.ncol])
+            print(v[i * self.ncol:(i + 1) * self.ncol])
 
     def inc(self, row, col, a):
         """
@@ -127,29 +123,29 @@ class GridWorld():
         return row, col
 
     def distance(self, s1, s2):
-        row1, col1 = self.to_m(s1.index)
-        row2, col2 = self.to_m(s2.index)
+        row1, col1 = self.to_m(s1)
+        row2, col2 = self.to_m(s2)
         return abs(row1 - row2) + abs(col1 - col2)
 
     def equality_operator(self, s1, s2):
         """
         Return True if the input states have the same indexes.
         """
-        return s1.index == s2.index
+        return s1 == s2
 
     def reachable_states(self, s, a):
-        row, col = self.to_m(s.index)
+        row, col = self.to_m(s)
         rs = np.zeros(shape=self.nS, dtype=int)
         if self.is_slippery:
             for b in [(a - 1) % 4, a, (a + 1) % 4]:
                 nr, nc = self.inc(row, col, b)
                 letter = self.desc[nr, nc]
-                if not(bytes(letter) in b'W'):
+                if not (bytes(letter) in b'W'):
                     rs[self.to_s(nr, nc)] = 1
         else:
             nr, nc = self.inc(row, col, a)
             letter = self.desc[nr, nc]
-            if not(bytes(letter) in b'W'):
+            if not (bytes(letter) in b'W'):
                 rs[self.to_s(nr, nc)] = 1
         return rs
 
@@ -171,7 +167,7 @@ class GridWorld():
         T = np.zeros(shape=(self.nS, self.nA, self.nS), dtype=float)
         for s in range(self.nS):
             for a in range(self.nA):
-                rs = self.reachable_states(State(s), a)
+                rs = self.reachable_states(s, a)
                 w_slip = 0.1
                 w_norm = 1.0 - float(np.sum(rs)) * w_slip
                 T[s, a, :] = np.asarray([0 if x == 0 else w_slip for x in rs], dtype=float)
@@ -182,15 +178,15 @@ class GridWorld():
         return T
 
     def transition_probability_distribution(self, s, a):
-        assert s.index < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s.index, nS)
+        assert s < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s, nS)
         assert a < self.nA, 'Error: action out of range: a={} nA={}'.format(a, nA)
-        return self.T[s.index, a]
+        return self.T[s, a]
 
     def transition_probability(self, s_p, s, a):
-        assert s.index < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s.index, nS)
+        assert s < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s, nS)
         assert a < self.nA, 'Error: action out of range: a={} nA={}'.format(a, nA)
-        assert s_p.index < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s_p.index, nS)
-        return self.T[s.index, a, s_p.index]
+        assert s_p < self.nS, 'Error: state out of range: s.index={} nS={}'.format(s_p, nS)
+        return self.T[s, a, s_p]
 
     def transition(self, s, a):
         """
@@ -198,7 +194,7 @@ class GridWorld():
         whether the termination criterion is reached or not.
         """
         d = self.transition_probability_distribution(s, a)
-        s_p = State(categorical_sample(d, self.np_random))
+        s_p = categorical_sample(d, self.np_random)
         r = self.instant_reward(s, a, s_p)
         done = self.is_terminal(s_p)
         return s_p, r, done
@@ -207,7 +203,7 @@ class GridWorld():
         """
         Return the instant reward for transition s, t, a, s_p
         """
-        row_p, col_p = self.to_m(s_p.index)
+        row_p, col_p = self.to_m(s_p)
         letter_p = self.desc[row_p, col_p]
         if letter_p == b'G':
             return 1.0
@@ -221,7 +217,7 @@ class GridWorld():
         r = 0.0
         d = self.transition_probability_distribution(s, a)
         for i in range(len(d)):
-            r_i = self.instant_reward(s, a, State(i))
+            r_i = self.instant_reward(s, a, i)
             r += r_i * d[i]
         return r
 
@@ -229,10 +225,10 @@ class GridWorld():
         """
         Return True if the input state is terminal.
         """
-        row, col = self.to_m(s.index)
+        row, col = self.to_m(s)
         letter = self.desc[row, col]
         done = bytes(letter) in b'GH'
-        #if s.time + self.tau >= self.nT:  # Timeout
+        # if s.time + self.tau >= self.nT:  # Timeout
         #    done = True
         return done
 
@@ -247,7 +243,7 @@ class GridWorld():
             return
         outfile = StringIO() if mode == 'ansi' else sys.stdout
 
-        row, col = self.state.index // self.ncol, self.state.index % self.ncol
+        row, col = self.state // self.ncol, self.state % self.ncol
         desc = self.desc.tolist()
         desc = [[c.decode('utf-8') for c in line] for line in desc]
         desc[row][col] = colorize.colorize(desc[row][col], "red", highlight=True)
