@@ -9,7 +9,6 @@ env.transition_probability_distribution(s, a)
 
 import numpy as np
 import llrl.utils.distribution as distribution
-from copy import copy
 
 
 class Handler(object):
@@ -25,7 +24,6 @@ class Handler(object):
         tmp_d = np.array(d)
         gap = threshold + 1.0
         while gap > threshold:
-            print('New iterate')  # TODO remove
             # Iterate
             for i in range(ns):
                 for j in range(ns):
@@ -38,7 +36,6 @@ class Handler(object):
                         delta_r = abs(m1.expected_reward(i, a) - m2.expected_reward(j, a))
                         d_ija = max(d_ija, self.cr * delta_r + self.ct * delta_t)
                     tmp_d[i, j] = d_ija
-                print('  ', i/ns, '%')  # TODO remove
             # Measure gap
             gap = 0.0
             for i in range(ns):
@@ -46,6 +43,4 @@ class Handler(object):
                     gap = max(gap, abs(d[i, j] - tmp_d[i, j]))
             # Update
             d = np.array(tmp_d)
-            print('gap =', gap)
-            print('d =\n', d)
         return d
