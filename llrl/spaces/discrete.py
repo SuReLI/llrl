@@ -16,3 +16,6 @@ class Discrete:
         
     def shape(self):
         return (self.n,)
+
+    def as_list(self):
+        return list(range(self.n))

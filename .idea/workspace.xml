@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7f396d0b-2dcc-4b02-8856-142fe866b7e6" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/examples/maze.py" beforeDir="false" afterPath="$PROJECT_DIR$/examples/maze.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/llrl/agents/random.py" beforeDir="false" afterPath="$PROJECT_DIR$/llrl/agents/random.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/llrl/envs/gridworld.py" beforeDir="false" afterPath="$PROJECT_DIR$/llrl/envs/gridworld.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/llrl/agents/mcts.py" beforeDir="false" afterPath="$PROJECT_DIR$/llrl/agents/mcts.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/llrl/spaces/discrete.py" beforeDir="false" afterPath="$PROJECT_DIR$/llrl/spaces/discrete.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -18,8 +17,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/maze.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="133">
-              <caret line="7" column="60" selection-start-line="7" selection-start-column="60" selection-end-line="7" selection-end-column="60" />
+            <state relative-caret-position="209">
+              <caret line="11" column="17" selection-start-line="11" selection-start-column="17" selection-end-line="11" selection-end-column="17" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -36,11 +35,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/llrl/envs/gridworld.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="579">
-              <caret line="254" column="73" selection-start-line="254" selection-start-column="73" selection-end-line="254" selection-end-column="73" />
+            <state relative-caret-position="465">
+              <caret line="248" lean-forward="true" selection-start-line="248" selection-end-line="248" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -51,8 +50,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/llrl/agents/mcts.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="343">
-              <caret line="155" column="30" lean-forward="true" selection-start-line="155" selection-start-column="30" selection-end-line="156" selection-end-column="26" />
+            <state relative-caret-position="256">
+              <caret line="45" column="23" lean-forward="true" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
+              <folding>
+                <element signature="e#160#173#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/llrl/spaces/discrete.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="380">
+              <caret line="20" column="32" selection-start-line="20" selection-start-column="32" selection-end-line="20" selection-end-column="32" />
             </state>
           </provider>
         </entry>
@@ -68,6 +79,13 @@
       <find>inc</find>
       <find>generate_transition_matrix</find>
       <find>self.nT</find>
+      <find>is_model_dynamic</find>
+      <find>utils</find>
+      <find>spaces</find>
+      <find>combinations</find>
+      <find>action_space</find>
+      <find>copy</find>
+      <find>shuff</find>
     </findStrings>
     <replaceStrings>
       <replace>total_return</replace>
@@ -79,10 +97,11 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/llrl/spaces/discrete.py" />
         <option value="$PROJECT_DIR$/llrl/agents/random.py" />
-        <option value="$PROJECT_DIR$/examples/maze.py" />
         <option value="$PROJECT_DIR$/llrl/envs/gridworld.py" />
+        <option value="$PROJECT_DIR$/examples/maze.py" />
+        <option value="$PROJECT_DIR$/llrl/agents/mcts.py" />
+        <option value="$PROJECT_DIR$/llrl/spaces/discrete.py" />
       </list>
     </option>
   </component>
@@ -200,17 +219,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/llrl/spaces/discrete.py">
+    <entry file="file://$PROJECT_DIR$/llrl/envs/gridworld.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="17" column="24" lean-forward="true" selection-start-line="17" selection-start-column="24" selection-end-line="17" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/llrl/agents/mcts.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="343">
-          <caret line="155" column="30" lean-forward="true" selection-start-line="155" selection-start-column="30" selection-end-line="156" selection-end-column="26" />
+        <state relative-caret-position="465">
+          <caret line="248" lean-forward="true" selection-start-line="248" selection-end-line="248" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
@@ -223,21 +238,28 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/maze.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="133">
-          <caret line="7" column="60" selection-start-line="7" selection-start-column="60" selection-end-line="7" selection-end-column="60" />
+        <state relative-caret-position="209">
+          <caret line="11" column="17" selection-start-line="11" selection-start-column="17" selection-end-line="11" selection-end-column="17" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/llrl/envs/gridworld.py">
+    <entry file="file://$PROJECT_DIR$/llrl/agents/mcts.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="579">
-          <caret line="254" column="73" selection-start-line="254" selection-start-column="73" selection-end-line="254" selection-end-column="73" />
+        <state relative-caret-position="256">
+          <caret line="45" column="23" lean-forward="true" selection-start-line="45" selection-start-column="23" selection-end-line="45" selection-end-column="23" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#160#173#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/llrl/spaces/discrete.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="20" column="32" selection-start-line="20" selection-start-column="32" selection-end-line="20" selection-end-column="32" />
         </state>
       </provider>
     </entry>
