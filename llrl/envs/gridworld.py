@@ -54,7 +54,7 @@ class GridWorld():
     G : goal (terminal)
     """
 
-    def __init__(self, desc=None, map_name="maze", nT=100, is_slippery=True):
+    def __init__(self, desc=None, map_name="maze", is_slippery=True):
         if desc is None and map_name is None:
             raise ValueError('Must provide either desc or map_name')
         elif desc is None:
@@ -65,7 +65,7 @@ class GridWorld():
         self.nS = self.nrow * self.ncol  # n states
         self.nA = 4  # n actions
         self.action_space = Discrete(self.nA)
-        self.nT = nT  # timeout
+        #self.nT = nT
         self.is_slippery = is_slippery
         self.tau = 1  # timestep duration
         isd = np.array(self.desc == b'S').astype('float64').ravel()  # Initial state distribution
@@ -147,7 +147,7 @@ class GridWorld():
                 if not(bytes(letter) in b'W'):
                     rs[self.to_s(nr, nc)] = 1
         else:
-            nr, nc = self.inc(row, col, b)
+            nr, nc = self.inc(row, col, a)
             letter = self.desc[nr, nc]
             if not(bytes(letter) in b'W'):
                 rs[self.to_s(nr, nc)] = 1
@@ -209,7 +209,7 @@ class GridWorld():
         """
         row_p, col_p = self.to_m(s_p.index)
         letter_p = self.desc[row_p, col_p]
-        if newletter == b'G':
+        if letter_p == b'G':
             return 1.0
         else:
             return 0.0
@@ -232,8 +232,8 @@ class GridWorld():
         row, col = self.to_m(s.index)
         letter = self.desc[row, col]
         done = bytes(letter) in b'GH'
-        if s.time + self.tau >= self.nT:  # Timeout
-            done = True
+        #if s.time + self.tau >= self.nT:  # Timeout
+        #    done = True
         return done
 
     def step(self, a):
@@ -252,7 +252,7 @@ class GridWorld():
         desc = [[c.decode('utf-8') for c in line] for line in desc]
         desc[row][col] = colorize.colorize(desc[row][col], "red", highlight=True)
         if self.last_action is not None:
-            outfile.write("  ({})\n".format(["Left", "Down", "Right", "Up"][self.last_action]))
+            outfile.write("  ({})\n".format(["Up", "Right", "Down", "Left"][self.last_action]))
         else:
             outfile.write("\n")
         outfile.write("\n".join(''.join(line) for line in desc) + "\n")

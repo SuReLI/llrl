@@ -6,8 +6,9 @@ import llrl.utils.utils as utils
 
 
 class RandomAgent(object):
-    def __init__(self, action_space):
+    def __init__(self, action_space, gamma=0.9):
         self.action_space = action_space
+        self.gamma = gamma
 
     def reset(self, p=None):
         """

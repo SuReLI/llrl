@@ -5,7 +5,7 @@ import llrl.agents.random as rd
 # Parameters
 np.random.seed(1993)
 timeout = 100
-env = gridworld.Gridworld(map_name='maze', nT=timeout)
+env = gridworld.GridWorld(map_name='maze', is_slippery=False)
 agent = rd.RandomAgent(env.action_space)
 agent.display()
 
@@ -15,7 +15,7 @@ env.render()
 discounted_return, total_return, total_time = 0.0, 0.0, 0
 for t in range(timeout):
     action = agent.act(env, done)
-    _, reward, done, _ = env.step(action)
+    _, reward, done = env.step(action)
     total_return += reward
     discounted_return += (agent.gamma**t) * reward
     env.render()
