@@ -24,7 +24,7 @@ class UCT(object):
     """
     def __init__(self, action_space, rollouts=100, horizon=100, gamma=0.9, ucb_constant=6.36396103068):
         self.action_space = action_space
-        self.n_actions = len(self.action_space)
+        self.n_actions = self.action_space.n
         self.rollouts = rollouts
         self.horizon = horizon
         self.gamma = gamma

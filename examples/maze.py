@@ -2,6 +2,7 @@ import numpy as np
 import llrl.envs.gridworld as gridworld
 import llrl.agents.random as rd
 import llrl.agents.mcts as mcts
+import llrl.agents.uct as uct
 
 # Parameters
 np.random.seed(1993)
@@ -10,6 +11,7 @@ env = gridworld.GridWorld(map_name='maze', is_slippery=False)
 
 agent = rd.RandomAgent(env.action_space)
 agent = mcts.MCTS(env.action_space)
+agent = uct.UCT(env.action_space)
 agent.display()
 
 # Run
