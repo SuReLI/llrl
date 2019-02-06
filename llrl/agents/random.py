@@ -4,7 +4,8 @@ Random Agent
 
 import llrl.utils.utils as utils
 
-class MyRandomAgent(object):
+
+class RandomAgent(object):
     def __init__(self, action_space):
         self.action_space = action_space
 
@@ -15,12 +16,12 @@ class MyRandomAgent(object):
         p : list of parameters
         """
         if p is not None:
-            utils.assert_types(p,[spaces.discrete.Discrete])
+            utils.assert_types(p, [spaces.discrete.Discrete])
             self.__init__(p[0])
 
     def display(self):
         """
-        Display infos about the attributes.
+        Display info about the attributes.
         """
         print('Displaying Random agent:')
         print('Action space       :', self.action_space)
