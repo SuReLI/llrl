@@ -17,12 +17,19 @@ MAPS = {
         "HFFG"
     ],
     "maze1": [
-        "GFF",
-        "FFF",
-        "FFS"
+        "GFFF",
+        "FFFF",
+        "FFFF",
+        "FFFS"
     ],
     "maze2": [
-        "HFF",
+        "FGFF",
+        "FFFF",
+        "FFFF",
+        "FFFS"
+    ],
+    "maze3": [
+        "HHF",
         "FFF",
         "FSG"
     ]
@@ -215,10 +222,11 @@ class GridWorld(object):
         Return the expected reward function at s, t, a
         """
         r = 0.0
-        d = self.transition_probability_distribution(s, a)
-        for i in range(len(d)):
-            r_i = self.instant_reward(s, a, i)
-            r += r_i * d[i]
+        if not self.is_terminal(s):
+            d = self.transition_probability_distribution(s, a)
+            for i in range(len(d)):
+                r_i = self.instant_reward(s, a, i)
+                r += r_i * d[i]
         return r
 
     def is_terminal(self, s):
