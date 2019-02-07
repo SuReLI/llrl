@@ -16,8 +16,8 @@ dv = abs(v1 - v2)
 h = Handler()
 state_distances = h.bi_simulation_distance(m1, m2)
 distance_m1_m2 = h.mdp_distance(m1, m2, state_distances)
-
-gap = (1.0 / (h.cr * (1.0 - gamma))) * distance_m1_m2
+lipschitz_constant = (1.0 / (h.cr * (1.0 - gamma)))
+gap = lipschitz_constant * distance_m1_m2
 
 upper_bounds = np.array(v1, dtype=float)
 for i in range(len(upper_bounds)):
@@ -36,6 +36,8 @@ m1.display_to_m(dv)
 print()
 
 print('Distance between states :\n', state_distances)
-print('Distance between MDPs   : ', distance_m1_m2)
-print('Predicted maximum gap   : ', gap)
-print('Upper-bounds for MDP 2  :\n', upper_bounds)
+print('Distance between MDPs d = ', distance_m1_m2)
+print('Lipschitz constant    K = ', lipschitz_constant)
+print('Gap               K * d = ', gap)
+print('Upper-bounds for MDP 2  :')
+m1.display_to_m(upper_bounds)
