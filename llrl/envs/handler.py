@@ -37,10 +37,10 @@ class Handler(object):
                 for j in range(ns):
                     d_ija = 0.0
                     for a in range(na):
-                        d1 = m1.transition_probability_distribution(i, a)
-                        d2 = m2.transition_probability_distribution(j, a)
-                        # delta_t = distribution.wass_dual(d1, d2, d)
-                        delta_t = distribution.wass_primal(d1, d2, d)
+                        di = m1.transition_probability_distribution(i, a)
+                        dj = m2.transition_probability_distribution(j, a)
+                        # delta_t = distribution.wass_dual(di, dj, d)
+                        delta_t = distribution.wass_primal(di, dj, d)
                         delta_r = abs(m1.expected_reward(i, a) - m2.expected_reward(j, a))
                         d_ija = max(d_ija, self.cr * delta_r + self.ct * delta_t)
                     tmp_d[i, j] = d_ija
