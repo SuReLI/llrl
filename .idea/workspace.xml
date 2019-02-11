@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7f396d0b-2dcc-4b02-8856-142fe866b7e6" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/experiments/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/llrl/envs/gridworld.py" beforeDir="false" afterPath="$PROJECT_DIR$/llrl/envs/gridworld.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -25,8 +24,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/llrl/envs/gridworld.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="529">
-              <caret line="231" column="51" lean-forward="true" selection-start-line="231" selection-start-column="51" selection-end-line="231" selection-end-column="51" />
+            <state relative-caret-position="491">
+              <caret line="235" column="31" lean-forward="true" selection-start-line="235" selection-start-column="31" selection-end-line="235" selection-end-column="31" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -380,8 +379,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/llrl/envs/gridworld.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="529">
-          <caret line="231" column="51" lean-forward="true" selection-start-line="231" selection-start-column="51" selection-end-line="231" selection-end-column="51" />
+        <state relative-caret-position="491">
+          <caret line="235" column="31" lean-forward="true" selection-start-line="235" selection-start-column="31" selection-end-line="235" selection-end-column="31" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
           </folding>

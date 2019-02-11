@@ -232,11 +232,10 @@ class GridWorld(object):
         Return the expected reward function at s, a
         """
         r = 0.0
-        if not self.is_terminal(s):
-            d = self.transition_probability_distribution(s, a)
-            for i in range(len(d)):
-                r_i = self.instant_reward(s, a, i)
-                r += r_i * d[i]
+        d = self.transition_probability_distribution(s, a)
+        for i in range(len(d)):
+            r_i = self.instant_reward(s, a, i)
+            r += r_i * d[i]
         return r
 
     def is_terminal(self, s):
