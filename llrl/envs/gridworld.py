@@ -149,12 +149,16 @@ class GridWorld(object):
                 for b in [(a - 1) % 4, a, (a + 1) % 4]:
                     nr, nc = self.inc(row, col, b)
                     letter = self.desc[nr, nc]
-                    if not (bytes(letter) in b'W'):
+                    if bytes(letter) in b'W':
+                        rs[self.to_s(row, col)] = 1
+                    else:
                         rs[self.to_s(nr, nc)] = 1
             else:
                 nr, nc = self.inc(row, col, a)
                 letter = self.desc[nr, nc]
-                if not (bytes(letter) in b'W'):
+                if bytes(letter) in b'W':
+                    rs[self.to_s(row, col)] = 1
+                else:
                     rs[self.to_s(nr, nc)] = 1
         return rs
 

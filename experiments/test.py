@@ -26,6 +26,9 @@ v1 = dynamic_programming(m1, gamma=gamma, threshold=1e-10, iter_max=1000, verbos
 v2 = dynamic_programming(m2, gamma=gamma, threshold=1e-10, iter_max=1000, verbose=False)
 dv = abs(v1 - v2)
 
+print(m1.reachable_states(3, 1))
+print(m2.reachable_states(3, 1))
+
 '''
 h = Handler()
 state_distances = h.bi_simulation_distance(m1, m2)
