@@ -26,9 +26,14 @@ def wass_primal(u, v, d):
     n = d.shape[0]
     obj = np.reshape(d, newshape=(n * n))
     A, B = marginal_matrices(n)
+    ''' # outdated
     Ae = np.concatenate((A, B), axis=0)
     be = np.concatenate((u, v))
+    '''
+    Ae = np.concatenate((A, B[0:-1]), axis=0)
+    be = np.concatenate((u, v[0:-1]))
     res = linprog(obj, A_eq=Ae, b_eq=be)
+
     return res.fun
 
 

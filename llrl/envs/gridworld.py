@@ -19,19 +19,16 @@ MAPS = {
     "maze1": [
         "WFF",
         "GSF",
-        "FFF",
         "FFF"
     ],
     "maze2": [
         "WGF",
         "FSF",
-        "FFF",
         "FFF"
     ],
     "maze3": [
         "FFF",
         "FSF",
-        "FFF",
         "FGW"
     ]
 }
