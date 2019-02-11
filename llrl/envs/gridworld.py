@@ -214,7 +214,7 @@ class GridWorld(object):
 
     def instant_reward(self, s, a, s_p):
         """
-        Return the instant reward for transition s, t, a, s_p
+        Return the instant reward for transition s, a, s_p
         """
         row, col = self.to_m(s)
         letter = self.desc[row, col]
@@ -229,7 +229,7 @@ class GridWorld(object):
 
     def expected_reward(self, s, a):
         """
-        Return the expected reward function at s, t, a
+        Return the expected reward function at s, a
         """
         r = 0.0
         if not self.is_terminal(s):
