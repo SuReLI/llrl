@@ -17,21 +17,22 @@ MAPS = {
         "HFFG"
     ],
     "maze1": [
-        "GFFF",
-        "FFFF",
-        "FFFF",
-        "FFFS"
+        "WFF",
+        "GSF",
+        "FFF",
+        "FFF"
     ],
     "maze2": [
-        "FGFF",
-        "FFFF",
-        "FFFF",
-        "FFFS"
+        "WGF",
+        "FSF",
+        "FFF",
+        "FFF"
     ],
     "maze3": [
-        "HHF",
         "FFF",
-        "FSG"
+        "FSF",
+        "FFF",
+        "FGW"
     ]
 }
 
@@ -93,7 +94,7 @@ class GridWorld(object):
         print(self.desc)
         print('n states  :', self.nS)
         print('n actions :', self.nA)
-        print('timeout   :', self.nT)
+        # print('timeout   :', self.nT)
 
     def display_to_m(self, v):
         for i in range(self.nrow):
@@ -111,7 +112,7 @@ class GridWorld(object):
             col = min(col + 1, self.ncol - 1)
         elif a == UP:
             row = max(row - 1, 0)
-        return (row, col)
+        return row, col
 
     def to_s(self, row, col):
         """
@@ -139,19 +140,22 @@ class GridWorld(object):
         return s1 == s2
 
     def reachable_states(self, s, a):
-        row, col = self.to_m(s)
         rs = np.zeros(shape=self.nS, dtype=int)
-        if self.is_slippery:
-            for b in [(a - 1) % 4, a, (a + 1) % 4]:
-                nr, nc = self.inc(row, col, b)
+        if self.is_terminal(s):  # self-loop
+            rs[s] = 1
+        else:
+            row, col = self.to_m(s)
+            if self.is_slippery:
+                for b in [(a - 1) % 4, a, (a + 1) % 4]:
+                    nr, nc = self.inc(row, col, b)
+                    letter = self.desc[nr, nc]
+                    if not (bytes(letter) in b'W'):
+                        rs[self.to_s(nr, nc)] = 1
+            else:
+                nr, nc = self.inc(row, col, a)
                 letter = self.desc[nr, nc]
                 if not (bytes(letter) in b'W'):
                     rs[self.to_s(nr, nc)] = 1
-        else:
-            nr, nc = self.inc(row, col, a)
-            letter = self.desc[nr, nc]
-            if not (bytes(letter) in b'W'):
-                rs[self.to_s(nr, nc)] = 1
         return rs
 
     def distances_matrix(self, states):
@@ -208,9 +212,11 @@ class GridWorld(object):
         """
         Return the instant reward for transition s, t, a, s_p
         """
+        row, col = self.to_m(s)
+        letter = self.desc[row, col]
         row_p, col_p = self.to_m(s_p)
         letter_p = self.desc[row_p, col_p]
-        if letter_p == b'G':
+        if letter == b'G' or letter_p == b'G':
             return 1.0
         elif letter_p == b'H':
             return -1.0

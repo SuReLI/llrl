@@ -11,7 +11,7 @@ env.transition_probability_distribution(s, a)
 import numpy as np
 
 
-def dynamic_programming(env, gamma=0.9, threshold=0.01, iter_max=1000, verbose=True):
+def dynamic_programming(env, gamma=0.9, threshold=0.01, iter_max=1000, verbose=False):
     nS = env.nS
     nA = env.nA
     value_function = np.zeros(shape=nS, dtype=float)
