@@ -21,8 +21,7 @@ class Handler(object):
         if d is None:
             d = self.bi_simulation_distance(m1, m2, threshold)
         ns = m1.nS
-        # uniform_distribution = (1.0 / float(ns)) * np.ones(shape=ns, dtype=float)
-        uniform_distribution = np.ones(shape=ns, dtype=float)
+        uniform_distribution = (1.0 / float(ns)) * np.ones(shape=ns, dtype=float)
         return distribution.wass_primal(uniform_distribution, uniform_distribution, d)
 
     def bi_simulation_distance(self, m1, m2, threshold=0.1):
