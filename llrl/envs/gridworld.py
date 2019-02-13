@@ -18,13 +18,13 @@ MAPS = {
     ],
     "maze1": [
         "WFF",
-        "GSF",
-        "FFF"
+        "GFF",
+        "FFS"
     ],
     "maze2": [
         "WGF",
-        "FSF",
-        "FFF"
+        "FFF",
+        "FFS"
     ],
     "maze3": [
         "FFF",

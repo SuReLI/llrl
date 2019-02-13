@@ -16,7 +16,39 @@ class Handler(object):
         self.cr = 0.5  # mixing parameter for reward term in bi-simulation metric
         self.ct = 0.5  # mixing parameter for transition term in bi-simulation metric
 
-    def mdp_distance(self, m1, m2, d=None, threshold=0.1):
+    def best_match_mdp_distance(self, m1, m2, d=None, threshold=0.1):
+        """
+        Compute the best-match distance between two MDPs i.e. find the best matching states using the input state
+        distance matrix and return the maximum distance between matched states.
+
+        :param m1: 1st MDP (environment)
+        :param m2: 2nd MDP (environment)
+        :param d: state distance matrix, compute the bi-simulation distance matrix if not provided
+        :param threshold: threshold for the bi-simulation distance matrix computation
+        :return: return the distance between the MDPs
+        """
+        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS, m2.nS)
+        # TODO put back
+        # if d is None:
+        #     d = self.bi_simulation_distance(m1, m2, threshold)
+
+        # TODO remove test
+        n = 2
+        d = np.eye(n)
+        print(d)
+        exit()
+
+    def wasserstein_mdp_distance(self, m1, m2, d=None, threshold=0.1):
+        """
+        Compute the Wasserstein distance between uniform distributions over the common state space using a specific
+        state metric given by the input state distance matrix.
+
+        :param m1: 1st MDP (environment)
+        :param m2: 2nd MDP (environment)
+        :param d: state distance matrix, compute the bi-simulation distance matrix if not provided
+        :param threshold: threshold for the bi-simulation distance matrix computation
+        :return: return the distance between the MDPs
+        """
         assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS, m2.nS)
         if d is None:
             d = self.bi_simulation_distance(m1, m2, threshold)

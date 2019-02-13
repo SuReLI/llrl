@@ -27,7 +27,7 @@ def wasserstein_mdp_distance_test():
     v2 = dynamic_programming(m2, gamma=gamma, threshold=1e-10, iter_max=1000, verbose=False)
 
     state_distances = h.bi_simulation_distance(m1, m2)
-    distance_m1_m2 = h.mdp_distance(m1, m2, state_distances)
+    distance_m1_m2 = h.wasserstein_mdp_distance(m1, m2, state_distances)
     lipschitz_constant = (float(m1.nS) / (h.cr * (1.0 - gamma)))
     gap = lipschitz_constant * distance_m1_m2
 
@@ -62,6 +62,8 @@ def best_match_mdp_distance_test():
     gamma = 0.9
 
     # Compute
+    distance_m1_m2 = h.best_match_mdp_distance(m1, m2)
+
     v1 = dynamic_programming(m1, gamma=gamma, threshold=1e-10, iter_max=1000, verbose=False)
     v2 = dynamic_programming(m2, gamma=gamma, threshold=1e-10, iter_max=1000, verbose=False)
 
