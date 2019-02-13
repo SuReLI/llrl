@@ -8,6 +8,7 @@ env.transition_probability_distribution(s, a)
 """
 
 import numpy as np
+import pulp
 import llrl.utils.distribution as distribution
 
 
