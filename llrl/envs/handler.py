@@ -22,22 +22,32 @@ class Handler(object):
         Compute the best-match distance between two MDPs i.e. find the best matching states using the input state
         distance matrix and return the maximum distance between matched states.
 
+        Matching states matrix: in row, the states in MDP m1, in columns, the states in MDP m2.
+
         :param m1: 1st MDP (environment)
         :param m2: 2nd MDP (environment)
         :param d: state distance matrix, compute the bi-simulation distance matrix if not provided
         :param threshold: threshold for the bi-simulation distance matrix computation
-        :return: return the distance between the MDPs
+        :return: return the tuple (distance between the MDPs, matching states matrix)
         """
-        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS, m2.nS)
-        # TODO put back
-        # if d is None:
-        #     d = self.bi_simulation_distance(m1, m2, threshold)
+        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS,
+                                                                                                                m2.nS)
+        ns = m1.nS
+        if d is None:
+            d = self.bi_simulation_distance(m1, m2, threshold)
 
-        # TODO remove test
-        n = 2
-        d = np.eye(n)
-        print(d)
-        exit()
+        pb = pulp.LpProblem('best-match', pulp.LpMinimize)
+        l = np.empty(d.shape, dtype=object)
+        for i in range(ns):
+            for j in range(ns):
+                l[i, j] = pulp.LpVariable('l_{}_{}'.format(i, j), cat=pulp.LpBinary)
+        pb += np.sum(l * d)
+        for i in range(ns):  # Sum to 1
+            pb += np.sum(l[i, :]) == 1
+            pb += np.sum(l[:, i]) == 1
+        assert pulp.LpStatus[pb.solve()] == 'Optimal'
+        matching_matrix = np.array([[l[i, j].value() for j in range(ns)] for i in range(ns)])
+        return pb.objective.value(), matching_matrix
 
     def wasserstein_mdp_distance(self, m1, m2, d=None, threshold=0.1):
         """
@@ -50,7 +60,8 @@ class Handler(object):
         :param threshold: threshold for the bi-simulation distance matrix computation
         :return: return the distance between the MDPs
         """
-        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS, m2.nS)
+        assert m1.nS == m2.nS, "Error: environments have different number of states: m1.nS={}, m2.nS={}".format(m1.nS,
+                                                                                                                m2.nS)
         if d is None:
             d = self.bi_simulation_distance(m1, m2, threshold)
         ns = m1.nS
@@ -58,8 +69,10 @@ class Handler(object):
         return distribution.wass_primal(uniform_distribution, uniform_distribution, d)
 
     def bi_simulation_distance(self, m1, m2, threshold=0.1):
-        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS, m2.nS)
-        assert m1.nA == m2.nA, 'Error: environments have different number of actions: m1.nA={}, m2.nA={}'.format(m1.nA, m2.nA)
+        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS,
+                                                                                                                m2.nS)
+        assert m1.nA == m2.nA, 'Error: environments have different number of actions: m1.nA={}, m2.nA={}'.format(m1.nA,
+                                                                                                                 m2.nA)
         ns, na = m1.nS, m1.nA
         d = np.zeros(shape=(ns, ns))
         tmp_d = np.array(d)
