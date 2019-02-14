@@ -34,7 +34,7 @@ def wass_primal(u, v, d):
     be = np.concatenate((u, v[0:-1]))
     res = linprog(obj, A_eq=Ae, b_eq=be)
 
-    return res.fun
+    return res.fun, res.x
 
 
 def wass_dual(u, v, d):

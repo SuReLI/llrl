@@ -47,7 +47,13 @@ class Handler(object):
             pb += np.sum(l[:, i]) == 1
         assert pulp.LpStatus[pb.solve()] == 'Optimal'
         matching_matrix = np.array([[l[i, j].value() for j in range(ns)] for i in range(ns)])
-        return pb.objective.value(), matching_matrix
+        distance = 0.0
+        for i in range(ns):
+            for j in range(ns):
+                if matching_matrix[i, j] == 1:
+                    if d[i, j] > distance:
+                        distance = d[i, j]
+        return distance, matching_matrix
 
     def wasserstein_mdp_distance(self, m1, m2, d=None, threshold=0.1):
         """
@@ -66,7 +72,9 @@ class Handler(object):
             d = self.bi_simulation_distance(m1, m2, threshold)
         ns = m1.nS
         uniform_distribution = (1.0 / float(ns)) * np.ones(shape=ns, dtype=float)
-        return distribution.wass_primal(uniform_distribution, uniform_distribution, d)
+        distance, matching_matrix = distribution.wass_primal(uniform_distribution, uniform_distribution, d)
+        matching_matrix = np.reshape(matching_matrix, newshape=(ns, ns))
+        return distance, matching_matrix
 
     def bi_simulation_distance(self, m1, m2, threshold=0.1):
         assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS,
@@ -86,7 +94,7 @@ class Handler(object):
                         di = m1.transition_probability_distribution(i, a)
                         dj = m2.transition_probability_distribution(j, a)
                         # delta_t = distribution.wass_dual(di, dj, d)
-                        delta_t = distribution.wass_primal(di, dj, d)
+                        delta_t, _ = distribution.wass_primal(di, dj, d)
                         delta_r = abs(m1.expected_reward(i, a) - m2.expected_reward(j, a))
                         d_ija = max(d_ija, self.cr * delta_r + self.ct * delta_t)
                     tmp_d[i, j] = d_ija

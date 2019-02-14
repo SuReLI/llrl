@@ -7,7 +7,7 @@ envs = [GridWorld(map_name=n, is_slippery=False) for n in envs_names]
 h = Handler()
 
 d = h.bi_simulation_distance(envs[0], envs[1])
-dist = h.mdp_distance(envs[0], envs[1], d)
+dist = h.wasserstein_mdp_distance(envs[0], envs[1], d)
 
 print('Render environments:')
 envs[0].render()
