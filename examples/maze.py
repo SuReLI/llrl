@@ -7,7 +7,7 @@ from llrl.envs.gridworld import GridWorld
 # Parameters
 np.random.seed(1993)
 timeout = 100
-env = GridWorld(map_name='maze', is_slippery=False)
+env = GridWorld(map_name='maze', slipperiness=0.1)
 
 # agent = rd.RandomAgent(env.action_space)
 # agent = mcts.MCTS(env.action_space)

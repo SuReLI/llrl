@@ -16,6 +16,13 @@ MAPS = {
         "FFFH",
         "HFFG"
     ],
+    "maze": [
+        "SFFFW",
+        "WWFWW",
+        "FFFFF",
+        "FWWWW",
+        "FFFFG"
+    ],
     "maze1": [
         "FGF",
         "FFF",
@@ -53,7 +60,7 @@ class GridWorld(object):
     G : goal (terminal)
     """
 
-    def __init__(self, desc=None, map_name="maze", is_slippery=True):
+    def __init__(self, desc=None, map_name="maze", slipperiness=0.1):
         if desc is None and map_name is None:
             raise ValueError('Must provide either desc or map_name')
         elif desc is None:
@@ -65,7 +72,7 @@ class GridWorld(object):
         self.nA = 4  # n actions
         self.action_space = Discrete(self.nA)
         # self.nT = nT
-        self.is_slippery = is_slippery
+        self.slipperiness = slipperiness  # in [0.0, 1.0] 0.0 means deterministic, 1.0 means random transitions
         self.tau = 1  # timestep duration
         isd = np.array(self.desc == b'S').astype('float64').ravel()  # Initial state distribution
         self.isd = isd / isd.sum()
@@ -101,15 +108,20 @@ class GridWorld(object):
         """
         Given a position (row, col) and an action a, return the resulting position (row, col).
         """
+        row_p, col_p = row, col
         if a == LEFT:
-            col = max(col - 1, 0)
+            col_p = max(col - 1, 0)
         elif a == DOWN:
-            row = min(row + 1, self.nrow - 1)
+            row_p = min(row + 1, self.nrow - 1)
         elif a == RIGHT:
-            col = min(col + 1, self.ncol - 1)
+            col_p = min(col + 1, self.ncol - 1)
         elif a == UP:
-            row = max(row - 1, 0)
-        return row, col
+            row_p = max(row - 1, 0)
+        letter = self.desc[row_p, col_p]
+        if bytes(letter) in b'W':
+            return row, col
+        else:
+            return row_p, col_p
 
     def to_s(self, row, col):
         """
@@ -142,16 +154,8 @@ class GridWorld(object):
             rs[s] = 1
         else:
             row, col = self.to_m(s)
-            if self.is_slippery:
-                for b in [(a - 1) % 4, a, (a + 1) % 4]:
-                    nr, nc = self.inc(row, col, b)
-                    letter = self.desc[nr, nc]
-                    if bytes(letter) in b'W':
-                        rs[self.to_s(row, col)] = 1
-                    else:
-                        rs[self.to_s(nr, nc)] = 1
-            else:
-                nr, nc = self.inc(row, col, a)
+            for b in [(a - 1) % 4, a, (a + 1) % 4]:
+                nr, nc = self.inc(row, col, b)
                 letter = self.desc[nr, nc]
                 if bytes(letter) in b'W':
                     rs[self.to_s(row, col)] = 1
@@ -178,7 +182,7 @@ class GridWorld(object):
         for s in range(self.nS):
             for a in range(self.nA):
                 rs = self.reachable_states(s, a)
-                w_slip = 0.1
+                w_slip = self.slipperiness / float(sum(rs))
                 w_norm = 1.0 - float(np.sum(rs)) * w_slip
                 T[s, a, :] = np.asarray([0 if x == 0 else w_slip for x in rs], dtype=float)
                 row, col = self.to_m(s)
