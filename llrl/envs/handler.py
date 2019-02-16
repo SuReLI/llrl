@@ -14,8 +14,8 @@ import llrl.utils.distribution as distribution
 
 class Handler(object):
     def __init__(self):
-        self.cr = 0.5  # mixing parameter for reward term in bi-simulation metric
-        self.ct = 0.5  # mixing parameter for transition term in bi-simulation metric
+        self.cr = 0.1  # mixing parameter for reward term in bi-simulation metric
+        self.ct = 1.0 - self.cr  # mixing parameter for transition term in bi-simulation metric
 
     def best_match_mdp_distance(self, m1, m2, d=None, threshold=0.1):
         """
