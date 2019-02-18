@@ -6,9 +6,8 @@ def test():
     inf = 1e99
     d = np.array(
         [
-            [0.0, inf, inf],
-            [inf, 0.0, 0.9],
-            [inf, 0.9, 1.0]
+            [0.0, 0.9],
+            [0.9, 1.0]
         ]
     )
     n = d.shape[0]
