@@ -17,7 +17,7 @@ class Rmax(object):
     An implementation of the R-MAX agent [Brafman and Tennenholtz 2002]
     """
 
-    def __init__(self, action_space, gamma=0.9, horizon=4, s_a_threshold=1.0):
+    def __init__(self, action_space, gamma=0.9, horizon=4, s_a_threshold=1):
         self.action_space = action_space
         self.nA = self.action_space.n
         self.gamma = gamma
@@ -25,9 +25,11 @@ class Rmax(object):
         self.s_a_threshold = s_a_threshold
 
         self.r_max = 1.0
-        self.q_func = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
-        self.rewards = defaultdict(lambda: defaultdict(list))  # [s][a][r_1, ...]
-        self.transitions = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))  # [s][a][s'][count]
+        self.Q = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
+        self.R = defaultdict(lambda: defaultdict(list))  # collected rewards [s][a][r_1, ...]
+        self.R_count = defaultdict(lambda: defaultdict(int))  # [s][a][count]
+        self.T = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))  # collected transitions [s][a][s'][count]
+        self.T_count = defaultdict(lambda: defaultdict(int))  # [s][a][count]
         self.prev_s = None
         self.prev_a = None
 
@@ -40,7 +42,7 @@ class Rmax(object):
         if p is None:
             self.__init__(self.action_space)
         else:
-            utils.assert_types(p, [discrete.Discrete, float, int, float])
+            utils.assert_types(p, [discrete.Discrete, float, int, int])
             self.__init__(p[0], p[1], p[2], p[3])
 
     def display(self):
@@ -54,36 +56,35 @@ class Rmax(object):
         print('Horizon                :', self.horizon)
         print('State action threshold :', self.s_a_threshold)
 
+    def is_known(self, s, a):
+        return self.r_counts[s][a] >= self.s_a_threshold and self.t_counts[s][a] >= self.s_a_threshold
+
     def get_num_known_sa(self):
         return sum([self.is_known(s,a) for s,a in self.r_s_a_counts.keys()])
 
-    def is_known(self, s, a):
-        return self.r_s_a_counts[s][a] >= self.s_a_threshold and self.t_s_a_counts[s][a] >= self.s_a_threshold
-
     def act(self, state, reward):
         # Update given s, a, r, s' : self.prev_state, self.prev_action, reward, state
-        self.update(self.prev_state, self.prev_action, reward, state)
+        self.update(self.prev_s, self.prev_a, reward, state)
 
         # Compute best action.
         action = self.get_max_q_action(state)
 
         # Update pointers.
-        self.prev_action = action
-        self.prev_state = state
+        self.prev_a = action
+        self.prev_s = state
 
         return action
 
-    def update(self, state, action, reward, next_state):
-        '''
-        Args:
-            state (State)
-            action (str)
-            reward (float)
-            next_state (State)
+    def update(self, s, a, r, s_p):
+        """
+        Updates transition and reward dictionaries.
 
-        Summary:
-            Updates T and R.
-        '''
+        :param s: int state
+        :param a: int action
+        :param r: float reward
+        :param s_p: int next state
+        :return: None
+        """
         if state != None and action != None:
             if self.r_s_a_counts[state][action] <= self.s_a_threshold:
                 # Add new data points if we haven't seen this s-a enough.
