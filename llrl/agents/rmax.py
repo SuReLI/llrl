@@ -2,30 +2,29 @@
 An implementation of the R-MAX agent [Brafman and Tennenholtz 2002]
 
 Required features of the environment class:
-TODO
+env.is_terminal(s)
 """
 
-import random
 import copy
 import llrl.utils.utils as utils
 import llrl.spaces.discrete as discrete
 from collections import defaultdict
 
 
-class Rmax(object):
+class RMax(object):
     """
     An implementation of the R-MAX agent [Brafman and Tennenholtz 2002]
     """
 
-    def __init__(self, action_space, gamma=0.9, horizon=4, s_a_threshold=1):
+    def __init__(self, action_space, gamma=0.9, horizon=4, count_threshold=1):
         self.action_space = action_space
         self.nA = self.action_space.n
         self.gamma = gamma
         self.horizon = horizon
-        self.s_a_threshold = s_a_threshold
+        self.count_threshold = count_threshold
 
         self.r_max = 1.0
-        self.Q = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
+        self.Q_init = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))  # heuristic
         self.R = defaultdict(lambda: defaultdict(list))  # collected rewards [s][a][r_1, ...]
         self.R_count = defaultdict(lambda: defaultdict(int))  # [s][a][count]
         self.T = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))  # collected transitions [s][a][s'][count]
@@ -54,30 +53,41 @@ class Rmax(object):
         print('Number of actions      :', self.nA)
         print('Gamma                  :', self.gamma)
         print('Horizon                :', self.horizon)
-        print('State action threshold :', self.s_a_threshold)
+        print('Count threshold        :', self.count_threshold)
+
+    def set_initial_q_function(self, q):
+        """
+        Set the initial heuristic function.
+
+        :param q: given heuristic.
+        :return: None
+        """
+        self.Q_init = copy.deepcopy(q)
 
     def is_known(self, s, a):
-        return self.r_counts[s][a] >= self.s_a_threshold and self.t_counts[s][a] >= self.s_a_threshold
+        return self.R_count[s][a] >= self.count_threshold and self.T_count[s][a] >= self.count_threshold
 
-    def get_num_known_sa(self):
-        return sum([self.is_known(s,a) for s,a in self.r_s_a_counts.keys()])
+    def get_nb_known_sa(self):
+        return sum([self.is_known(s, a) for s, a in self.R_count.keys()])
 
-    def act(self, state, reward):
-        # Update given s, a, r, s' : self.prev_state, self.prev_action, reward, state
-        self.update(self.prev_s, self.prev_a, reward, state)
+    def act(self, s, r):
+        """
+        Acting method called online during learning.
 
-        # Compute best action.
-        action = self.get_max_q_action(state)
-
-        # Update pointers.
-        self.prev_a = action
-        self.prev_s = state
-
-        return action
+        :param s: int current state of the agent
+        :param r: float received reward for the previous transition
+        :return: return the greedy action wrt the current learned model.
+        """
+        self.update(self.prev_s, self.prev_a, r, s)
+        _, a = self.compute_max_q_value_action_pair(s)
+        self.prev_a = a
+        self.prev_s = s
+        return a
 
     def update(self, s, a, r, s_p):
         """
-        Updates transition and reward dictionaries.
+        Updates transition and reward dictionaries with the input transition
+        tuple if the corresponding state-action pair is not known enough.
 
         :param s: int state
         :param a: int action
@@ -85,152 +95,93 @@ class Rmax(object):
         :param s_p: int next state
         :return: None
         """
-        if state != None and action != None:
-            if self.r_s_a_counts[state][action] <= self.s_a_threshold:
-                # Add new data points if we haven't seen this s-a enough.
-                self.rewards[state][action] += [reward]
-                self.r_s_a_counts[state][action] += 1
+        if s is not None and a is not None:
+            if self.R_count[s][a] <= self.count_threshold:
+                self.R[s][a] += [r]
+                self.R_count[s][a] += 1
 
-            if self.t_s_a_counts[state][action] <= self.s_a_threshold:
-                self.transitions[state][action][next_state] += 1
-                self.t_s_a_counts[state][action] += 1
+            if self.T_count[s][a] <= self.count_threshold:
+                self.T[s][a][s_p] += 1
+                self.T_count[s][a] += 1
 
-    def _compute_max_qval_action_pair(self, state, horizon=None):
-        '''
-        Args:
-            state (State)
-            horizon (int): Indicates the level of recursion depth for computing Q.
+    def compute_max_q_value_action_pair(self, s, horizon=None):
+        """
+        Compute the greedy action wrt the current Q-value function.
 
-        Returns:
-            (tuple) --> (float, str): where the float is the Qval, str is the action.
-        '''
-        # If this is the first call, use the default horizon.
+        :param s: int state
+        :param horizon: int horizon
+        :return: return the tuple (q_star, a_star) with q_star the maximum Q-value and a_star the maximizing action.
+        """
+        if horizon is None:
+            horizon = self.horizon
+        a_star = 0
+        q_star = self.compute_q_value(s, a_star, horizon)
+        for a in range(1, self.nA):
+            q_s_a = self.compute_q_value(s, a, horizon)
+            if q_s_a > q_star:
+                q_star = q_s_a
+                a_star = a
+        return q_star, a_star
+
+    def compute_q_value(self, s, a, horizon=None):
+        """
+        Compute the learned Q-value at (s, a).
+
+        :param s: int state
+        :param a: int action
+        :param horizon: int number of steps ahead
+        :return: return Q(s, a)
+        """
         if horizon is None:
             horizon = self.horizon
 
-        # Grab random initial action in case all equal
-        best_action = random.choice(self.actions)
-        max_q_val = self.get_q_value(state, best_action, horizon)
+        r_s_a = self.get_reward(s, a)
+        if horizon <= 0 or self.env.is_terminal(s):
+            return r_s_a
+        else:
+            expected_future_return = self.gamma * self.compute_expected_future_return(s, a, horizon)
+            q_val = r_s_a + expected_future_return
+            return q_val
 
-        # Find best action (action w/ current max predicted Q value)
-        for action in self.actions:
-            q_s_a = self.get_q_value(state, action, horizon)
-            if q_s_a > max_q_val:
-                max_q_val = q_s_a
-                best_action = action
+    def compute_expected_future_return(self, s, a, horizon=None):
+        """
+        Compute the expected return 1 step ahead from (s, a)
 
-        return max_q_val, best_action
-
-    def get_max_q_action(self, state, horizon=None):
-        '''
-        Args:
-            state (State)
-            horizon (int): Indicates the level of recursion depth for computing Q.
-
-        Returns:
-            (str): The string associated with the action with highest Q value.
-        '''
-
-        # If this is the first call, use the default horizon.
-        if horizon is None:
-            horizon = self.horizon 
-        return self._compute_max_qval_action_pair(state, horizon)[1]
-
-    def get_max_q_value(self, state, horizon=None):
-        '''
-        Args:
-            state (State)
-            horizon (int): Indicates the level of recursion depth for computing Q.
-
-        Returns:
-            (float): The Q value of the best action in this state.
-        '''
-
-        # If this is the first call, use the default horizon.
-        if horizon is None:
-            horizon = self.horizon 
-        return self._compute_max_qval_action_pair(state, horizon)[0]
-
-    def get_q_value(self, state, action, horizon=None):
-        '''
-        Args:
-            state (State)
-            action (str)
-            horizon (int): Indicates the level of recursion depth for computing Q.
-
-        Returns:
-            (float)
-        '''
-
-        # If this is the first call, use the default horizon.
+        :param s: int state
+        :param a: int action
+        :param horizon: int number of steps ahead
+        :return: return the expected return 1 step ahead from (s, a)
+        """
         if horizon is None:
             horizon = self.horizon
 
-        if horizon <= 0 or state.is_terminal():
-            # If we're not looking any further.
-            return self._get_reward(state, action)
+        s_p_dictionary = self.T[s][a]
 
-        # Compute future return.
-        expected_future_return = self.gamma*self._compute_exp_future_return(state, action, horizon)
-        q_val = self._get_reward(state, action) + expected_future_return# self.q_func[(state, action)] = self._get_reward(state, action) + expected_future_return
+        denominator = float(sum(s_p_dictionary.values()))
 
-        return q_val
+        s_p_weights = defaultdict(float)
 
-    def _compute_exp_future_return(self, state, action, horizon=None):
-        '''
-        Args:
-            state (State)
-            action (str)
-            horizon (int): Recursion depth to compute Q
+        for s_p in s_p_dictionary.keys():
+            count = s_p_dictionary[s_p]
+            s_p_weights[s_p] = (count / denominator)
 
-        Return:
-            (float): Discounted expected future return from applying @action in @state.
-        '''
-
-        # If this is the first call, use the default horizon.
-        if horizon is None:
-            horizon = self.horizon
-
-        next_state_dict = self.transitions[state][action]
-
-        denominator = float(sum(next_state_dict.values()))
-        state_weights = defaultdict(float)
-        for next_state in next_state_dict.keys():
-            count = next_state_dict[next_state]
-            state_weights[next_state] = (count / denominator)
-
-        weighted_future_returns = [self.get_max_q_value(next_state, horizon-1) * state_weights[next_state] for next_state in next_state_dict.keys()]
-
+        weighted_future_returns = [self.compute_max_q_value_action_pair(s_p, horizon - 1)[0] * s_p_weights[s_p]
+                                   for s_p in s_p_dictionary.keys()]
         return sum(weighted_future_returns)
 
-    def _get_reward(self, state, action):
-        '''
-        Args:
-            state (State)
-            action (str)
+    def get_reward(self, s, a):
+        """
+        Return the learned expected reward function at (s, a) if known.
+        Else return the used heuristic.
 
-        Returns:
-            Believed reward of executing @action in @state. If R(s,a) is unknown
-            for this s,a pair, return self.rmax. Otherwise, return the MLE.
-        '''
-
-        if self.r_s_a_counts[state][action] >= self.s_a_threshold:
-            # Compute MLE if we've seen this s,a pair enough.
-            rewards_s_a = self.rewards[state][action]
-            return float(sum(rewards_s_a)) / len(rewards_s_a)
-        elif self.init_q_func is not None:
-            return self.init_q_func[state][action]
+        :param s: int state
+        :param a: int action
+        :return: return R(s, a)
+        """
+        if self.R_count[s][a] >= self.count_threshold:
+            collected_rewards = self.R[s][a]
+            return float(sum(collected_rewards)) / float(len(collected_rewards))
+        elif self.Q_init is not None:
+            return self.Q_init[s][a]
         else:
-            # Otherwise return rmax.
-            return self.rmax
-
-    def _reset_reward(self):
-        self.rewards = defaultdict(lambda : defaultdict(list)) # S --> A --> [r_1, ...]
-        self.r_s_a_counts = defaultdict(lambda : defaultdict(int)) # S --> A --> #rs
-
-    def set_init_q_function(self, q_func):
-        '''
-        Set initial heuristic value function.
-        Qinit(s, a) <- U(s, a)
-        '''
-        self.init_q_func = copy.deepcopy(q_func)
+            return self.r_max

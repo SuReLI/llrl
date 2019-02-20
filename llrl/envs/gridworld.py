@@ -246,8 +246,6 @@ class GridWorld(object):
         row, col = self.to_m(s)
         letter = self.desc[row, col]
         done = bytes(letter) in b'GH'
-        # if s.time + self.tau >= self.nT:  # Timeout
-        #    done = True
         return done
 
     def step(self, a):
