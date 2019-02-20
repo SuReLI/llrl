@@ -1,7 +1,7 @@
 """
-UCT Algorithm
+UCT Algorithm [Kocsis and Szepesvari 2006]
 
-Required features of the environment:
+Required features of the environment class:
 env.state
 env.action_space
 env.transition(s, a)
