@@ -9,9 +9,17 @@ np.random.seed(1993)
 timeout = 100
 env = GridWorld(map_name='maze', slipperiness=0.1)
 
-# agent = rd.RandomAgent(env.action_space)
-# agent = mcts.MCTS(env.action_space)
-agent = uct.UCT(env.action_space)
+agent = None
+agent_name = 'uct'
+if agent_name == 'random':
+    agent = rd.RandomAgent(env.action_space)
+elif agent_name == 'mcts':
+    agent = mcts.MCTS(env.action_space)
+elif agent_name == 'uct':
+    agent = uct.UCT(env.action_space)
+else:
+    print('Unknown agent name:', agent_name, 'please choose among (random, mcts, uct).')
+    exit()
 agent.display()
 
 # Run
