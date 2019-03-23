@@ -2,7 +2,7 @@ from llrl.envs.gridworld import GridWorld
 from llrl.algorithms.dynamic_programming import dynamic_programming
 
 # Parameters
-env = GridWorld(map_name='maze1', is_slippery=False)
+env = GridWorld(map_name='frozen_lake', slipperiness=.5)
 gamma = 0.9
 threshold = 1e-10
 iter_max = 1000

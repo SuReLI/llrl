@@ -10,7 +10,7 @@ DOWN = 2
 LEFT = 3
 
 MAPS = {
-    "frozenlake": [
+    "frozen_lake": [
         "SFFF",
         "FHFH",
         "FFFH",
@@ -148,6 +148,15 @@ class GridWorld(object):
         """
         return s1 == s2
 
+    def is_terminal(self, s):
+        """
+        Return True if the input state is terminal.
+        """
+        row, col = self.to_m(s)
+        letter = self.desc[row, col]
+        done = bytes(letter) in b'GH'
+        return done
+
     def reachable_states(self, s, a):
         rs = np.zeros(shape=self.nS, dtype=int)
         if self.is_terminal(s):  # self-loop
@@ -182,13 +191,16 @@ class GridWorld(object):
         for s in range(self.nS):
             for a in range(self.nA):
                 rs = self.reachable_states(s, a)
-                w_slip = self.slipperiness / float(sum(rs))
-                w_norm = 1.0 - float(np.sum(rs)) * w_slip
-                T[s, a, :] = np.asarray([0 if x == 0 else w_slip for x in rs], dtype=float)
-                row, col = self.to_m(s)
-                row_p, col_p = self.inc(row, col, a)
-                s_p = self.to_s(row_p, col_p)
-                T[s, a, s_p] += w_norm
+                if self.is_terminal(s):  # self-loop
+                    T[s, a] = rs
+                else:
+                    w_slip = self.slipperiness / float(sum(rs))
+                    w_norm = 1.0 - float(np.sum(rs)) * w_slip
+                    T[s, a, :] = np.asarray([0 if x == 0 else w_slip for x in rs], dtype=float)
+                    row, col = self.to_m(s)
+                    row_p, col_p = self.inc(row, col, a)
+                    s_p = self.to_s(row_p, col_p)
+                    T[s, a, s_p] += w_norm
         return T
 
     def transition_probability_distribution(self, s, a):
@@ -238,15 +250,6 @@ class GridWorld(object):
             r_i = self.instant_reward(s, a, i)
             r += r_i * d[i]
         return r
-
-    def is_terminal(self, s):
-        """
-        Return True if the input state is terminal.
-        """
-        row, col = self.to_m(s)
-        letter = self.desc[row, col]
-        done = bytes(letter) in b'GH'
-        return done
 
     def step(self, a):
         s, r, done = self.transition(self.state, a)
