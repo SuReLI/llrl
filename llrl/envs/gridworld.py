@@ -1,8 +1,9 @@
 import numpy as np
 import sys
+from six import StringIO
+
 import llrl.utils.colorize as colorize
 from llrl.spaces.discrete import Discrete as Discrete
-from six import StringIO
 
 UP = 0
 RIGHT = 1
