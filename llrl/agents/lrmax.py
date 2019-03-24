@@ -23,26 +23,26 @@ class LRMax(Agent):
         self.prev_a = None
 
         # Learned model
-        self.Q_init, self.R, self.T, self.counter = self.empty_memory_structure()
+        self.R, self.T, self.counter = self.empty_memory_structure()
 
         # Lifelong Learning memories
-        self.Q_memory = []
+        self.U_memory = []
         self.R_memory = []
         self.T_memory = []
-        self.counter_memory = []
 
     def reset(self):
         """
         Reset the attributes to initial state.
+        Save the previous model.
+
+        TODO check whether reset is only applied when sampling new task in lifelong setting -> not between instances
+
         :return: None
         """
         if len(self.counter) > 0:  # Save previously learned model
-            self.Q_memory.append(self.Q_init)
-            self.R_memory.append(self.R)
-            self.T_memory.append(self.T)
-            self.counter_memory.append(self.counter_memory)
+            self.update_memory()
 
-        self.Q_init, self.R, self.T, self.counter = self.empty_memory_structure()
+        self.R, self.T, self.counter = self.empty_memory_structure()
 
         self.prev_s = None
         self.prev_a = None
@@ -50,14 +50,12 @@ class LRMax(Agent):
     def empty_memory_structure(self):
         """
         Empty memory structure:
-        Q_init[s][a] (float): initial upper-bound
         R[s][a] (list): list of collected rewards
         T[s][a][s'] (int): number of times the transition has been observed
         counter[s][a] (int): number of times the state action pair has been sampled
-        :return: Q_init, R, T, counter
+        :return: R, T, counter
         """
-        return defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma))), \
-               defaultdict(lambda: defaultdict(list)), \
+        return defaultdict(lambda: defaultdict(list)), \
                defaultdict(lambda: defaultdict(lambda: defaultdict(int))), \
                defaultdict(lambda: defaultdict(int))
 
@@ -132,6 +130,33 @@ class LRMax(Agent):
                 self.R[s][a] += [r]
                 self.counter[s][a] += 1
                 self.T[s][a][s_p] += 1
+
+    def update_memory(self):
+        """
+        Update the memory:
+        1. Store the reward and transitions for the known state-action pairs in R_memory and T_memory
+        2. Compute the final upper-bound and store it in U_memory
+        :return: None
+        """
+        new_R = defaultdict(lambda: defaultdict(list))
+        new_T = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        new_U = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
+
+        # Store known rewards and transition
+        for s in self.R:
+            for a in self.R[s]:
+                if self.is_known(s, a):
+                    new_R[s][a] = self.R[s][a]
+                    new_T[s][a] = self.T[s][a]
+
+        # Compute and store upper-bounds
+        for s in new_R:
+            for a in new_R[s]:
+                new_U[s][a] = self.compute_q_value(s, a)
+
+        self.R_memory.append(new_R)
+        self.T_memory.append(new_T)
+        self.U_memory.append(new_U)
 
     def _compute_max_q_value_action_pair(self, s, horizon=None):
         """

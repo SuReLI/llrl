@@ -23,11 +23,11 @@ def main():
 
     # Agents
     rand_agent = RandomAgent(actions=mdp1.get_actions())
-    rmax_agent = RMax(actions=mdp1.get_actions(), gamma=.9, horizon=3, count_threshold=10)
-    lrmax_agent = LRMax(actions=mdp1.get_actions(), gamma=0.9, horizon=3, count_threshold=10)
+    rmax_agent = RMax(actions=mdp1.get_actions(), gamma=.9, horizon=3, count_threshold=20)
+    lrmax_agent = LRMax(actions=mdp1.get_actions(), gamma=0.9, horizon=3, count_threshold=20)
 
     # Run
-    run_agents_on_mdp([rand_agent, rmax_agent, lrmax_agent], mdp1, instances=5, episodes=100, steps=20,
+    run_agents_on_mdp([lrmax_agent, rand_agent, rmax_agent], mdp1, instances=5, episodes=10, steps=40,
                       reset_at_terminal=True, verbose=False)
     test(lrmax_agent)
 
