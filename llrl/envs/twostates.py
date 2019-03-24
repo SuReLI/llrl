@@ -19,6 +19,9 @@ class TwoStates(MDP):
         self.T = self.generate_transition_matrix()
         MDP.__init__(self, self.actions, self._transition_func, self._reward_func, init_state=State(0))
 
+    def __str__(self):
+        return "two-states"
+
     def _transition_func(self, s, a):
         """
         Transition function sampling a resulting state from the application of the input action at the input state.
