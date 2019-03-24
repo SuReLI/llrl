@@ -19,22 +19,47 @@ class LRMax(Agent):
         self.r_max = 1.0
         self.horizon = horizon
         self.count_threshold = count_threshold
-        self.reset()
+        self.prev_s = None
+        self.prev_a = None
 
-        # Lifelong Learning memory
-        self.memory = []
+        # Learned model
+        self.Q_init, self.R, self.T, self.counter = self.empty_memory_structure()
+
+        # Lifelong Learning memories
+        self.Q_memory = []
+        self.R_memory = []
+        self.T_memory = []
+        self.counter_memory = []
 
     def reset(self):
         """
         Reset the attributes to initial state.
         :return: None
         """
-        self.Q_init = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))  # TODO heuristic
-        self.R = defaultdict(lambda: defaultdict(list))  # collected rewards [s][a][r_1, ...]
-        self.T = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))  # collected transitions [s][a][s'][count]
-        self.counter = defaultdict(lambda: defaultdict(int))  # counter [s][a][count]
+        if len(self.counter) > 0:  # Save previously learned model
+            self.Q_memory.append(self.Q_init)
+            self.R_memory.append(self.R)
+            self.T_memory.append(self.T)
+            self.counter_memory.append(self.counter_memory)
+
+        self.Q_init, self.R, self.T, self.counter = self.empty_memory_structure()
+
         self.prev_s = None
         self.prev_a = None
+
+    def empty_memory_structure(self):
+        """
+        Empty memory structure:
+        Q_init[s][a] (float): initial upper-bound
+        R[s][a] (list): list of collected rewards
+        T[s][a][s'] (int): number of times the transition has been observed
+        counter[s][a] (int): number of times the state action pair has been sampled
+        :return: Q_init, R, T, counter
+        """
+        return defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma))), \
+               defaultdict(lambda: defaultdict(list)), \
+               defaultdict(lambda: defaultdict(lambda: defaultdict(int))), \
+               defaultdict(lambda: defaultdict(int))
 
     def set(self, p=None):
         """

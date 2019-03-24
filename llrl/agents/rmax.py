@@ -1,5 +1,5 @@
 """
-Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
+Implementation of an R-Max Agent [Brafman and Tennenholtz 2003]
 """
 
 import copy
@@ -13,7 +13,7 @@ from simple_rl.agents.AgentClass import Agent
 
 class RMax(Agent):
     """
-    Implementation for an R-Max Agent [Brafman and Tennenholtz 2003]
+    Implementation of an R-Max Agent [Brafman and Tennenholtz 2003]
     """
 
     def __init__(self, actions, gamma=0.9, horizon=3, count_threshold=1, name="RMax-h"):
