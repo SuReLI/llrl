@@ -4,7 +4,8 @@ Comparison of the bounds provided by R-MAX and Lipschitz-R-Max.
 
 from llrl.envs.twostates import TwoStates
 from llrl.agents.lrmax import LRMax
-from simple_rl.agents import RandomAgent, RMaxAgent
+from llrl.agents.rmax import RMax
+from simple_rl.agents import RandomAgent
 from simple_rl.run_experiments import run_agents_on_mdp
 
 
@@ -22,7 +23,7 @@ def main():
 
     # Agents
     rand_agent = RandomAgent(actions=mdp1.get_actions())
-    rmax_agent = RMaxAgent(actions=mdp1.get_actions(), gamma=.9, horizon=3, s_a_threshold=10)
+    rmax_agent = RMax(actions=mdp1.get_actions(), gamma=.9, horizon=3, count_threshold=10)
     lrmax_agent = LRMax(actions=mdp1.get_actions(), gamma=0.9, horizon=3, count_threshold=10)
 
     # Run

@@ -157,22 +157,23 @@ class RMax(Agent):
         :param horizon: int number of steps ahead
         :return: return the expected return 1 step ahead from (s, a)
         """
-        if horizon is None:
-            horizon = self.horizon
+        if self.is_known(s, a):
+            if horizon is None:
+                horizon = self.horizon
 
-        s_p_dictionary = self.T[s][a]
+            s_p_dictionary = self.T[s][a]
 
-        denominator = float(sum(s_p_dictionary.values()))
+            denominator = float(sum(s_p_dictionary.values()))
+            s_p_weights = defaultdict(float)
+            for s_p in s_p_dictionary.keys():
+                count = s_p_dictionary[s_p]
+                s_p_weights[s_p] = (count / denominator)
 
-        s_p_weights = defaultdict(float)
-
-        for s_p in s_p_dictionary.keys():
-            count = s_p_dictionary[s_p]
-            s_p_weights[s_p] = (count / denominator)
-
-        weighted_future_returns = [self._compute_max_q_value_action_pair(s_p, horizon - 1)[0] * s_p_weights[s_p]
-                                   for s_p in s_p_dictionary.keys()]
-        return sum(weighted_future_returns)
+            weighted_future_returns = [self._compute_max_q_value_action_pair(s_p, horizon - 1)[0] * s_p_weights[s_p]
+                                       for s_p in s_p_dictionary.keys()]
+            return sum(weighted_future_returns)
+        else:
+            return self.r_max / (1. - self.gamma)
 
     def _get_reward(self, s, a):
         """
@@ -183,7 +184,7 @@ class RMax(Agent):
         :param a: int action
         :return: return R(s, a)
         """
-        if self.counter[s][a] >= self.count_threshold:
+        if self.is_known(s, a):
             collected_rewards = self.R[s][a]
             return float(sum(collected_rewards)) / float(len(collected_rewards))
         else:
