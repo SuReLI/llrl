@@ -12,7 +12,8 @@ def main():
     rmax_agent = RMaxAgent(actions=mdp.get_actions(), gamma=.9, horizon=3, s_a_threshold=10)
 
     # Run experiment and make plot.
-    run_agents_on_mdp([rmax_agent, ql_agent, rand_agent], mdp, instances=5, episodes=100, steps=20, reset_at_terminal=True, verbose=False)
+    run_agents_on_mdp([rmax_agent, ql_agent, rand_agent], mdp, instances=5,
+                      episodes=100, steps=20, reset_at_terminal=True, verbose=False)
 
 if __name__ == "__main__":
     main()
