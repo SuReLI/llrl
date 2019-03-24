@@ -1,4 +1,3 @@
-import copy
 import random
 from collections import defaultdict
 
@@ -82,15 +81,6 @@ class LRMax(Agent):
         print('Horizon                :', self.horizon)
         print('Count threshold        :', self.count_threshold)
 
-    def set_initial_q_function(self, q):
-        """
-        Set the initial heuristic function.
-
-        :param q: given heuristic.
-        :return: None
-        """
-        self.Q_init = copy.deepcopy(q)
-
     def is_known(self, s, a):
         return self.counter[s][a] >= self.count_threshold
 
@@ -107,6 +97,7 @@ class LRMax(Agent):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
+        _, a = self._compute_max_q_value_action_pair(s)
         _, a = self._compute_max_q_value_action_pair(s)
 
         self.prev_a = a
@@ -158,9 +149,13 @@ class LRMax(Agent):
         self.T_memory.append(new_T)
         self.U_memory.append(new_U)
 
+    def compute_min_upper_bound(self, s, horizon=None):
+        #TODO
+        return 0  # TODO remove
+
     def _compute_max_q_value_action_pair(self, s, horizon=None):
         """
-        Compute the greedy action wrt the current Q-value function.
+        Compute the greedy action wrt the current R-Max Q-value function.
 
         :param s: int state
         :param horizon: int horizon

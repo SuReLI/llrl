@@ -1,9 +1,10 @@
 """
-Implementation of an R-Max Agent [Brafman and Tennenholtz 2003]
+Implementation of an R-Max agent [Brafman and Tennenholtz 2003]
+Use Value Iteration (VI) to compute the R-Max upper-bound.
 """
 
-import copy
 import random
+import numpy as np
 from collections import defaultdict
 
 import llrl.utils.utils as utils
@@ -11,31 +12,49 @@ import llrl.spaces.discrete as discrete
 from simple_rl.agents.AgentClass import Agent
 
 
-class RMax(Agent):
+class RMaxVI(Agent):
     """
-    Implementation of an R-Max Agent [Brafman and Tennenholtz 2003]
+    Implementation of an R-Max agent [Brafman and Tennenholtz 2003]
+    Use Value Iteration (VI) to compute the R-Max upper-bound.
     """
 
-    def __init__(self, actions, gamma=0.9, horizon=3, count_threshold=1, name="RMax-h"):
+    def __init__(self, actions, gamma=0.9, horizon=3, count_threshold=1, name="RMaxVI-h"):
         name = name + str(horizon) if name[-2:] == "-h" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.nA = len(self.actions)
         self.r_max = 1.0
         self.horizon = horizon
         self.count_threshold = count_threshold
-        self.reset()
+
+        self.U, self.R, self.T, self.counter = self.empty_memory_structure()
+        self.prev_s = None
+        self.prev_a = None
 
     def reset(self):
         """
         Reset the attributes to initial state.
+        Save the previous model.
+
+        TODO check whether reset is only applied when sampling new task in lifelong setting -> not between instances
+
         :return: None
         """
-        self.Q_init = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))  # heuristic
-        self.R = defaultdict(lambda: defaultdict(list))  # collected rewards [s][a][r_1, ...]
-        self.T = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))  # collected transitions [s][a][s'][count]
-        self.counter = defaultdict(lambda: defaultdict(int))  # counter [s][a][count]
+        self.U, self.R, self.T, self.counter = self.empty_memory_structure()
         self.prev_s = None
         self.prev_a = None
+
+    def empty_memory_structure(self):
+        """
+        Empty memory structure:
+        R[s][a] (list): list of collected rewards
+        T[s][a][s'] (int): number of times the transition has been observed
+        counter[s][a] (int): number of times the state action pair has been sampled
+        :return: R, T, counter
+        """
+        return defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma))), \
+               defaultdict(lambda: defaultdict(list)), \
+               defaultdict(lambda: defaultdict(lambda: defaultdict(int))), \
+               defaultdict(lambda: defaultdict(int))
 
     def set(self, p=None):
         """
@@ -53,7 +72,7 @@ class RMax(Agent):
         """
         Display info about the attributes.
         """
-        print('Displaying R-MAX agent :')
+        print('Displaying R-MAX-VI agent :')
         print('Action space           :', self.actions)
         print('Number of actions      :', self.nA)
         print('Gamma                  :', self.gamma)
@@ -76,7 +95,8 @@ class RMax(Agent):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
-        _, a = self._compute_max_q_value_action_pair(s)
+        # _, a = self._compute_max_q_value_action_pair(s)  # TODO remove
+        a = self.greedy_action(s)
 
         self.prev_a = a
         self.prev_s = s
@@ -95,13 +115,68 @@ class RMax(Agent):
         :return: None
         """
         if s is not None and a is not None:
-            if self.counter[s][a] <= self.count_threshold:
-                self.R[s][a] += [r]
+            if self.counter[s][a] < self.count_threshold:
                 self.counter[s][a] += 1
+                self.R[s][a] += [r]
                 self.T[s][a][s_p] += 1
+                if self.counter[s][a] == self.count_threshold:
+                    self.update_upper_bound()
 
+    def greedy_action(self, s):
+        """
+        Compute the greedy action wrt the current upper bound.
+        :param s: state
+        :return: return the greedy action.
+        """
+        a_star = random.choice(self.actions)
+        u_star = self.U[s][a_star]
+        for a in self.actions:
+            u_s_a = self.U[s][a]
+            if u_s_a > u_star:
+                u_star = u_s_a
+                a_star = a
+        return a_star
+
+    def update_upper_bound(self, epsilon=0.1):
+        """
+        Update the upper bound on the Q-value function.
+        Called when a new state-action pair is known.
+        :param epsilon: maximum gap between the estimated Q-value and the optimal one.
+        :return: None
+        """
+        n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))
+        for i in range(n_iter):
+            for s in self.R:
+                for a in self.R[s]:
+                    n_s_a = float(self.counter[s][a])
+                    r_s_a = sum(self.R[s][a]) / n_s_a
+
+                    # METHOD 1
+                    s_p_dict = self.T[s][a]
+                    s_p_weights = defaultdict(float)
+                    denominator = float(sum(s_p_dict.values()))
+                    for s_p in s_p_dict:
+                        s_p_weights[s_p] = s_p_dict[s_p] / denominator
+                    weighted_next_upper_bound = sum(
+                        [self.U[s_p][self.greedy_action(s_p)] * s_p_weights[s_p] for s_p in s_p_dict]
+                    )
+                    # print(weighted_next_upper_bound)
+
+                     # METHOD 2 TODO compare
+                    s_p_dict = self.T[s][a]
+                    denominator = float(sum(s_p_dict.values()))
+                    weighted_next_upper_bound = 0.
+                    for s_p in s_p_dict:
+                        weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p)] * s_p_dict[s_p] / denominator
+                    # print(weighted_next_upper_bound)
+
+                    # TODO compare denominator and n_s_a
+
+                    self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
+    '''
     def _compute_max_q_value_action_pair(self, s, horizon=None):
         """
+        TODO remove
         Compute the greedy action wrt the current Q-value function.
 
         :param s: int state
@@ -118,9 +193,10 @@ class RMax(Agent):
                 q_star = q_s_a
                 a_star = a
         return q_star, a_star
-
+        
     def compute_q_value(self, s, a, horizon=None):
         """
+        TODO remove
         Compute the learned Q-value at (s, a).
 
         :param s: int state
@@ -141,6 +217,7 @@ class RMax(Agent):
 
     def _compute_expected_future_return(self, s, a, horizon=None):
         """
+        TODO remove
         Compute the expected return 1 step ahead from (s, a)
 
         :param s: int state
@@ -168,6 +245,7 @@ class RMax(Agent):
 
     def _get_reward(self, s, a):
         """
+        TODO remove
         Return the learned expected reward function at (s, a) if known.
         Else return the used heuristic.
 
@@ -180,3 +258,4 @@ class RMax(Agent):
             return float(sum(collected_rewards)) / float(len(collected_rewards))
         else:
             return self.r_max
+    '''
