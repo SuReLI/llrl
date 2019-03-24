@@ -2,6 +2,8 @@
   <dictionary name="root">
     <words>
       <w>lipschitz</w>
+      <w>lrmax</w>
+      <w>rmax</w>
     </words>
   </dictionary>
 </component>

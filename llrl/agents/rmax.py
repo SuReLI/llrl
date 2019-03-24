@@ -186,7 +186,5 @@ class RMax(Agent):
         if self.counter[s][a] >= self.count_threshold:
             collected_rewards = self.R[s][a]
             return float(sum(collected_rewards)) / float(len(collected_rewards))
-        elif self.Q_init is not None:
-            return self.Q_init[s][a]
         else:
             return self.r_max
