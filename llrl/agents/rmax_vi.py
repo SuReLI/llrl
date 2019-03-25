@@ -16,11 +16,13 @@ class RMaxVI(Agent):
     Use Value Iteration to compute the R-Max upper-bound.
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, name="RMaxVI"):
+    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-VI-e"):
+        name = name + str(epsilon) if name[-2:] == "-e" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.nA = len(self.actions)
         self.r_max = 1.0
         self.count_threshold = count_threshold
+        self.vi_n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))  # Nb of value iterations
 
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
         self.prev_s = None
@@ -116,15 +118,13 @@ class RMaxVI(Agent):
                 a_star = a
         return a_star
 
-    def update_upper_bound(self, epsilon=0.1):
+    def update_upper_bound(self):
         """
         Update the upper bound on the Q-value function.
         Called when a new state-action pair is known.
-        :param epsilon: maximum gap between the estimated Q-value and the optimal one.
         :return: None
         """
-        n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))
-        for i in range(n_iter):
+        for i in range(self.vi_n_iter):
             for s in self.R:
                 for a in self.R[s]:
                     n_s_a = float(self.counter[s][a])

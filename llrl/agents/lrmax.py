@@ -10,11 +10,13 @@ class LRMax(Agent):
     Lipschitz R-Max agent
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, name="Lipschitz-RMax"):
+    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="Lipschitz-RMax"):
+        name = name + str(epsilon) if name[-2:] == "-e" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.nA = len(self.actions)
         self.r_max = 1.0
         self.count_threshold = count_threshold
+        self.vi_n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))  # Nb of value iterations
 
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
         self.prev_s = None
@@ -113,25 +115,25 @@ class LRMax(Agent):
         2. Compute the final upper-bound and store it in U_memory
         :return: None
         """
-        new_R = defaultdict(lambda: defaultdict(list))
-        new_T = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
-        new_U = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
+        new_r = defaultdict(lambda: defaultdict(list))
+        new_t = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
+        new_u = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
 
         # Store known rewards and transition
         for s in self.R:
             for a in self.R[s]:
                 if self.is_known(s, a):
-                    new_R[s][a] = self.R[s][a]
-                    new_T[s][a] = self.T[s][a]
+                    new_r[s][a] = self.R[s][a]
+                    new_t[s][a] = self.T[s][a]
 
         # Compute and store upper-bounds
-        for s in new_R:
-            for a in new_R[s]:
-                new_U[s][a] = self.U[s][a]
+        for s in new_r:
+            for a in new_r[s]:
+                new_u[s][a] = self.U[s][a]
 
-        self.R_memory.append(new_R)
-        self.T_memory.append(new_T)
-        self.U_memory.append(new_U)
+        self.R_memory.append(new_r)
+        self.T_memory.append(new_t)
+        self.U_memory.append(new_u)
 
     def compute_min_upper_bound(self, s):
         #TODO
@@ -152,15 +154,13 @@ class LRMax(Agent):
                 a_star = a
         return a_star
 
-    def update_upper_bound(self, epsilon=0.1):
+    def update_upper_bound(self):
         """
         Update the upper bound on the Q-value function.
         Called when a new state-action pair is known.
-        :param epsilon: maximum gap between the estimated Q-value and the optimal one.
         :return: None
         """
-        n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))
-        for i in range(n_iter):
+        for i in range(self.vi_n_iter):
             for s in self.R:
                 for a in self.R[s]:
                     n_s_a = float(self.counter[s][a])
