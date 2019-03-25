@@ -77,7 +77,7 @@ class LRMax(Agent):
             return []
         else:
             for i in range(n_prev_mdps):
-                u_i =
+                u_i =  # TODO init
 
     def compute_lipschitz_upper_bound(self, U_mem, R_mem, T_mem):
         # Initialize model's distances upper-bounds
@@ -103,15 +103,27 @@ class LRMax(Agent):
 
         # Compute model's distances upper-bounds
         for s, a in s_a_kk:
-            r_s_a = sum(self.R[s][a]) / float(len(self.R[s][a]))
-            r_s_a_mem = sum(R_mem[s][a]) / float(len(R_mem[s][a]))
+            n_s_a = float(self.counter[s][a])
+            r_s_a = sum(self.R[s][a]) / n_s_a
+            r_s_a_mem = sum(R_mem[s][a]) / float(self.count_threshold)  # there should be count_threshold rewards
+
+            assert self.count_threshold == len(R_mem[s][a])  # TODO remove after testing
 
             weighted_sum = 0.
             for s_p in self.T[s][a]:
                 if s_p in T_mem[s][a]:
-                    weighted_sum +=  # TODO
-
+                    a_p = self.greedy_action(s_p, U_mem)
+                    model_diff = abs(self.T[s][a][s_p] / n_s_a - T_mem[s][a][s_p] / float(self.count_threshold))
+                    # TODO check that T_mem[s][a][s_p] == 0 if s_p not in T_mem[s][a]
+                    weighted_sum += U_mem[s_p][a_p] * model_diff
+            for s_p in T_mem[s][a]:
+                if not s_p in self.T[s][a]:
+                    a_p = self.greedy_action(s_p, U_mem)
+                    model_diff = T_mem[s][a][s_p] / float(self.count_threshold)
+                    weighted_sum += U_mem[s_p][a_p] * model_diff
             d_dict[s][a] = abs(r_s_a - r_s_a_mem) + self.gamma * weighted_sum
+            # TODO check this
+
         for s, a in s_a_ku:
             # TODO
         for s, a in s_a_uk:
