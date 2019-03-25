@@ -5,8 +5,7 @@ Use Value Iteration to compute the R-Max upper-bound following [Strehl et al 200
 Changes compared to Dave's original RMax:
 - Use of Value Iteration for upper-bound computation with provable precision;
 - Only use learned transition model when state-action pair is known;
-- Single visit counter (less memory);
-- end_of_episode method implemented avoiding using the initial state as the resulting state from the last transition.
+- Single visit counter (less memory).
 """
 
 import random
