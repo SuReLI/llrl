@@ -7,8 +7,6 @@ import random
 import numpy as np
 from collections import defaultdict
 
-import llrl.utils.utils as utils
-import llrl.spaces.discrete as discrete
 from simple_rl.agents.AgentClass import Agent
 
 
@@ -41,6 +39,7 @@ class RMaxVI(Agent):
     def empty_memory_structure(self):
         """
         Empty memory structure:
+        U[s][a] (float): upper-bound on the Q-value
         R[s][a] (list): list of collected rewards
         T[s][a][s'] (int): number of times the transition has been observed
         counter[s][a] (int): number of times the state action pair has been sampled
@@ -50,18 +49,6 @@ class RMaxVI(Agent):
                defaultdict(lambda: defaultdict(list)), \
                defaultdict(lambda: defaultdict(lambda: defaultdict(int))), \
                defaultdict(lambda: defaultdict(int))
-
-    def set(self, p=None):
-        """
-        Set the attributes.
-        Expect to receive them in the same order as init.
-        p : list of parameters
-        """
-        if p is None:
-            self.__init__(self.actions)
-        else:
-            utils.assert_types(p, [discrete.Discrete, float, int, int])
-            self.__init__(p[0], p[1], p[2], p[3])
 
     def display(self):
         """

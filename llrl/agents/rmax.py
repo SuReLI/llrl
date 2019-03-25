@@ -2,12 +2,9 @@
 Implementation of an R-Max Agent [Brafman and Tennenholtz 2003]
 """
 
-import copy
 import random
 from collections import defaultdict
 
-import llrl.utils.utils as utils
-import llrl.spaces.discrete as discrete
 from simple_rl.agents.AgentClass import Agent
 
 
@@ -30,24 +27,11 @@ class RMax(Agent):
         Reset the attributes to initial state.
         :return: None
         """
-        self.Q_init = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))  # heuristic
         self.R = defaultdict(lambda: defaultdict(list))  # collected rewards [s][a][r_1, ...]
         self.T = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))  # collected transitions [s][a][s'][count]
         self.counter = defaultdict(lambda: defaultdict(int))  # counter [s][a][count]
         self.prev_s = None
         self.prev_a = None
-
-    def set(self, p=None):
-        """
-        Set the attributes.
-        Expect to receive them in the same order as init.
-        p : list of parameters
-        """
-        if p is None:
-            self.__init__(self.actions)
-        else:
-            utils.assert_types(p, [discrete.Discrete, float, int, int])
-            self.__init__(p[0], p[1], p[2], p[3])
 
     def display(self):
         """
