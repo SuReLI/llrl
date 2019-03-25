@@ -1,4 +1,5 @@
 import random
+import numpy as np
 from collections import defaultdict
 
 from simple_rl.agents.AgentClass import Agent
@@ -126,13 +127,13 @@ class LRMax(Agent):
         # Compute and store upper-bounds
         for s in new_R:
             for a in new_R[s]:
-                new_U[s][a] = self.compute_q_value(s, a)
+                new_U[s][a] = self.U[s][a]
 
         self.R_memory.append(new_R)
         self.T_memory.append(new_T)
         self.U_memory.append(new_U)
 
-    def compute_min_upper_bound(self, s, horizon=None):
+    def compute_min_upper_bound(self, s):
         #TODO
         return 0  # TODO remove
 
