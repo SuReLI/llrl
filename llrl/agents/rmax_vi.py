@@ -36,8 +36,7 @@ class RMaxVI(Agent):
 
     def reset(self):
         """
-        Reset the attributes to initial state.
-        Save the previous model.
+        Reset the attributes to initial state (called between instances).
         :return: None
         """
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()

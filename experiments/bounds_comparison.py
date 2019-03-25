@@ -33,8 +33,8 @@ def main():
     lrmax_agent = LRMax(actions=mdp1.get_actions(), gamma=0.9, count_threshold=1)
 
     # Run
-    run_agents_on_mdp([lrmax_agent, rand_agent], mdp1, instances=1, episodes=30, steps=1,
-                      reset_at_terminal=True, verbose=False, open_plot=False)
+    run_agents_on_mdp([lrmax_agent, rmax_vi_agent, rand_agent], mdp1, instances=1, episodes=30, steps=20,
+                      reset_at_terminal=True, verbose=False, open_plot=True)
     test(lrmax_agent)
 
 
