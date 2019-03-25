@@ -1,6 +1,12 @@
 """
 Implementation of an R-Max agent [Brafman and Tennenholtz 2003]
 Use Value Iteration to compute the R-Max upper-bound.
+
+Changes compared to David's original RMax:
+- Use of Value Iteration for upper-bound computation with provable precision
+- Only use learned transition model when state-action pair is known
+- Single visit counter (less memory)
+- end_of_episode method implemented avoiding using initial state as resulting state from last transition
 """
 
 import random
@@ -35,6 +41,14 @@ class RMaxVI(Agent):
         :return: None
         """
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
+        self.prev_s = None
+        self.prev_a = None
+
+    def end_of_episode(self):
+        """
+        Reset between episodes within the same MDP.
+        :return: None
+        """
         self.prev_s = None
         self.prev_a = None
 

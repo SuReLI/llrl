@@ -10,7 +10,7 @@ class LRMax(Agent):
     Lipschitz R-Max agent
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="Lipschitz-RMax"):
+    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="LRMax-e"):
         name = name + str(epsilon) if name[-2:] == "-e" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.nA = len(self.actions)
@@ -40,6 +40,14 @@ class LRMax(Agent):
             self.update_memory()
 
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
+        self.prev_s = None
+        self.prev_a = None
+
+    def end_of_episode(self):
+        """
+        Reset between episodes within the same MDP.
+        :return: None
+        """
         self.prev_s = None
         self.prev_a = None
 
@@ -111,22 +119,20 @@ class LRMax(Agent):
     def update_memory(self):
         """
         Update the memory:
-        1. Store the reward and transitions for the known state-action pairs in R_memory and T_memory
-        2. Compute the final upper-bound and store it in U_memory
+        Store the rewards, transitions and upper-bounds for the known state-action pairs
+        respectively in R_memory, T_memory and U_memory.
         :return: None
         """
         new_r = defaultdict(lambda: defaultdict(list))
         new_t = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         new_u = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
 
-        # Store known rewards and transition
         for s in self.R:
             for a in self.R[s]:
                 if self.is_known(s, a):
                     new_r[s][a] = self.R[s][a]
                     new_t[s][a] = self.T[s][a]
 
-        # Compute and store upper-bounds
         for s in new_r:
             for a in new_r[s]:
                 new_u[s][a] = self.U[s][a]
@@ -169,6 +175,7 @@ class LRMax(Agent):
                     s_p_dict = self.T[s][a]
                     weighted_next_upper_bound = 0.
                     for s_p in s_p_dict:
-                        weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p)] * s_p_dict[s_p] / n_s_a
+                        a_p = self.greedy_action(s_p)
+                        weighted_next_upper_bound += self.U[s_p][a_p] * s_p_dict[s_p] / n_s_a
 
                     self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
