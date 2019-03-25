@@ -94,13 +94,22 @@ class LRMax(Agent):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
-        # local_upper_bound = self.compute_min_upper_bound(s)  # TODO need?
-        a = self.greedy_action(s, self.U)
+        a = self.greedy_action(s, self.min_upper_bound(s))
 
         self.prev_a = a
         self.prev_s = s
 
         return a
+
+    def min_upper_bound(self, s):
+        u_min = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
+        for a in self.actions:
+            u_min[s][a] = self.U[s][a]
+            if len(self.U_lip) > 0:
+                for u in self.U_lip:
+                    if u[s][a] < u_min[s][a]:
+                        u_min[s][a] = u[s][a]
+        return u_min
 
     def update(self, s, a, r, s_p):
         """
@@ -206,14 +215,15 @@ class LRMax(Agent):
     def compute_lipschitz_upper_bound(self, U_mem, R_mem, T_mem):
         # 1. Separate state-action pairs
         s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(U_mem, R_mem, T_mem)
-        print('Containers sizes:', len(s_a_kk), len(s_a_ku), len(s_a_uk))  # TODO remove
 
         # 2. Compute models distances upper-bounds
         d_dict = self.models_distances(U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 3. Compute the Q-values gap with dynamic programming
+        gap = self.q_values_gap(d_dict, s_a_kk, s_a_ku, s_a_uk)
 
         # 4. Deduce upper-bound from U_mem
+        return self.lipschitz_upper_bound(U_mem, gap)
 
     def separate_state_action_pairs(self, U_mem, R_mem, T_mem):
         # Different state-action pairs container:
@@ -301,3 +311,28 @@ class LRMax(Agent):
 
         return d_dict
 
+    def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):
+        gap_max = self.r_max * (1. + self.gamma) / ((1. - self.gamma)**2)
+        gap = defaultdict(lambda: defaultdict(lambda: gap_max))
+
+        for s, a in s_a_uk:  # Unknown (s, a) in current MDP
+            gap[s][a] = d_dict[s][a] + self.gamma * gap_max
+
+        for i in range(self.vi_n_iter):
+            for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
+                weighted_next_gap = 0.
+                for s_p in self.T[s][a]:
+                    a_p = self.greedy_action(s_p, gap)
+                    weighted_next_gap += gap[s_p][a_p] * self.T[s][a][s_p] / float(self.counter[s][a])
+
+                gap[s][a] = d_dict[s][a] + self.gamma * weighted_next_gap
+
+        return gap
+
+    def lipschitz_upper_bound(self, U_mem, gap):
+        U_max = 2 * self.r_max / ((1. - self.gamma)**2)
+        U = defaultdict(lambda: defaultdict(lambda: U_max))
+        for s in gap:
+            for a in gap[s]:
+                U[s][a] = U_mem[s][a] + gap[s][a]
+        return U
