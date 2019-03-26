@@ -36,7 +36,6 @@ class LRMax(Agent):
         Save the previous model.
         :return: None
         """
-        print('RESET')  # TODO remove
         if len(self.counter) > 0:  # Save previously learned model
             self.update_memory()
 
@@ -87,7 +86,6 @@ class LRMax(Agent):
     def act(self, s, r):
         """
         Acting method called online during learning.
-
         :param s: int current state of the agent
         :param r: float received reward for the previous transition
         :return: return the greedy action wrt the current learned model.
@@ -102,6 +100,12 @@ class LRMax(Agent):
         return a
 
     def min_upper_bound(self, s):
+        """
+        Choose the minimum local upper-bound between the one provided by R-Max and
+        those provided by each Lipschitz bound.
+        :param s: input state for which the bound is derived
+        :return: return the minimum upper-bound.
+        """
         u_min = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
         for a in self.actions:
             u_min[s][a] = self.U[s][a]
@@ -117,10 +121,10 @@ class LRMax(Agent):
         tuple if the corresponding state-action pair is not known enough.
         If a new state-action pair is known, update both the R-Max upper-bound
         and the Lipschitz upper-bounds.
-        :param s: int state
-        :param a: int action
-        :param r: float reward
-        :param s_p: int next state
+        :param s: state
+        :param a: action
+        :param r: reward
+        :param s_p: next state
         :return: None
         """
         if s is not None and a is not None:
@@ -134,9 +138,11 @@ class LRMax(Agent):
 
     def update_memory(self):
         """
-        Update the memory:
+        Update the memory (called between each MDP change i.e. when the method reset is called).
         Store the rewards, transitions and upper-bounds for the known state-action pairs
         respectively in R_memory, T_memory and U_memory.
+        All the data corresponding to partially known state-action pairs are discarded.
+        Consequently, the saved state-action pairs only refer to known pairs.
         :return: None
         """
         new_r = defaultdict(lambda: defaultdict(list))
@@ -160,7 +166,7 @@ class LRMax(Agent):
     def greedy_action(self, s, upper_bound):
         """
         Compute the greedy action wrt the input upper bound.
-        :param s: state
+        :param s: state at which the upper-bound is evaluated
         :param upper_bound: input upper-bound
         :return: return the greedy action.
         """
@@ -185,36 +191,30 @@ class LRMax(Agent):
                     n_s_a = float(self.counter[s][a])
                     r_s_a = sum(self.R[s][a]) / n_s_a
 
-                    s_p_dict = self.T[s][a]
                     weighted_next_upper_bound = 0.
-                    for s_p in s_p_dict:
+                    for s_p in self.T[s][a]:
                         a_p = self.greedy_action(s_p, self.U)
-                        weighted_next_upper_bound += self.U[s_p][a_p] * s_p_dict[s_p] / n_s_a
+                        weighted_next_upper_bound += self.U[s_p][a_p] * self.T[s][a][s_p] / n_s_a
 
                     self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
 
     def update_lipschitz_upper_bounds(self):
         """
         Update the Lipschitz upper-bound for all the previous tasks.
-        Can be used for initialization as well (just after sampling a new task).
         Called at initialization and when a new state-action pair is known.
         :return: None
         """
         n_prev_mdps = len(self.U_memory)
-        if n_prev_mdps == 0:
-            self.U_lip = []
-        else:
-            self.U_lip = []
+        self.U_lip = []
+        if n_prev_mdps > 0:
             for i in range(n_prev_mdps):
                 self.U_lip.append(
-                    self.compute_lipschitz_upper_bound(
-                        self.U_memory[i], self.R_memory[i], self.T_memory[i]
-                    )
+                    self.compute_lipschitz_upper_bound(self.U_memory[i], self.R_memory[i], self.T_memory[i])
                 )
 
     def compute_lipschitz_upper_bound(self, U_mem, R_mem, T_mem):
         # 1. Separate state-action pairs
-        s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(U_mem, R_mem, T_mem)
+        s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(R_mem)
 
         # 2. Compute models distances upper-bounds
         d_dict = self.models_distances(U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk)
@@ -225,7 +225,7 @@ class LRMax(Agent):
         # 4. Deduce upper-bound from U_mem
         return self.lipschitz_upper_bound(U_mem, gap)
 
-    def separate_state_action_pairs(self, U_mem, R_mem, T_mem):
+    def separate_state_action_pairs(self, R_mem):
         # Different state-action pairs container:
         s_a_kk = []  # Known in both MDPs
         s_a_ku = []  # Known in current MDP - Unknown in previous MDP

@@ -2,19 +2,29 @@ import llrl.utils.distribution as dist
 import numpy as np
 
 
+class Foo(object):
+    def __init__(self):
+        self.name = "Foo"
+
+    def method(self):
+        print(self.name)
+
+
+class Bar(Foo):
+    def __init__(self):
+        Foo.__init__(self)
+        self.name = "Bar"
+
+    def method(self):
+        print("My bar-name is", self.name)
+
+
 def test():
-    inf = 1e99
-    d = np.array(
-        [
-            [0.0, 0.9],
-            [0.9, 1.0]
-        ]
-    )
-    n = d.shape[0]
-    uniform = (1.0 / float(n)) * np.ones(shape=n, dtype=float)
-    distance, match = dist.wass_primal(uniform, uniform, d)
-    print('distance :', distance)
-    print('match    :', match)
+    f = Foo()
+    b = Bar()
+
+    f.method()
+    b.method()
 
 
 if __name__ == "__main__":

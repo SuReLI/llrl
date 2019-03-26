@@ -142,9 +142,8 @@ class RMaxVI(Agent):
                     n_s_a = float(self.counter[s][a])
                     r_s_a = sum(self.R[s][a]) / n_s_a
 
-                    s_p_dict = self.T[s][a]
                     weighted_next_upper_bound = 0.
-                    for s_p in s_p_dict:
-                        weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p)] * s_p_dict[s_p] / n_s_a
+                    for s_p in self.T[s][a]:
+                        weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p)] * self.T[s][a][s_p] / n_s_a
 
                     self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
