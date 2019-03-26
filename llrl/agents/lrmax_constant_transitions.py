@@ -35,6 +35,10 @@ class LRMaxCT(Agent):
         self.U_lip = []
         self.update_lipschitz_upper_bounds()
 
+        # Counters used for experiments (not useful to the algorithm)
+        self.n_rmax = 0  # nb of times the rmax bound is smaller  # TRM
+        self.n_lip = 0  # nb of times the lip bound is smaller  # TRM
+
     def reset(self):
         """
         Reset the attributes to initial state (called between instances).
@@ -49,6 +53,13 @@ class LRMaxCT(Agent):
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
 
         self.update_lipschitz_upper_bounds()
+
+        if (self.n_rmax + self.n_lip) > 0:
+            print("nb bounding:", (self.n_rmax + self.n_lip))
+            print("use of rmax bound :", self.n_rmax, "(", 100. * self.n_rmax / (self.n_rmax + self.n_lip), "% )")  # TRM
+            print("use of lip bound  :", self.n_lip, "(", 100. * self.n_lip / (self.n_rmax + self.n_lip), "% )")  # TRM
+            self.n_rmax = 0  # nb of times the rmax bound is smaller  # TRM
+            self.n_lip = 0  # nb of times the lip bound is smaller  # TRM
 
     def end_of_episode(self):
         """
@@ -116,6 +127,10 @@ class LRMaxCT(Agent):
             u_min[s][a] = self.U[s][a]
             if len(self.U_lip) > 0:
                 for u in self.U_lip:
+                    if u[s][a] < self.U[s][a]:  # TRM
+                        self.n_lip += 1
+                    else:  # TRM
+                        self.n_rmax += 1
                     if u[s][a] < u_min[s][a]:
                         u_min[s][a] = u[s][a]
         return u_min

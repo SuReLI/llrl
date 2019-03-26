@@ -23,19 +23,16 @@ def main():
     rand = RandomAgent(actions=mdp1.get_actions())
     rmax = RMaxVI(actions=mdp1.get_actions(), gamma=.9, count_threshold=1)
     lrmax = LRMax(actions=mdp1.get_actions(), gamma=.9, count_threshold=1)
-    lrmaxct = LRMaxCT(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, delta_r=.1)
+    lrmaxct = LRMaxCT(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, delta_r=0.)
 
-    agent_pool = [lrmaxct]
+    agent_pool = [rmax, lrmaxct, rand]  # The agents you want to test
 
     # Run
     run_agents_on_mdp(agent_pool, mdp1, instances=1, episodes=100, steps=30,
-                      reset_at_terminal=True, verbose=False, open_plot=False)
-
-    print('exit after first MDP')  # TODO remove
-    exit()
+                      reset_at_terminal=True, verbose=False, open_plot=True)
 
     run_agents_on_mdp(agent_pool, mdp2, instances=1, episodes=100, steps=30,
-                      reset_at_terminal=True, verbose=False, open_plot=False)
+                      reset_at_terminal=True, verbose=False, open_plot=True)
 
 
 if __name__ == "__main__":
