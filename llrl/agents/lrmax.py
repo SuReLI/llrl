@@ -226,6 +226,14 @@ class LRMax(Agent):
         return self.lipschitz_upper_bound(U_mem, gap)
 
     def separate_state_action_pairs(self, R_mem):
+        """
+        Create 3 lists of state-action pairs corresponding to:
+        - pairs known in the current MDP and the considered previous one;
+        - known only in the current MDP;
+        - known only in the previous MDP.
+        :param R_mem: Reward memory of the previous MDP
+        :return: the 3 lists as a tuple
+        """
         # Different state-action pairs container:
         s_a_kk = []  # Known in both MDPs
         s_a_ku = []  # Known in current MDP - Unknown in previous MDP
@@ -330,8 +338,7 @@ class LRMax(Agent):
         return gap
 
     def lipschitz_upper_bound(self, U_mem, gap):
-        U_max = 2 * self.r_max / ((1. - self.gamma)**2)
-        U = defaultdict(lambda: defaultdict(lambda: U_max))
+        U = defaultdict(lambda: defaultdict(lambda: 2. * self.r_max / ((1. - self.gamma)**2)))
         for s in gap:
             for a in gap[s]:
                 U[s][a] = U_mem[s][a] + gap[s][a]

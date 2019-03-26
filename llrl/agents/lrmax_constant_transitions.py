@@ -14,7 +14,8 @@ class LRMaxCT(Agent):
     - Prior knowledge on maximal reward gap (attribute self.delta_r)
     """
 
-    def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, delta_r=.5, name="LRMaxCT"):
+    def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, delta_r=1., name="LRMaxCT"):
+        ''' Note: different from LRMax '''
         name = name + "-e" + str(epsilon) + "-dr" + str(delta_r)
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.r_max = 1.0
@@ -217,19 +218,28 @@ class LRMaxCT(Agent):
                 )
 
     def compute_lipschitz_upper_bound(self, U_mem, R_mem, T_mem):
+        ''' Note: different from LRMax '''
         # 1. Separate state-action pairs
         s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(R_mem)
 
         # 2. Compute models distances upper-bounds
-        d_dict = self.models_distances(U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk)
+        d_dict = self.models_distances(R_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 3. Compute the Q-values gap with dynamic programming
-        gap = self.q_values_gap(d_dict, s_a_kk, s_a_ku, s_a_uk)
+        gap = self.q_values_gap(d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 4. Deduce upper-bound from U_mem
         return self.lipschitz_upper_bound(U_mem, gap)
 
     def separate_state_action_pairs(self, R_mem):
+        """
+        Create 3 lists of state-action pairs corresponding to:
+        - pairs known in the current MDP and the considered previous one;
+        - known only in the current MDP;
+        - known only in the previous MDP.
+        :param R_mem: Reward memory of the previous MDP
+        :return: the 3 lists as a tuple
+        """
         # Different state-action pairs container:
         s_a_kk = []  # Known in both MDPs
         s_a_ku = []  # Known in current MDP - Unknown in previous MDP
@@ -250,92 +260,64 @@ class LRMaxCT(Agent):
 
         return s_a_kk, s_a_ku, s_a_uk
 
-    def models_distances(self, U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk):
+    def models_distances(self, R_mem, s_a_kk, s_a_ku, s_a_uk):
+        ''' Note: different from LRMax '''
         # Initialize model's distances upper-bounds
-        d_dict = defaultdict(lambda: defaultdict(lambda: self.r_max * (1. + self.gamma) / (1. - self.gamma)))
+        d_dict = defaultdict(lambda: defaultdict(lambda: self.delta_r))
 
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
             n_s_a = float(self.counter[s][a])
             r_s_a = sum(self.R[s][a]) / n_s_a
-            r_s_a_mem = sum(R_mem[s][a]) / float(self.count_threshold)  # there should be count_threshold rewards
-
+            r_s_a_mem = sum(R_mem[s][a]) / float(self.count_threshold)
+            d_dict[s][a] = abs(r_s_a - r_s_a_mem)
             assert self.count_threshold == len(R_mem[s][a])  # TODO remove after testing
-
-            weighted_sum = 0.
-            for s_p in self.T[s][a]:
-                if s_p in T_mem[s][a]:
-                    a_p = self.greedy_action(s_p, U_mem)
-                    model_diff = abs(self.T[s][a][s_p] / n_s_a - T_mem[s][a][s_p] / float(self.count_threshold))
-                    # TODO check that T_mem[s][a][s_p] == 0 if s_p not in T_mem[s][a]
-                    weighted_sum += U_mem[s_p][a_p] * model_diff
-            for s_p in T_mem[s][a]:
-                if not s_p in self.T[s][a]:
-                    a_p = self.greedy_action(s_p, U_mem)
-                    model_diff = T_mem[s][a][s_p] / float(self.count_threshold)
-                    weighted_sum += U_mem[s_p][a_p] * model_diff
-            d_dict[s][a] = abs(r_s_a - r_s_a_mem) + self.gamma * weighted_sum
-            # TODO check this
 
         # Compute model's distances upper-bounds for known-unknown (s, a)
         for s, a in s_a_ku:
-            n_s_a = float(self.counter[s][a])
-            r_s_a = sum(self.R[s][a]) / n_s_a
-
-            weighted_sum = 0.
-            for s_p in self.T[s][a]:
-                a_p = self.greedy_action(s_p, U_mem)
-                weighted_sum += U_mem[s_p][a_p] * self.T[s][a][s_p] / n_s_a
-
-            d_dict[s][a] = \
-                max(self.r_max - r_s_a, r_s_a) + \
-                self.gamma * weighted_sum + \
-                self.r_max * self.gamma / (1. - self.gamma)
-            # TODO check this
+            r_s_a = sum(self.R[s][a]) / float(self.count_threshold)
+            d_dict[s][a] = min(self.delta_r, max(self.r_max - r_s_a, r_s_a))
+            assert self.count_threshold == self.counter[s][a]  # TODO remove after testing
 
         # Compute model's distances upper-bounds for unknown-known (s, a)
         for s, a in s_a_uk:
-            r_s_a_mem = sum(R_mem[s][a]) / float(self.count_threshold)  # there should be count_threshold rewards
-
-            weighted_sum = 0.
-            for s_p in T_mem[s][a]:
-                a_p = self.greedy_action(s_p, U_mem)
-                weighted_sum += U_mem[s_p][a_p] * T_mem[s][a][s_p] / float(self.count_threshold)
-
-            d_dict[s][a] = \
-                max(self.r_max - r_s_a_mem, r_s_a_mem) + \
-                self.gamma * weighted_sum + \
-                self.r_max * self.gamma / (1. - self.gamma)
-
-        '''
-        for s in d_dict:  # TODO investigate the large d_dict[s][a] when everything is unknown in new model
-            for a in d_dict[s]:
-                print(s, a, d_dict[s][a])
-        '''
+            r_s_a_mem = sum(R_mem[s][a]) / float(self.count_threshold)
+            d_dict[s][a] = min(self.delta_r, max(self.r_max - r_s_a_mem, r_s_a_mem))
+            assert self.count_threshold == len(R_mem[s][a])  # TODO remove after testing
 
         return d_dict
 
-    def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):
-        gap_max = self.r_max * (1. + self.gamma) / ((1. - self.gamma)**2)
+    def q_values_gap(self, d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk):
+        ''' Note: different from LRMax '''
+        gap_max = self.delta_r / (1. - self.gamma)
         gap = defaultdict(lambda: defaultdict(lambda: gap_max))
 
         for s, a in s_a_uk:  # Unknown (s, a) in current MDP
             gap[s][a] = d_dict[s][a] + self.gamma * gap_max
 
         for i in range(self.vi_n_iter):
+            for s, a in s_a_uk:  # Unknown (s, a) in current MDP
+                weighted_next_gap = 0.
+                for s_p in T_mem[s][a]:
+                    a_p = self.greedy_action(s_p, gap)
+                    weighted_next_gap += gap[s_p][a_p] * T_mem[s][a][s_p] / float(self.count_threshold)
+
+                gap[s][a] = d_dict[s][a] + self.gamma * weighted_next_gap
+
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in self.T[s][a]:
                     a_p = self.greedy_action(s_p, gap)
-                    weighted_next_gap += gap[s_p][a_p] * self.T[s][a][s_p] / float(self.counter[s][a])
+                    weighted_next_gap += gap[s_p][a_p] * self.T[s][a][s_p] / float(self.count_threshold)
+                    assert self.count_threshold == self.counter[s][a]  # TODO remove after testing
 
                 gap[s][a] = d_dict[s][a] + self.gamma * weighted_next_gap
 
         return gap
 
     def lipschitz_upper_bound(self, U_mem, gap):
-        U_max = 2 * self.r_max / ((1. - self.gamma)**2)
-        U = defaultdict(lambda: defaultdict(lambda: U_max))
+        ''' Note: different from LRMax '''
+        U = defaultdict(lambda: defaultdict(lambda: (self.delta_r + self.r_max) / (1. - self.gamma)))
         for s in gap:
             for a in gap[s]:
                 U[s][a] = U_mem[s][a] + gap[s][a]
