@@ -3,6 +3,7 @@ Comparison of the bounds provided by R-MAX and Lipschitz-R-Max.
 """
 
 from llrl.envs.twostates import TwoStates
+from llrl.envs.gridworld import GridWorld
 from llrl.agents.lrmax import LRMax
 from llrl.agents.rmax_vi import RMaxVI
 from llrl.agents.lrmax_constant_transitions import LRMaxCT
@@ -14,8 +15,8 @@ from simple_rl.tasks import GridWorldMDP
 def main():
     # MDP
     size = 5
-    mdp1 = GridWorldMDP(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], slip_prob=0.)
-    mdp2 = GridWorldMDP(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], slip_prob=0.)
+    mdp1 = GridWorld(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], goal_reward=1.0)
+    mdp2 = GridWorld(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], goal_reward=1.0)
     # mdp1 = TwoStates(rewards=(0., 1.), proba=(0., 0.))
     # mdp2 = TwoStates(rewards=(0., 1.), proba=(.9, .9))
 
