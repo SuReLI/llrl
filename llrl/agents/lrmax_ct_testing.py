@@ -48,8 +48,8 @@ class LRMaxCTTesting(LRMaxCT):
             # Reset
             self.n_rmax = 0
             self.n_lip = 0
-            self.n_time_steps = 0
-            self.n_time_steps_cv = 0
+        self.n_time_steps = 0
+        self.n_time_steps_cv = 0
 
     def min_upper_bound(self, s):
         """
