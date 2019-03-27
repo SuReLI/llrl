@@ -9,6 +9,7 @@ class LRMaxCTTesting(LRMaxCT):
     Copy of LRMaxCT agent with a few modifications used for experiments.
     - Record the number of use of the Lipschitz bound and the R-Max bound
     - Save this result at each call to the reset function
+    - Record number of time steps to convergence
     """
 
     def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, delta_r=1., name="LRMaxCTTesting", path="output.csv"):
@@ -23,7 +24,6 @@ class LRMaxCTTesting(LRMaxCT):
         self.n_time_steps = 0  # nb of time steps
         self.n_time_steps_cv = 0  # nb of time steps before convergence with high probability
 
-        # Save into csv file
         self.path = path
 
     def reset(self):
@@ -48,6 +48,8 @@ class LRMaxCTTesting(LRMaxCT):
             # Reset
             self.n_rmax = 0
             self.n_lip = 0
+            self.n_time_steps = 0
+            self.n_time_steps_cv = 0
 
     def min_upper_bound(self, s):
         """
