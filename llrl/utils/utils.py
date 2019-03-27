@@ -6,9 +6,9 @@ from math import isclose
 def csv_write(row, path, mode):
     """
     Write a row into a csv.
-    :param row: written row
-    :param path: path to the edited csv
-    :param mode: mode for writing: 'w' override, 'a' append
+    :param row: (array-like) written row, array-like whose elements are separated in the output file.
+    :param path: (str) path to the edited csv
+    :param mode: (str) mode for writing: 'w' override, 'a' append
     :return: None
     """
     with open(path, mode) as csvfile:
