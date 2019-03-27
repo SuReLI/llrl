@@ -1,39 +1,38 @@
 """
 Comparison of the bounds provided by R-MAX and Lipschitz-R-Max.
+
+Setting:
+- Using two grid-world MDPs with same transition functions and different reward functions while reaching goal;
+- Learning on the first MDP and transferring the Lipschitz bound to the second one;
+- Plotting percentage of bound use vs amount of prior knowledge.
 """
 
-from llrl.envs.twostates import TwoStates
+import numpy as np
+
 from llrl.envs.gridworld import GridWorld
-from llrl.agents.lrmax import LRMax
-from llrl.agents.rmax_vi import RMaxVI
-from llrl.agents.lrmax_constant_transitions import LRMaxCT
-from simple_rl.agents import RandomAgent
+from llrl.agents.lrmax_constant_transitions_testing import LRMaxCTTesting
 from simple_rl.run_experiments import run_agents_on_mdp
-from simple_rl.tasks import GridWorldMDP
+
+
+SAVE_PATH = "results/bounds_comparison_results.csv"
+PRIOR = np.linspace(0., 1., num=11)
 
 
 def main():
     # MDP
     size = 5
     mdp1 = GridWorld(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], goal_reward=1.0)
-    mdp2 = GridWorld(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], goal_reward=0.5)
-    # mdp1 = TwoStates(rewards=(0., 1.), proba=(0., 0.))
-    # mdp2 = TwoStates(rewards=(0., 1.), proba=(.9, .9))
+    mdp2 = GridWorld(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], goal_reward=0.8)
 
-    # Agents
-    rand = RandomAgent(actions=mdp1.get_actions())
-    rmax = RMaxVI(actions=mdp1.get_actions(), gamma=.9, count_threshold=1)
-    lrmax = LRMax(actions=mdp1.get_actions(), gamma=.9, count_threshold=1)
-    lrmaxct = LRMaxCT(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, delta_r=0.5)
+    for prior in PRIOR:
+        lrmaxct = LRMaxCTTesting(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, delta_r=prior, path=SAVE_PATH)
 
-    agent_pool = [rmax, lrmaxct, rand]  # The agents you want to test
+        # Run twice
+        run_agents_on_mdp([lrmaxct], mdp1, instances=1, episodes=100, steps=30,
+                          reset_at_terminal=True, verbose=False, open_plot=False)
 
-    # Run
-    run_agents_on_mdp(agent_pool, mdp1, instances=1, episodes=100, steps=30,
-                      reset_at_terminal=True, verbose=False, open_plot=False)
-
-    run_agents_on_mdp(agent_pool, mdp2, instances=1, episodes=100, steps=30,
-                      reset_at_terminal=True, verbose=False, open_plot=True)
+        run_agents_on_mdp([lrmaxct], mdp2, instances=1, episodes=100, steps=30,
+                          reset_at_terminal=True, verbose=False, open_plot=False)
 
 
 if __name__ == "__main__":
