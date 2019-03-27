@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from llrl.agents.lrmax_constant_transitions import LRMaxCT
+from llrl.agents.lrmax_ct import LRMaxCT
 from llrl.utils.utils import csv_write
 
 
