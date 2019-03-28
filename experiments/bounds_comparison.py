@@ -4,7 +4,7 @@ Comparison of the bounds provided by R-MAX and Lipschitz-R-Max.
 Setting:
 - Using two grid-world MDPs with same transition functions and different reward functions while reaching goal;
 - Learning on the first MDP and transferring the Lipschitz bound to the second one;
-- Plotting percentage of bound use vs amount of prior knowledge.
+- Plotting percentage of bound use vs amount of prior knowledge + speed-up.
 """
 
 import pandas as pd
