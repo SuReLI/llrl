@@ -1,0 +1,10 @@
+(MDP)
+	gridworld_h-2_w-2
+(Agents)
+	LRMax-CT-Exp-e0.1-dr1.0,0
+	RMax-VI-Exp,1
+(Params)
+	episodes : 100
+	track_disc_reward : False
+	steps : 30
+	instances : 1
