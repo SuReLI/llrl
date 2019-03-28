@@ -4,9 +4,9 @@ from llrl.agents.lrmax_ct import LRMaxCT
 from llrl.utils.utils import csv_write
 
 
-class LRMaxCTTesting(LRMaxCT):
+class LRMaxCTExp(LRMaxCT):
     """
-    Copy of LRMaxCT agent with a few modifications used for experiments.
+    Copy of LRMaxCT agent for experiments.
     - Record the number of use of the Lipschitz bound and the R-Max bound
     - Save this result at each call to the reset function
     - Record number of time steps to convergence

@@ -2,9 +2,9 @@ from llrl.agents.rmax_vi import RMaxVI
 from llrl.utils.utils import csv_write
 
 
-class RMaxVITesting(RMaxVI):
+class RMaxVIExp(RMaxVI):
     """
-    Copy of RMaxVI for testing:
+    Copy of RMaxVI for experiments:
     - Record number of time steps to convergence
     """
 

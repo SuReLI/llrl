@@ -14,8 +14,8 @@ from matplotlib import rc
 
 from llrl.utils.utils import csv_write
 from llrl.envs.gridworld import GridWorld
-from llrl.agents.lrmax_ct_testing import LRMaxCTTesting
-from llrl.agents.rmax_vi_testing import RMaxVITesting
+from llrl.agents.lrmax_ct_exp import LRMaxCTExp
+from llrl.agents.rmax_vi_exp import RMaxVIExp
 from simple_rl.run_experiments import run_agents_on_mdp
 
 
