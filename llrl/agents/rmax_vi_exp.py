@@ -8,7 +8,7 @@ class RMaxVIExp(RMaxVI):
     - Record number of time steps to convergence
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-VI-Testing", path="output.csv"):
+    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-VI-Exp", path="output.csv"):
         RMaxVI.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon=epsilon, name=name)
 
         self.n_time_steps = 0  # nb of time steps

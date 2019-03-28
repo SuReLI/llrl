@@ -59,7 +59,7 @@ def plot_results():
     plt.show()
 
 
-def bounds_test(verbose=True):
+def bounds_test(verbose=False):
     # MDP
     sz = 2
     mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=1.0)

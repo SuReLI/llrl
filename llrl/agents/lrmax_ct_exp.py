@@ -12,7 +12,7 @@ class LRMaxCTExp(LRMaxCT):
     - Record number of time steps to convergence
     """
 
-    def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, delta_r=1., name="LRMaxCTTesting", path="output.csv"):
+    def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, delta_r=1., name="LRMax-CT-Exp", path="output.csv"):
         LRMaxCT.__init__(
             self, actions, gamma=gamma, count_threshold=count_threshold, epsilon=epsilon, delta_r=delta_r, name=name
         )
