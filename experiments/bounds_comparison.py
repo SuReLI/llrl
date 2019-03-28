@@ -28,9 +28,9 @@ N_INSTANCES = 100
 PRIOR = [.0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.]
 
 
-def plot_results():
+def plot_results(path):
     # 1. Results in terms of bound-use
-    df = pd.read_csv(SAVE_PATH)
+    df = pd.read_csv(path)
     prior = df.prior
     ratio = df.ratio_lip_bound_use_mean
     ratio_up = df.ratio_lip_bound_use_upper
@@ -46,9 +46,9 @@ def plot_results():
 
     colors = ['steelblue', 'darkorange', 'green']
     plt.plot(prior, ratio, '-o', color=colors[0], label=r'\% use Lipschitz bound')
-    plt.fill_between(prior, ratio_up, ratio_lo, color=colors[0], alpha=0.1)
-    plt.plot(prior, speed_up, '-o', color=colors[1], label=r'\% time-steps gained (speed-up)')
-    plt.fill_between(prior, speed_up_up, speed_up_lo, color=colors[1], alpha=0.1)
+    plt.fill_between(prior, ratio_up, ratio_lo, color=colors[0], alpha=0.2)
+    plt.plot(prior, speed_up, '-^', color=colors[1], label=r'\% time-steps gained (speed-up)')
+    plt.fill_between(prior, speed_up_up, speed_up_lo, color=colors[1], alpha=0.2)
 
     plt.xlim(1., 0.)  # decreasing upper-bound
     plt.xlabel(r'Prior knowledge (known upper-bound on $\max_{s, a} = |R_s^a - \bar{R}_s^a|$)')
@@ -61,7 +61,7 @@ def plot_results():
 
 def bounds_test(verbose=False):
     # MDP
-    sz = 2
+    sz = 3
     mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=1.0)
     mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=0.8)
 
@@ -120,5 +120,6 @@ def bounds_test(verbose=False):
 
 
 if __name__ == '__main__':
-    bounds_test()
-    plot_results()
+    # bounds_test()
+    # plot_results(SAVE_PATH)
+    plot_results('results/bounds-use-and-speed-up/gridworld_h-2_w-2/data.csv')
