@@ -1,20 +1,6 @@
 import numpy as np
-import csv
 import scipy.stats
 from math import isclose
-
-
-def csv_write(row, path, mode):
-    """
-    Write a row into a csv.
-    :param row: (array-like) written row, array-like whose elements are separated in the output file.
-    :param path: (str) path to the edited csv
-    :param mode: (str) mode for writing: 'w' override, 'a' append
-    :return: None
-    """
-    with open(path, mode) as csvfile:
-        w = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        w.writerow(row)
 
 
 def mean_confidence_interval(data, confidence=0.95):

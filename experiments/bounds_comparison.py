@@ -11,7 +11,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
 
-from llrl.utils.utils import csv_write, mean_confidence_interval
+from llrl.utils.utils import mean_confidence_interval
+from llrl.utils.save import csv_write
 from llrl.envs.gridworld import GridWorld
 from llrl.agents.lrmax_ct_exp import LRMaxCTExp
 from llrl.agents.rmax_vi_exp import RMaxVIExp

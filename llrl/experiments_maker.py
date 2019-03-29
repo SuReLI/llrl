@@ -5,15 +5,31 @@ Useful functions for making experiments (e.g. Lifelong RL)
 import time
 from collections import defaultdict
 
-from llrl.utils.utils import csv_write, mean_confidence_interval
+from llrl.utils.utils import mean_confidence_interval
+from llrl.utils.save import save
 from llrl.utils.chart_utils import plot
 from simple_rl.experiments import Experiment
 from simple_rl.run_experiments import run_single_agent_on_mdp
 
 
-def plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=True):
+def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=True):
     n_tasks = len(returns_per_agent[0])
     x = range(1, n_tasks + 1)
+
+    data = []
+    for agent in range(len(agents)):
+        data.append([])
+        for task in range(n_tasks):
+            data[-1].append([
+                x[task],
+                returns_per_agent[agent][task][0],
+                returns_per_agent[agent][task][1],
+                returns_per_agent[agent][task][2]
+            ])
+    save(
+        path, csv_name='returns_vs_tasks', agents=agents, data=data,
+        labels=['task_number', 'discounted_return', 'discounted_return_lo', 'discounted_return_up']
+    )
 
     returns = []
     returns_lo = []
@@ -139,5 +155,5 @@ def run_agents_lifelong(
     print("-------------\n")
 
     # Plot
-    plot_returns_vs_tasks(experiment.exp_directory, agents, returns_per_agent)
+    save_and_plot_returns_vs_tasks(experiment.exp_directory, agents, returns_per_agent)
     experiment.make_plots(open_plot=open_plot)
