@@ -2,6 +2,8 @@
 Useful functions for making experiments (e.g. Lifelong RL)
 """
 
+import sys
+import os
 import time
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -10,9 +12,10 @@ from collections import defaultdict
 from llrl.utils.utils import csv_write, mean_confidence_interval
 from simple_rl.experiments import Experiment
 from simple_rl.run_experiments import run_single_agent_on_mdp
+from simple_rl.utils.chart_utils import _format_title
 
 
-def plot_returns_vs_tasks(agents, returns_per_agent):
+def plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=True):
     n_tasks = len(returns_per_agent[0])
     x = range(1, n_tasks + 1)
 
@@ -32,7 +35,26 @@ def plot_returns_vs_tasks(agents, returns_per_agent):
     plt.ylabel(r'Discounted return')
     plt.legend(loc='best')
     plt.grid(True, linestyle='--')
-    plt.show()
+    exp_dir_split_list = path.split("/")
+    if 'results' in exp_dir_split_list:
+        exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
+    else:
+        exp_name = exp_dir_split_list[0]
+    plt_title = _format_title('Discounted return: ' + exp_name)
+    plt.title(plt_title)
+
+    # Save
+    plot_file_name = os.path.join(path, "returns_vs_tasks.pdf")
+    plt.savefig(plot_file_name, format="pdf")
+
+    # Open
+    if open_plot:
+        open_prefix = "gnome-" if sys.platform == "linux" or sys.platform == "linux2" else ""
+        os.system(open_prefix + "open " + plot_file_name)
+
+    # Clear and close
+    plt.cla()
+    plt.close()
 
 
 def run_agents_lifelong(
@@ -145,5 +167,5 @@ def run_agents_lifelong(
     print("-------------\n")
 
     # Plot
-    plot_returns_vs_tasks(agents, returns_per_agent)
+    plot_returns_vs_tasks(experiment.exp_directory, agents, returns_per_agent)
     experiment.make_plots(open_plot=open_plot)
