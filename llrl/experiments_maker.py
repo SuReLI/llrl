@@ -12,9 +12,9 @@ from simple_rl.experiments import Experiment
 from simple_rl.run_experiments import run_single_agent_on_mdp
 
 
-def plot_cumulative_returns(agents, cumulative_returns):
-    n_tasks = len(cumulative_returns[0][0])
-    x = range(n_tasks)
+def plot_returns_vs_tasks(agents, returns_per_agent):
+    n_tasks = len(returns_per_agent[0])
+    x = range(1, n_tasks + 1)
 
     # LaTeX rendering
     rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
@@ -22,15 +22,14 @@ def plot_cumulative_returns(agents, cumulative_returns):
     plt.rc('font', family='serif')
 
     for i in range(len(agents)):
-        print(agents[i].name)
-        print(cumulative_returns[i][0])
-        print(cumulative_returns[i][1])
-        print(cumulative_returns[i][2])
-        plt.plot(x, cumulative_returns[i][0], '-o', label=agents[i])
-        plt.fill_between(x, cumulative_returns[i][1], cumulative_returns[i][2], alpha=0.2)
+        mean_return = [returns_per_agent[i][j][0] for j in range(n_tasks)]
+        mean_return_lo = [returns_per_agent[i][j][1] for j in range(n_tasks)]
+        mean_return_up = [returns_per_agent[i][j][2] for j in range(n_tasks)]
+        plt.plot(x, mean_return, '-o', label=agents[i])
+        plt.fill_between(x, mean_return_lo, mean_return_up, alpha=0.2)
 
     plt.xlabel(r'Task number')
-    plt.ylabel(r'Cumulative discounted return')
+    plt.ylabel(r'Discounted return')
     plt.legend(loc='best')
     plt.grid(True, linestyle='--')
     plt.show()
@@ -54,8 +53,8 @@ def run_agents_lifelong(
     """
     Tweaked version of simple_rl.run_experiments.run_agents_lifelong
     Modifications are the following:
-    - Tasks are first sampled so that agents experience the same tasks;
-    - Track and plot cumulative return for each task with confidence interval.
+    - Tasks are first sampled so that agents experience the same sequence of tasks;
+    - Track and plot return for each task with confidence interval.
 
     Runs each agent on the MDP distribution according to the given parameters.
     If @mdp_distr has a non-zero horizon, then gamma is set to 1 and @steps is ignored.
@@ -71,7 +70,7 @@ def run_agents_lifelong(
     :param track_disc_reward: (bool) If true records and plots discounted reward, discounted over episodes.
     So, if each episode is 100 steps, then episode 2 will start discounting as though it's step 101.
     :param reset_at_terminal: (bool)
-    :param resample_at_terminal: (bool)
+    :param resample_at_terminal: (bool) (not implemented in this tweaked version of run_agents_lifelong)
     :param cumulative_plot: (bool)
     :param dir_for_plot: (str)
     :return:
@@ -79,7 +78,7 @@ def run_agents_lifelong(
     if resample_at_terminal:
         print('Warning: not implemented in this tweaked version of run_agents_lifelong')
 
-    # Experiment (for reproducibility, plotting).
+    # Experiment (for reproducibility, plotting)
     exp_params = {"samples":samples, "episodes":episodes, "steps":steps}
     experiment = Experiment(
         agents=agents,
@@ -93,45 +92,36 @@ def run_agents_lifelong(
         dir_for_plot=dir_for_plot
     )
 
-    # Record how long each agent spends learning.
     print("Running experiment: \n" + str(experiment))
-    start = time.clock()
-
     times = defaultdict(float)
-    cumulative_returns = []
+    returns_per_agent = []
 
-    # Sample tasks at first so that agents experience the same tasks
+    # Sample tasks at first so that agents experience the same sequence of tasks
     tasks = []
     for _ in range(samples):
         tasks.append(mdp_distr.sample())
 
-    # Learn.
     for agent in agents:
         print(str(agent) + " is learning.")
         start = time.clock()
 
-        cumulative_return_per_task = [0.] * samples
-        cumulative_return_per_task_lo = [0.] * samples
-        cumulative_return_per_task_up = [0.] * samples
+        return_per_task = [(0., 0., 0.)] * samples  # Mean, lower confidence interval bound, upper
 
         for i in range(samples):
             print("  Experience task " + str(i + 1) + " of " + str(samples) + ".")
 
-            # Select the MDP.
+            # Select the MDP
             mdp = tasks[i]
 
-            # Run the agent.
-            hit_terminal, total_steps_taken, cumulative_returns_per_episode = run_single_agent_on_mdp(
-                agent, mdp, episodes, steps, experiment, verbose,
-                track_disc_reward, reset_at_terminal, resample_at_terminal
+            # Run the agent
+            hit_terminal, total_steps_taken, return_per_episode = run_single_agent_on_mdp(
+                agent, mdp, episodes, steps, experiment, verbose=verbose, track_disc_reward=track_disc_reward,
+                reset_at_terminal=reset_at_terminal, resample_at_terminal=resample_at_terminal
             )
 
-            cumulative_return_per_task[i],\
-            cumulative_return_per_task_lo[i],\
-            cumulative_return_per_task_up[i] =\
-                mean_confidence_interval(cumulative_returns_per_episode)
+            return_per_task[i] = mean_confidence_interval(return_per_episode)
 
-            # If we re-sample at terminal, keep grabbing MDPs until we're done.
+            # If we re-sample at terminal, keep grabbing MDPs until we're done
             while resample_at_terminal and hit_terminal and total_steps_taken < steps:
                 mdp = mdp_distr.sample()
                 hit_terminal, steps_taken, _ = run_single_agent_on_mdp(
@@ -140,23 +130,20 @@ def run_agents_lifelong(
                 )
                 total_steps_taken += steps_taken
 
-            # Reset the agent.
+            # Reset the agent
             agent.reset()
+        returns_per_agent.append(return_per_task)
 
-        cumulative_returns.append(
-            (cumulative_return_per_task, cumulative_return_per_task_lo, cumulative_return_per_task_up)
-        )
-
-        # Track how much time this agent took.
+        # Track how much time this agent took
         end = time.clock()
         times[agent] = round(end - start, 3)
 
-    # Time stuff.
+    # Time stuff
     print("\n--- TIMES ---")
     for agent in times.keys():
         print(str(agent) + " agent took " + str(round(times[agent], 2)) + " seconds.")
     print("-------------\n")
 
     # Plot
-    plot_cumulative_returns(agents, cumulative_returns)
+    plot_returns_vs_tasks(agents, returns_per_agent)
     experiment.make_plots(open_plot=open_plot)
