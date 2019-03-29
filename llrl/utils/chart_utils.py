@@ -1,10 +1,16 @@
 import sys
 import os
+from cycler import cycler
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib.ticker import MaxNLocator
 
-from simple_rl.utils.chart_utils import _format_title
+COLOR_SHIFT = 0
+
+color_ls = [
+    [118, 167, 125], [102, 120, 173], [198, 113, 113], [94, 94, 94], [169, 193, 213],
+    [230, 169, 132], [192, 197, 182], [210, 180, 226], [167, 167, 125], [125, 167, 125]
+]
 
 
 def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True):
@@ -31,10 +37,16 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
+    # Set markers and colors
+    markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
+    colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
+    colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
+    ax.set_prop_cycle(cycler('color', colors))
+
     for i in range(len(agents)):
-        plt.plot(x, y[i], '-o', label=agents[i])
         if y_lo is not None and y_up is not None:
-            plt.fill_between(x, y_lo[i], y_up[i], alpha=0.2)
+            plt.fill_between(x, y_lo[i], y_up[i], alpha=0.25)
+        plt.plot(x, y[i], '-o', label=agents[i], marker=markers[i])
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -60,3 +72,10 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
     # Clear and close
     plt.cla()
     plt.close()
+
+
+def _format_title(plot_title):
+    plot_title = plot_title.replace("_", " ")
+    plot_title = plot_title.replace("-", " ")
+    if len(plot_title.split(" ")) > 1:
+        return " ".join([w[0].upper() + w[1:] for w in plot_title.strip().split(" ")])

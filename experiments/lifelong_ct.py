@@ -20,7 +20,7 @@ def experiment():
     rmax = RMaxVI(actions=env_distribution.get_actions(), gamma=GAMMA, count_threshold=1)
 
     run_agents_lifelong(
-        [rmax], env_distribution, samples=3, episodes=3, steps=100,
+        [rmax, rmax], env_distribution, samples=3, episodes=3, steps=100,
         reset_at_terminal=False, open_plot=True, cumulative_plot=False
     )
 
