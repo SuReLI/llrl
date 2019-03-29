@@ -6,6 +6,7 @@ import sys
 import os
 import time
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from matplotlib import rc
 from collections import defaultdict
 
@@ -23,6 +24,8 @@ def plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=True):
     rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
     plt.rc('text', usetex=True)
     plt.rc('font', family='serif')
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     for i in range(len(agents)):
         mean_return = [returns_per_agent[i][j][0] for j in range(n_tasks)]
