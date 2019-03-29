@@ -23,8 +23,6 @@ LRMAX_TMP_SAVE_PATH = 'results/tmp/bounds_comparison_results_LRMAX.csv'
 RMAX_TMP_SAVE_PATH = 'results/tmp/bounds_comparison_results_RMAX.csv'
 
 N_INSTANCES = 100
-
-# PRIOR = [1., .9, .8, .7, .6, .5, .4, .35, .3, .25, .2, .1, .0]
 PRIOR = [.0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.]
 
 

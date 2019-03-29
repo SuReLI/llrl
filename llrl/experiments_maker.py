@@ -3,11 +3,37 @@ Useful functions for making experiments (e.g. Lifelong RL)
 """
 
 import time
+import matplotlib.pyplot as plt
+from matplotlib import rc
 from collections import defaultdict
 
 from llrl.utils.utils import csv_write, mean_confidence_interval
 from simple_rl.experiments import Experiment
 from simple_rl.run_experiments import run_single_agent_on_mdp
+
+
+def plot_cumulative_returns(agents, cumulative_returns):
+    n_tasks = len(cumulative_returns[0][0])
+    x = range(n_tasks)
+
+    # LaTeX rendering
+    rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+
+    for i in range(len(agents)):
+        print(agents[i].name)
+        print(cumulative_returns[i][0])
+        print(cumulative_returns[i][1])
+        print(cumulative_returns[i][2])
+        plt.plot(x, cumulative_returns[i][0], '-o', label=agents[i])
+        plt.fill_between(x, cumulative_returns[i][1], cumulative_returns[i][2], alpha=0.2)
+
+    plt.xlabel(r'Task number')
+    plt.ylabel(r'Cumulative discounted return')
+    plt.legend(loc='best')
+    plt.grid(True, linestyle='--')
+    plt.show()
 
 
 def run_agents_lifelong(
@@ -72,6 +98,7 @@ def run_agents_lifelong(
     start = time.clock()
 
     times = defaultdict(float)
+    cumulative_returns = []
 
     # Sample tasks at first so that agents experience the same tasks
     tasks = []
@@ -94,7 +121,7 @@ def run_agents_lifelong(
             mdp = tasks[i]
 
             # Run the agent.
-            hit_terminal, total_steps_taken, cumulative_returns = run_single_agent_on_mdp(
+            hit_terminal, total_steps_taken, cumulative_returns_per_episode = run_single_agent_on_mdp(
                 agent, mdp, episodes, steps, experiment, verbose,
                 track_disc_reward, reset_at_terminal, resample_at_terminal
             )
@@ -102,7 +129,7 @@ def run_agents_lifelong(
             cumulative_return_per_task[i],\
             cumulative_return_per_task_lo[i],\
             cumulative_return_per_task_up[i] =\
-                mean_confidence_interval(cumulative_returns)
+                mean_confidence_interval(cumulative_returns_per_episode)
 
             # If we re-sample at terminal, keep grabbing MDPs until we're done.
             while resample_at_terminal and hit_terminal and total_steps_taken < steps:
@@ -116,9 +143,9 @@ def run_agents_lifelong(
             # Reset the agent.
             agent.reset()
 
-        print(cumulative_return_per_task)  # TODO remove
-        print(cumulative_return_per_task_lo)  # TODO remove
-        print(cumulative_return_per_task_up)  # TODO remove
+        cumulative_returns.append(
+            (cumulative_return_per_task, cumulative_return_per_task_lo, cumulative_return_per_task_up)
+        )
 
         # Track how much time this agent took.
         end = time.clock()
@@ -130,4 +157,6 @@ def run_agents_lifelong(
         print(str(agent) + " agent took " + str(round(times[agent], 2)) + " seconds.")
     print("-------------\n")
 
+    # Plot
+    plot_cumulative_returns(agents, cumulative_returns)
     experiment.make_plots(open_plot=open_plot)
