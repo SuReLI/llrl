@@ -16,10 +16,9 @@ def my_atomic_function(core_number, thread_number):
     :return: None
     """
     path = 'tmp/benchmark-example-' + str(core_number) + '-' + str(thread_number) + '.csv'
-    csv_write(['counter'], path, 'w')
     for i in range(100):
         time.sleep(1)
-        csv_write([i], path, 'a')
+        csv_write([i], path, 'w')
 
 
 if __name__ == "__main__":
