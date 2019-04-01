@@ -10,5 +10,6 @@
 
 experiments/results/
 examples/results/
+tmp/
 outdated/
 
