@@ -1,7 +1,7 @@
 from collections import defaultdict
 
 from llrl.agents.lrmax_ct import LRMaxCT
-from llrl.utils.utils import csv_write
+from llrl.utils.save import csv_write
 
 
 class LRMaxCTExp(LRMaxCT):
@@ -12,9 +12,9 @@ class LRMaxCTExp(LRMaxCT):
     - Record number of time steps to convergence
     """
 
-    def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, delta_r=1., name="LRMax-CT-Exp", path="output.csv"):
+    def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, prior=1., name="LRMax-CT-Exp", path="output.csv"):
         LRMaxCT.__init__(
-            self, actions, gamma=gamma, count_threshold=count_threshold, epsilon=epsilon, delta_r=delta_r, name=name
+            self, actions, gamma=gamma, count_threshold=count_threshold, epsilon=epsilon, prior=prior, name=name
         )
 
         # Counters used for experiments (not useful to the algorithm)
@@ -40,7 +40,7 @@ class LRMaxCTExp(LRMaxCT):
             ratio_rmax_bound_use = self.n_rmax / n_bound_use
             ratio_lip_bound_use = self.n_lip / n_bound_use
             csv_write(
-                [self.delta_r, ratio_rmax_bound_use, ratio_lip_bound_use, self.n_time_steps, self.n_time_steps_cv],
+                [self.prior, ratio_rmax_bound_use, ratio_lip_bound_use, self.n_time_steps, self.n_time_steps_cv],
                 self.path,
                 'a'
             )
@@ -74,8 +74,8 @@ class LRMaxCTExp(LRMaxCT):
     def act(self, s, r):
         """
         Acting method called online during learning.
-        :param s: int current state of the agent
-        :param r: float received reward for the previous transition
+        :param s: current state of the agent
+        :param r: (float) received reward for the previous transition
         :return: return the greedy action wrt the current learned model.
         """
         self.update(self.prev_s, self.prev_a, r, s)

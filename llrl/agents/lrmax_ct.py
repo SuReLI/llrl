@@ -1,27 +1,42 @@
 import random
 import numpy as np
+import copy
 from collections import defaultdict
 
 from simple_rl.agents.AgentClass import Agent
 
 
+def print_upper_bound(bound):
+    """
+    Print the input bound expected to be a dictionary of the following form:
+    bound[s][a] (float): value of the bound at (s, a).
+    :param bound: input bound
+    :return: None
+    """
+    for s in bound:
+        for a in bound[s]:
+            print('{:>12}  {:>12}  {:>12}'.format(str(s), a, bound[s][a]))
+
+
 class LRMaxCT(Agent):
     """
-    Lipschitz R-Max agent.
+    Lipschitz R-Max agent for constant transitions setting.
 
     Assumptions:
     - Shared transition function across MDPs in Lifelong RL setting;
-    - Prior knowledge on maximal reward gap (attribute self.delta_r)
+    - Prior knowledge on maximal reward gap (attribute self.prior)
+
+    TODO inherit from the methods of LRMax
     """
 
-    def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, delta_r=1., name="LRMaxCT"):
+    def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, prior=1., name="LRMax-CT"):
         ''' Note: different from LRMax '''
-        name = name + "-e" + str(epsilon) + "-dr" + str(delta_r)
+        name = name + "-e" + str(epsilon) + "-prior" + str(prior)
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.r_max = 1.0
         self.count_threshold = count_threshold
         self.vi_n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))  # Nb of value iterations
-        self.delta_r = delta_r
+        self.prior = prior
 
         self.prev_s = None
         self.prev_a = None
@@ -91,8 +106,8 @@ class LRMaxCT(Agent):
     def act(self, s, r):
         """
         Acting method called online during learning.
-        :param s: int current state of the agent
-        :param r: float received reward for the previous transition
+        :param s: current state of the agent
+        :param r: (float) received reward for the previous transition
         :return: return the greedy action wrt the current learned model.
         """
         self.update(self.prev_s, self.prev_a, r, s)
@@ -111,13 +126,12 @@ class LRMaxCT(Agent):
         :param s: input state for which the bound is derived
         :return: return the minimum upper-bound.
         """
-        u_min = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
-        for a in self.actions:
-            u_min[s][a] = self.U[s][a]
-            if len(self.U_lip) > 0:
-                for u in self.U_lip:
-                    if u[s][a] < u_min[s][a]:
-                        u_min[s][a] = u[s][a]
+        # TODO export modification to others
+        u_min = copy.deepcopy(self.U)
+        for u_lip in self.U_lip:
+            for a in self.actions:
+                if u_lip[s][a] < u_min[s][a]:
+                    u_min[s][a] = copy.deepcopy(u_lip[s][a])
         return u_min
 
     def update(self, s, a, r, s_p):
@@ -190,6 +204,8 @@ class LRMaxCT(Agent):
         Called when a new state-action pair is known.
         :return: None
         """
+        # TODO export modification to others or not?
+        '''  # Original version without buffer.
         for i in range(self.vi_n_iter):
             for s in self.R:
                 for a in self.R[s]:
@@ -202,6 +218,23 @@ class LRMaxCT(Agent):
                         weighted_next_upper_bound += self.U[s_p][a_p] * self.T[s][a][s_p] / n_s_a
 
                     self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
+        '''
+        for i in range(self.vi_n_iter):  # TODO remove?
+            U_buffer = copy.deepcopy(self.U)
+            for s in self.R:
+                for a in self.R[s]:
+                    n_s_a = float(self.counter[s][a])
+                    r_s_a = sum(self.R[s][a]) / n_s_a
+
+                    weighted_next_upper_bound = 0.
+                    for s_p in self.T[s][a]:
+                        a_p = self.greedy_action(s_p, self.U)
+                        weighted_next_upper_bound += self.U[s_p][a_p] * self.T[s][a][s_p] / n_s_a
+
+                    U_buffer[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
+            for s in self.U:
+                for a in self.U[s]:
+                    self.U[s][a] = U_buffer[s][a]
 
     def update_lipschitz_upper_bounds(self):
         """
@@ -263,7 +296,7 @@ class LRMaxCT(Agent):
     def models_distances(self, R_mem, s_a_kk, s_a_ku, s_a_uk):
         ''' Note: different from LRMax '''
         # Initialize model's distances upper-bounds
-        d_dict = defaultdict(lambda: defaultdict(lambda: self.delta_r))
+        d_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
@@ -276,20 +309,20 @@ class LRMaxCT(Agent):
         # Compute model's distances upper-bounds for known-unknown (s, a)
         for s, a in s_a_ku:
             r_s_a = sum(self.R[s][a]) / float(self.count_threshold)
-            d_dict[s][a] = min(self.delta_r, max(self.r_max - r_s_a, r_s_a))
+            d_dict[s][a] = min(self.prior, max(self.r_max - r_s_a, r_s_a))
             assert self.count_threshold == self.counter[s][a]  # TODO remove after testing
 
         # Compute model's distances upper-bounds for unknown-known (s, a)
         for s, a in s_a_uk:
             r_s_a_mem = sum(R_mem[s][a]) / float(self.count_threshold)
-            d_dict[s][a] = min(self.delta_r, max(self.r_max - r_s_a_mem, r_s_a_mem))
+            d_dict[s][a] = min(self.prior, max(self.r_max - r_s_a_mem, r_s_a_mem))
             assert self.count_threshold == len(R_mem[s][a])  # TODO remove after testing
 
         return d_dict
 
     def q_values_gap(self, d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk):
         ''' Note: different from LRMax '''
-        gap_max = self.delta_r / (1. - self.gamma)
+        gap_max = self.prior / (1. - self.gamma)
         gap = defaultdict(lambda: defaultdict(lambda: gap_max))
 
         for s, a in s_a_uk:  # Unknown (s, a) in current MDP
@@ -317,7 +350,7 @@ class LRMaxCT(Agent):
 
     def lipschitz_upper_bound(self, U_mem, gap):
         ''' Note: different from LRMax '''
-        U = defaultdict(lambda: defaultdict(lambda: (self.delta_r + self.r_max) / (1. - self.gamma)))
+        U = defaultdict(lambda: defaultdict(lambda: (self.prior + self.r_max) / (1. - self.gamma)))
         for s in gap:
             for a in gap[s]:
                 U[s][a] = U_mem[s][a] + gap[s][a]

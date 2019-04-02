@@ -29,6 +29,7 @@ def make_env_distribution(env_class='grid-world', n_env=10, gamma=.9, w=5, h=5, 
 
     for _ in range(n_env):
         sampled_reward = np.random.uniform(.5, .7)
+        sampled_reward = 1.  # TODO remove
         new_env = GridWorld(
             width=w, height=h, init_loc=(1, 1), goal_locs=[(w, h)],
             gamma=gamma, slip_prob=0.0, goal_reward=sampled_reward, name="grid-world"

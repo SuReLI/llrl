@@ -27,8 +27,13 @@ def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=Tr
                 returns_per_agent[agent][task][2]
             ])
     save(
-        path, csv_name='returns_vs_tasks', agents=agents, data=data,
-        labels=['task_number', 'discounted_return', 'discounted_return_lo', 'discounted_return_up']
+        path, csv_name='average_discounted_return', agents=agents, data=data,
+        labels=[
+            'task_number',
+            'average_discounted_return',
+            'average_discounted_return_lo',
+            'average_discounted_return_up'
+        ]
     )
 
     returns = []
@@ -40,8 +45,9 @@ def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=Tr
         returns_up.append([returns_per_agent[i][j][2] for j in range(n_tasks)])
 
     plot(
-        path, pdf_name='returns_vs_tasks', agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=r'Task number', y_label=r'Discounted return', title_prefix='Discounted return: ', open_plot=open_plot
+        path, pdf_name='average_discounted_return', agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
+        x_label=r'Task number', y_label=r'Average discounted return', title_prefix='Average discounted return: ',
+        open_plot=open_plot
     )
 
 
@@ -58,7 +64,7 @@ def run_agents_lifelong(
         reset_at_terminal=False,
         resample_at_terminal=False,
         cumulative_plot=True,
-        dir_for_plot="results"
+        dir_for_plot='results'
 ):
     """
     Tweaked version of simple_rl.run_experiments.run_agents_lifelong

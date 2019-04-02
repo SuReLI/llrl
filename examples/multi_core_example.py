@@ -5,7 +5,7 @@ Simple example for multi-processing use.
 import time
 
 from llrl.utils.save import csv_write
-from llrl.utils.benchmark import multi_cores
+from llrl.utils.benchmark import multi_core
 
 
 def my_atomic_function(core_number):
@@ -22,4 +22,4 @@ def my_atomic_function(core_number):
 
 if __name__ == "__main__":
     n_cores = 4
-    multi_cores(my_atomic_function, n_cores)
+    multi_core(my_atomic_function, n_cores)

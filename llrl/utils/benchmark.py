@@ -6,7 +6,7 @@ import multiprocessing
 import time
 
 
-def multi_cores(atomic_function, n_cores, core_number_as_arg=True, verbose=True):
+def multi_core(atomic_function, n_cores, core_number_as_arg=True, verbose=True):
     """
     Execute the input function on the given number of cores / threads.
     :param atomic_function: function to be executed taking only two arguments: (core_number, thread_number)
