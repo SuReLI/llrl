@@ -26,7 +26,7 @@ class LRMaxCT(Agent):
     - Shared transition function across MDPs in Lifelong RL setting;
     - Prior knowledge on maximal reward gap (attribute self.prior)
 
-    TODO inherit from the methods of LRMax
+    TODO inherit from the methods of LRMax that are the same
     """
 
     def __init__(self, actions, gamma=.9, count_threshold=1, epsilon=.1, prior=1., name="LRMax-CT"):
@@ -56,14 +56,24 @@ class LRMaxCT(Agent):
         Save the previous model.
         :return: None
         """
-        if len(self.counter) > 0:  # Save previously learned model
+        if len(self.counter) > 0:  # Save previously learned model  # TODO put back
             self.update_memory()
+        # if len(self.counter) > 0 and len(self.U_memory) < 2:  # Save previously learned model  # TODO remove
 
         self.prev_s = None
         self.prev_a = None
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
 
         self.update_lipschitz_upper_bounds()
+
+        self.test()  # TODO remove
+
+    def test(self):  # TODO remove
+        print('Print U_lip:')
+        for ulip in self.U_lip:
+            print_upper_bound(ulip)
+            print()
+        print('\n\n\n')
 
     def end_of_episode(self):
         """
