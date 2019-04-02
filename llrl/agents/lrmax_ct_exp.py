@@ -1,3 +1,4 @@
+import copy
 from collections import defaultdict
 
 from llrl.agents.lrmax_ct import LRMaxCT
@@ -58,17 +59,15 @@ class LRMaxCTExp(LRMaxCT):
         :param s: input state for which the bound is derived
         :return: return the minimum upper-bound.
         """
-        u_min = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
-        for a in self.actions:
-            u_min[s][a] = self.U[s][a]
-            if len(self.U_lip) > 0:
-                for u in self.U_lip:
-                    if u[s][a] < self.U[s][a]:
-                        self.n_lip += 1
-                    else:
-                        self.n_rmax += 1
-                    if u[s][a] < u_min[s][a]:
-                        u_min[s][a] = u[s][a]
+        u_min = copy.deepcopy(self.U)
+        for u_lip in self.U_lip:
+            for a in self.actions:
+                if u_lip[s][a] < u_min[s][a]:
+                    u_min[s][a] = copy.deepcopy(u_lip[s][a])
+                if u_lip[s][a] < self.U[s][a]:
+                    self.n_lip += 1
+                else:
+                    self.n_rmax += 1
         return u_min
 
     def act(self, s, r):

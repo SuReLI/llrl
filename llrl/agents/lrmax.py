@@ -1,4 +1,5 @@
 import random
+import copy
 import numpy as np
 from collections import defaultdict
 
@@ -106,13 +107,11 @@ class LRMax(Agent):
         :param s: input state for which the bound is derived
         :return: return the minimum upper-bound.
         """
-        u_min = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
-        for a in self.actions:
-            u_min[s][a] = self.U[s][a]
-            if len(self.U_lip) > 0:
-                for u in self.U_lip:
-                    if u[s][a] < u_min[s][a]:
-                        u_min[s][a] = u[s][a]
+        u_min = copy.deepcopy(self.U)
+        for u_lip in self.U_lip:
+            for a in self.actions:
+                if u_lip[s][a] < u_min[s][a]:
+                    u_min[s][a] = copy.deepcopy(u_lip[s][a])
         return u_min
 
     def update(self, s, a, r, s_p):

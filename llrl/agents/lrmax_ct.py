@@ -126,7 +126,6 @@ class LRMaxCT(Agent):
         :param s: input state for which the bound is derived
         :return: return the minimum upper-bound.
         """
-        # TODO export modification to others
         u_min = copy.deepcopy(self.U)
         for u_lip in self.U_lip:
             for a in self.actions:
@@ -204,8 +203,6 @@ class LRMaxCT(Agent):
         Called when a new state-action pair is known.
         :return: None
         """
-        # TODO export modification to others or not?
-        '''  # Original version without buffer.
         for i in range(self.vi_n_iter):
             for s in self.R:
                 for a in self.R[s]:
@@ -218,8 +215,9 @@ class LRMaxCT(Agent):
                         weighted_next_upper_bound += self.U[s_p][a_p] * self.T[s][a][s_p] / n_s_a
 
                     self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
+        # TODO buffer version, remove?
         '''
-        for i in range(self.vi_n_iter):  # TODO remove?
+        for i in range(self.vi_n_iter):  
             U_buffer = copy.deepcopy(self.U)
             for s in self.R:
                 for a in self.R[s]:
@@ -235,6 +233,7 @@ class LRMaxCT(Agent):
             for s in self.U:
                 for a in self.U[s]:
                     self.U[s][a] = U_buffer[s][a]
+        '''
 
     def update_lipschitz_upper_bounds(self):
         """

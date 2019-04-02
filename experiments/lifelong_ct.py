@@ -23,7 +23,7 @@ def experiment():
     lrmax1 = LRMaxCT(actions=env_distribution.get_actions(), gamma=GAMMA, count_threshold=1, prior=1.0)
 
     agents_pool = [rmax, lrmax1, lrmax06, lrmax02]
-    agents_pool = [lrmax02]
+    # agents_pool = [lrmax02]
 
     run_agents_lifelong(
         agents_pool, env_distribution, samples=10, episodes=100, steps=100,
