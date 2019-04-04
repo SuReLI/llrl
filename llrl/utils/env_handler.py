@@ -12,7 +12,7 @@ def sample_grid_world(gamma, w, h, verbose=False):
     # Parameters
     r_min = .5
     r_max = .7
-    possible_goals = [(1, h), (w, 1)]
+    possible_goals = [(w, h)] # [(1, h), (w, 1)]
 
     sampled_reward = np.random.uniform(r_min, r_max)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]

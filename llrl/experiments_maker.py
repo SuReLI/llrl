@@ -46,7 +46,7 @@ def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=Tr
 
     plot(
         path, pdf_name='average_discounted_return', agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=r'Task number', y_label=r'Average discounted return', title_prefix='Average discounted return: ',
+        x_label=r'Task Number', y_label=r'Average Discounted Return', title_prefix='Average Discounted Return: ',
         open_plot=open_plot
     )
 
@@ -54,15 +54,15 @@ def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=Tr
 def test_sample(samples):  # TODO remove
     from llrl.envs.gridworld import GridWorld
 
-    sz = 10
+    sz = 3
 
     m1 = GridWorld(
         width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)],
-        gamma=.9, slip_prob=0.0, goal_reward=.2, name="grid-world"
+        gamma=.9, slip_prob=0.0, goal_reward=.5, name="grid-world"
     )
     m2 = GridWorld(
         width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)],
-        gamma=.9, slip_prob=0.0, goal_reward=.3, name="grid-world"
+        gamma=.9, slip_prob=0.0, goal_reward=.6, name="grid-world"
     )
 
     return [m1, m2] * int(samples / 2 + 1)
