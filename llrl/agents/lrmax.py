@@ -14,7 +14,6 @@ class LRMax(Agent):
     def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="LRMax-e"):
         name = name + str(epsilon) if name[-2:] == "-e" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
-        self.nA = len(self.actions)
         self.r_max = 1.0
         self.count_threshold = count_threshold
         self.vi_n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))  # Nb of value iterations
@@ -67,16 +66,6 @@ class LRMax(Agent):
                defaultdict(lambda: defaultdict(list)), \
                defaultdict(lambda: defaultdict(lambda: defaultdict(int))), \
                defaultdict(lambda: defaultdict(int))
-
-    def display(self):
-        """
-        Display info about the attributes.
-        """
-        print('Displaying R-MAX agent :')
-        print('Action space           :', self.actions)
-        print('Number of actions      :', self.nA)
-        print('Gamma                  :', self.gamma)
-        print('Count threshold        :', self.count_threshold)
 
     def is_known(self, s, a):
         return self.counter[s][a] >= self.count_threshold

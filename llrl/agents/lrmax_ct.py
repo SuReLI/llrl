@@ -124,27 +124,10 @@ class LRMaxCT(Agent):
         a = self.greedy_action(s, self.min_upper_bound(s))
         print('selected ->', a)  # TODO remove
 
-        # self.online_test(s, a)  # TODO remove
-
         self.prev_a = a
         self.prev_s = s
 
         return a
-
-    def online_test(self, s, a):  # TODO remove
-        actions = ['left', 'up', 'right', 'down']
-
-        u_rma = [0., 0., 0., 0.]
-        for i in range(4):
-            u_rma[i] = self.U[s][actions[i]]
-        print('{:>17}  {:>17}'.format(str(s), a, ))
-        print('                 u_lip: {:>17}  {:>17}  {:>17}  {:>17}'.format(u_lip[0], u_lip[1], u_lip[2], u_lip[3]))
-
-        if len(self.U_lip) > 0:
-            u_lip = [0., 0., 0., 0.]
-            for i in range(4):
-                u_lip[i] = self.U_lip[0][s][actions[i]]
-            print('                 u_rma: {:>17}  {:>17}  {:>17}  {:>17}'.format(u_rma[0], u_rma[1], u_rma[2], u_rma[3]))
 
     def min_upper_bound(self, s):
         """
