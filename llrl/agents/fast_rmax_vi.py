@@ -27,7 +27,7 @@ class RMaxVI(Agent):
     Use Value Iteration to compute the R-Max upper-bound following [Strehl et al 2009].
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-VI-e"):
+    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-e"):
         name = name + str(epsilon) if name[-2:] == "-e" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.nA = len(self.actions)
@@ -126,6 +126,13 @@ class RMaxVI(Agent):
 
                 if self.counter[s][a] == self.count_threshold:
                     self.update_upper_bound()
+
+        for s in self.R:  # TODO remove
+            for a in self.R[s]:
+                print(s, a, 'R(s, a) =', self.R[s][a])
+                for s_p in self.T[s][a]:
+                    print(s_p, self.T[s][a][s_p])
+                print()
 
     def greedy_action(self, s):
         """

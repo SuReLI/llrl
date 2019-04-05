@@ -21,7 +21,7 @@ class RMaxVI(Agent):
     Use Value Iteration to compute the R-Max upper-bound following [Strehl et al 2009].
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-VI-e"):
+    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-e"):
         name = name + str(epsilon) if name[-2:] == "-e" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.nA = len(self.actions)
