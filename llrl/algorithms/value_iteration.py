@@ -1,7 +1,8 @@
 import numpy as np
+from collections import defaultdict
 
 
-def value_iteration(env, gamma=0.9, threshold=0.01, iter_max=1000, verbose=True):
+def value_iteration(env, gamma=.9, threshold=.01, iter_max=1000, verbose=True):
     """
     Exact Value iteration algorithm.
 
@@ -59,34 +60,50 @@ def approximate_model(env, epsilon=.1, delta=.05):
     :return: tuple(dictionary, dictionary) reward_model, transition_model
     """
     states = env.states()
-    actions = env.actions()
+    actions = env.actions
     m_r = np.log(2. / delta) / (2. * epsilon**2)
     m_t = 2. * (np.log(2**(len(states)) - 2.) - np.log(delta)) / (epsilon**2)
-    n_iter = int(max(m_r, m_t))
+    n_samples = int(max(m_r, m_t))
 
-    print(m_r)
-    print(m_t)
-    print(n_iter)
-    exit()
+    sampled_rewards = defaultdict(lambda: defaultdict(list))
+    sampled_transitions = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
 
-    #for s in states:
-    #return reward_model, transition_model
+    for s in states:
+        for a in actions:
+            for i in range(n_samples):
+                r = env.reward_func(s, a)
+                s_p = env.transition_func(s, a)
+                sampled_rewards[s][a] += [r]
+                sampled_transitions[s][a][s_p] += 1
+
+    reward_model = defaultdict(lambda: defaultdict(float))
+    transition_model = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+
+    for s in states:
+        for a in actions:
+            reward_model[s][a] = sum(sampled_rewards[s][a]) / float(n_samples)
+            for s_p in sampled_transitions[s][a]:
+                transition_model[s][a][s_p] = sampled_transitions[s][a][s_p] / float(n_samples)
+
+    return reward_model, transition_model
 
 
-def approximate_value_iteration(env, gamma, epsilon, verbose=True):
+def approximate_value_iteration(env, gamma=.9, epsilon=.1, delta=.05, verbose=True):
     """
     Approximate Value iteration algorithm.
 
     Required features from the environment:
     env.states() (array-like containing each state of the environment)
-    env.actions() (array-like containing each action of the environment)
+    env.actions (array-like containing each action of the environment)
     env.reward_func(s, a) (sample a r(s, a))
     env.transition_func(s, a) (sample resulting state from application of a at s)
 
     :param env: environment object
     :param gamma: discount factor
-    :param epsilon:
+    :param epsilon: precision of the model (1-norm)
+    :param delta: the model is epsilon-accurate with probability 1 - delta
     :param verbose:
     :return: the value function as a dictionary
     """
-    reward_model, transition_model = approximate_model(env)
+    reward_model, transition_model = approximate_model(env, epsilon, delta)
+    print('TODO')

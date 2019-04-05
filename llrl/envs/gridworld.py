@@ -1,4 +1,5 @@
 from simple_rl.tasks import GridWorldMDP
+from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 class GridWorld(GridWorldMDP):
     """
@@ -51,3 +52,21 @@ class GridWorld(GridWorldMDP):
             return -self.lava_cost
         else:
             return 0 - self.step_cost
+
+    def reward_func(self, state, action):
+        return self._reward_func(state, action)
+
+    def transition_func(self, state, action):
+        return self._transition_func(state, action)
+
+    def states(self):
+        """
+        Compute a list of the states of the environment.
+        :return: list of states
+        """
+        states = []
+        for i in range(self.width):
+            for j in range(self.height):
+                states.append(GridWorldState(i + 1, j + 1))
+        return states
+
