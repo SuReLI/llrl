@@ -1,6 +1,3 @@
-import random
-import numpy as np
-import copy
 from collections import defaultdict
 
 from llrl.agents.lrmax import LRMax
