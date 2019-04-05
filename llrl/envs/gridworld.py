@@ -8,9 +8,7 @@ class GridWorld(GridWorldMDP):
     """
     Tweaked version of GridWorldMDP from simple_rl.
 
-    1) _reward and _transition functions are removed to only allow for a joint transition and reward model.
-
-    2) Reward when reaching goal is variable and set as an attribute
+    1) Reward when reaching goal is variable and set as an attribute
     """
 
     def __init__(

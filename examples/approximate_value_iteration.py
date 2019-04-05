@@ -15,7 +15,7 @@ def example():
     # Create environment
     env = GridWorld(
         width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)],
-        gamma=gamma, slip_prob=0.0, goal_reward=1.0, name="grid-world"
+        gamma=gamma, slip_prob=0.0, goal_reward=1.0, is_goal_terminal=True
     )
 
     # Run approximate value iteration

@@ -127,20 +127,6 @@ class RMaxVI(Agent):
                 if self.counter[s][a] == self.count_threshold:
                     self.update_upper_bound()
 
-        from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
-        if s == GridWorldState(5, 6) and a == "right":  # TODO remove
-            print(s, a, r, s_p)
-        '''
-        for s in self.R:  # TODO remove
-            for a in self.R[s]:
-                if self.is_known(s, a):
-                    print(s, a, 'R(s, a) =', self.R[s][a])
-                    for s_p in self.T[s][a]:
-                        print(s_p, self.T[s][a][s_p])
-                    print(self.counter[s][a])
-                    print()
-        '''
-
     def greedy_action(self, s):
         """
         Compute the greedy action wrt the current upper bound.
