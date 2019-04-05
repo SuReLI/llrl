@@ -55,7 +55,7 @@ class GridWorld(GridWorldMDP):
         """
 
         if s.is_terminal():
-            return s
+            return 0., s
         
         if self.slip_prob > random.random():  # Flip direction
             if a == "up":
@@ -86,7 +86,7 @@ class GridWorld(GridWorldMDP):
         elif (s_p.x, s_p.y) in self.lava_locs:
             r = - self.lava_cost
         else:
-            r = 0 - self.step_cost
+            r = 0. - self.step_cost
 
         return r, s_p
 

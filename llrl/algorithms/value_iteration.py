@@ -121,17 +121,19 @@ def approximate_value_iteration(env, gamma=.9, epsilon=.1, delta=.05, verbose=Tr
         print('number of iterations :', n_iter)
 
     for i in range(n_iter):
-        tmp = copy.deepcopy(value_function)
+        # tmp = copy.deepcopy(value_function)
+        tmp = defaultdict(float)
         for s in states:
-            v_s = 0.
+            max_q_sa = 0.
             for a in actions:
                 v_s_p = 0.
                 for s_p in transition_model[s][a]:
-                    v_s_p = transition_model[s][a][s_p] * value_function[s_p]
+                    v_s_p += transition_model[s][a][s_p] * value_function[s_p]
                 q_sa = reward_model[s][a] + gamma * v_s_p
-                if v_s < q_sa:
-                    v_s = q_sa
-            tmp[s] = v_s
+
+                if max_q_sa < q_sa:
+                    max_q_sa = q_sa
+            tmp[s] = max_q_sa
         value_function = copy.deepcopy(tmp)
 
     return value_function
