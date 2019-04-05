@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from collections import defaultdict
 
@@ -100,10 +101,24 @@ def approximate_value_iteration(env, gamma=.9, epsilon=.1, delta=.05, verbose=Tr
 
     :param env: environment object
     :param gamma: discount factor
-    :param epsilon: precision of the model (1-norm)
+    :param epsilon: precision of the model (1-norm) and precision of the computed value function
     :param delta: the model is epsilon-accurate with probability 1 - delta
     :param verbose:
     :return: the value function as a dictionary
     """
+    states = env.states()
     reward_model, transition_model = approximate_model(env, epsilon, delta)
-    print('TODO')
+
+    value_function = defaultdict(float)
+    for s in states:
+        value_function[s] = 0.
+
+    n_iter = int(np.log(1. / (epsilon * (1. - gamma))) / (1. - gamma))  # Nb of value iterations
+
+    for i in range(n_iter):
+        tmp = copy.deepcopy(value_function)
+        for s in states:
+            # do max over A
+            tmp[s] =
+
+    return value_function
