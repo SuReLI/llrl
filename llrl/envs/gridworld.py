@@ -1,63 +1,101 @@
+import random
+
 from simple_rl.tasks import GridWorldMDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 class GridWorld(GridWorldMDP):
     """
-    Copy of GridWorldMDP from simple_rl with a few changes:
-    - Reward when reaching goal is set as an attribute
+    Tweaked version of GridWorldMDP from simple_rl.
+
+    1) _reward and _transition functions are removed to only allow for a joint transition and reward model.
+
+    2) Reward when reaching goal is variable and set as an attribute
     """
 
-    def __init__(self,
-                 width=5,
-                 height=3,
-                 init_loc=(1, 1),
-                 rand_init=False,
-                 goal_locs=[(5, 3)],
-                 lava_locs=[()],
-                 walls=[],
-                 is_goal_terminal=True,
-                 gamma=0.99,
-                 slip_prob=0.0,
-                 step_cost=0.0,
-                 lava_cost=0.01,
-                 goal_reward=1.0,
-                 name="gridworld"):
-        GridWorldMDP.__init__(self,
-                              width=width,
-                              height=height,
-                              init_loc=init_loc,
-                              rand_init=rand_init,
-                              goal_locs=goal_locs,
-                              lava_locs=lava_locs,
-                              walls=walls,
-                              is_goal_terminal=is_goal_terminal,
-                              gamma=gamma,
-                              slip_prob=slip_prob,
-                              step_cost=step_cost,
-                              lava_cost=lava_cost,
-                              name=name)
+    def __init__(
+            self,
+            width=5,
+            height=3,
+            init_loc=(1, 1),
+            rand_init=False,
+            goal_locs=[(5, 3)],
+            lava_locs=[()],
+            walls=[],
+            is_goal_terminal=True,
+            gamma=0.99, slip_prob=0.0,
+            step_cost=0.0,
+            lava_cost=0.01,
+            goal_reward=1.0,
+            name="Grid-world"
+    ):
+        GridWorldMDP.__init__(
+            self,
+            width=width,
+            height=height,
+            init_loc=init_loc,
+            rand_init=rand_init,
+            goal_locs=goal_locs,
+            lava_locs=lava_locs,
+            walls=walls,
+            is_goal_terminal=is_goal_terminal,
+            gamma=gamma,
+            slip_prob=slip_prob,
+            step_cost=step_cost,
+            lava_cost=lava_cost,
+            name=name
+        )
         self.goal_reward = goal_reward
 
-    def _reward_func(self, state, action):
+    def transition(self, s, a):
         """
-        Override of the reward function of GridWorldMDP setting a variable goal reward
-        when reaching the goal (set in the attribute self.goal_reward)
-        :param state: queried state
-        :param action: queried action
-        :return: None
+        Joint transition method.
+
+        :param s: (GridWorldState) state
+        :param a: (str) action
+        :return: reward and resulting state (r, s_p)
         """
-        if self._is_goal_state_action(state, action):
-            return self.goal_reward - self.step_cost
-        elif (int(state.x), int(state.y)) in self.lava_locs:
-            return -self.lava_cost
+
+        if s.is_terminal():
+            return s
+        
+        if self.slip_prob > random.random():  # Flip direction
+            if a == "up":
+                a = random.choice(["left", "right"])
+            elif a == "down":
+                a = random.choice(["left", "right"])
+            elif a == "left":
+                a = random.choice(["up", "down"])
+            elif a == "right":
+                a = random.choice(["up", "down"])
+
+        if a == "up" and s.y < self.height and not self.is_wall(s.x, s.y + 1):
+            s_p = GridWorldState(s.x, s.y + 1)
+        elif a == "down" and s.y > 1 and not self.is_wall(s.x, s.y - 1):
+            s_p = GridWorldState(s.x, s.y - 1)
+        elif a == "right" and s.x < self.width and not self.is_wall(s.x + 1, s.y):
+            s_p = GridWorldState(s.x + 1, s.y)
+        elif a == "left" and s.x > 1 and not self.is_wall(s.x - 1, s.y):
+            s_p = GridWorldState(s.x - 1, s.y)
         else:
-            return 0 - self.step_cost
+            s_p = GridWorldState(s.x, s.y)
 
-    def reward_func(self, state, action):
-        return self._reward_func(state, action)
+        if (s_p.x, s_p.y) in self.goal_locs and self.is_goal_terminal:
+            s_p.set_terminal(True)
 
-    def transition_func(self, state, action):
-        return self._transition_func(state, action)
+        if (s_p.x, s_p.y) in self.goal_locs:
+            r = self.goal_reward - self.step_cost
+        elif (s_p.x, s_p.y) in self.lava_locs:
+            r = - self.lava_cost
+        else:
+            r = 0 - self.step_cost
+
+        return r, s_p
+
+    def _reward_func(self, state, action):
+        raise ValueError('Method _reward_func not implemented in this Grid-world version, see transition method.')
+
+    def _transition_func(self, state, action):
+        raise ValueError('Method _transition_func not implemented in this Grid-world version, see transition method.')
 
     def states(self):
         """

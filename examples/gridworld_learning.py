@@ -1,17 +1,17 @@
 import numpy as np
 
 from simple_rl.agents import QLearningAgent, RandomAgent, RMaxAgent
-from simple_rl.tasks import GridWorldMDP
 from simple_rl.run_experiments import run_agents_on_mdp
 from llrl.agents.fast_rmax_vi import RMaxVI as FastRMaxVI
 from llrl.agents.rmax_vi import RMaxVI
+from llrl.envs.gridworld import GridWorld
 
 
 def main():
     # Setup MDP.
     w = 6
     h = 6
-    mdp = GridWorldMDP(width=w, height=h, init_loc=(1, 1), goal_locs=[(6, 6)], slip_prob=.1)
+    mdp = GridWorld(width=w, height=h, init_loc=(1, 1), goal_locs=[(6, 6)], slip_prob=.1)
 
     # Compute number of samples for R-MAX to achieve epsilon optimal behavior with high probability (1 - delta)
     epsilon = .1
@@ -19,6 +19,7 @@ def main():
     m_r = np.log(2. / delta) / (2. * epsilon ** 2)
     m_t = 2. * (np.log(2**(float(w * h)) - 2.) - np.log(delta)) / (epsilon ** 2)
     n_samples = int(max(m_r, m_t))
+    n_samples = 30
 
     # Setup Agents.
     ql_agent = QLearningAgent(actions=mdp.get_actions())
