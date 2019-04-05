@@ -138,15 +138,14 @@ class LRMax(RMax):
                 )
 
     def compute_lipschitz_upper_bound(self, u_mem, r_mem, t_mem):
-        # TODO here
         # 1. Separate state-action pairs
         s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
 
         # 2. Compute models distances upper-bounds
-        d_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
+        distances_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 3. Compute the Q-values gap with dynamic programming
-        gap = self.q_values_gap(d_dict, s_a_kk, s_a_ku, s_a_uk)
+        gap = self.q_values_gap(distances_dict, s_a_kk, s_a_ku, s_a_uk)
 
         # 4. Deduce upper-bound from u_mem
         return self.lipschitz_upper_bound(u_mem, gap)

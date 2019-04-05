@@ -46,15 +46,18 @@ class LRMaxCT(LRMax):
         s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(R_mem)
 
         # 2. Compute models distances upper-bounds
-        d_dict = self.models_distances(R_mem, s_a_kk, s_a_ku, s_a_uk)
+        d_dict = self._models_distances(R_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 3. Compute the Q-values gap with dynamic programming
-        gap = self.q_values_gap(d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk)
+        gap = self._q_values_gap(d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 4. Deduce upper-bound from U_mem
         return self.lipschitz_upper_bound(U_mem, gap)
 
-    def models_distances(self, R_mem, s_a_kk, s_a_ku, s_a_uk):
+    def models_distances(self, U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk):
+        raise ValueError('Method models_distances not implemented in this class, see _models_distances method.')
+
+    def _models_distances(self, R_mem, s_a_kk, s_a_ku, s_a_uk):
         ''' Note: different from LRMax '''
         # Initialize model's distances upper-bounds
         d_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
@@ -81,7 +84,10 @@ class LRMaxCT(LRMax):
 
         return d_dict
 
-    def q_values_gap(self, d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk):
+    def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):
+        raise ValueError('Method q_values_gap not implemented in this class, see _q_values_gap method.')
+
+    def _q_values_gap(self, d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk):
         ''' Note: different from LRMax '''
         gap_max = self.prior / (1. - self.gamma)
         gap = defaultdict(lambda: defaultdict(lambda: gap_max))
