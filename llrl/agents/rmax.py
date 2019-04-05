@@ -59,8 +59,8 @@ class RMax(Agent):
         """
         Empty memory structure:
         U[s][a] (float): upper-bound on the Q-value
-        R[s][a] (list): list of collected rewards
-        T[s][a][s'] (int): number of times the transition has been observed
+        R[s][a] (float): average reward
+        T[s][a][s'] (float): probability of the transition
         counter[s][a] (int): number of times the state action pair has been sampled
         :return: U, R, T, counter
         """
@@ -85,7 +85,7 @@ class RMax(Agent):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
-        a = self.greedy_action(s)
+        a = self.greedy_action(s, self.U)
 
         self.prev_a = a
         self.prev_s = s
@@ -114,24 +114,25 @@ class RMax(Agent):
                         self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
 
                 if self.counter[s][a] == self.count_threshold:
-                    self.update_upper_bound()
+                    self.update_rmax_upper_bound()
 
-    def greedy_action(self, s):
+    def greedy_action(self, s, f):
         """
-        Compute the greedy action wrt the current upper bound.
-        :param s: state
+        Compute the greedy action wrt the input function of (s, a).
+        :param s: state at which the upper-bound is evaluated
+        :param f: input function of (s, a)
         :return: return the greedy action.
         """
         a_star = random.choice(self.actions)
-        u_star = self.U[s][a_star]
+        u_star = f[s][a_star]
         for a in self.actions:
-            u_s_a = self.U[s][a]
+            u_s_a = f[s][a]
             if u_s_a > u_star:
                 u_star = u_s_a
                 a_star = a
         return a_star
 
-    def update_upper_bound(self):
+    def update_rmax_upper_bound(self):
         """
         Update the upper bound on the Q-value function.
         Called when a new state-action pair is known.
@@ -144,6 +145,6 @@ class RMax(Agent):
 
                     weighted_next_upper_bound = 0.
                     for s_p in self.T[s][a]:
-                        weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p)] * self.T[s][a][s_p]
+                        weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p, self.U)] * self.T[s][a][s_p]
 
                     self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound

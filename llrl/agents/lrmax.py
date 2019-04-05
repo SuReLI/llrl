@@ -1,26 +1,17 @@
 import random
 import copy
-import numpy as np
 from collections import defaultdict
 
-from simple_rl.agents.AgentClass import Agent
+from llrl.agents.rmax import RMax
 
 
-class LRMax(Agent):
+class LRMax(RMax):
     """
     Lipschitz R-Max agent
     """
 
     def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="LRMax-e"):
-        name = name + str(epsilon) if name[-2:] == "-e" else name
-        Agent.__init__(self, name=name, actions=actions, gamma=gamma)
-        self.r_max = 1.0
-        self.count_threshold = count_threshold
-        self.vi_n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))  # Nb of value iterations
-
-        self.prev_s = None
-        self.prev_a = None
-        self.U, self.R, self.T, self.counter = self.empty_memory_structure()
+        RMax.__init__(self, actions, gamma, count_threshold, epsilon, name)
 
         # Lifelong Learning memories
         self.U_memory = []
@@ -39,39 +30,9 @@ class LRMax(Agent):
         if len(self.counter) > 0:  # Save previously learned model
             self.update_memory()
 
-        self.prev_s = None
-        self.prev_a = None
-        self.U, self.R, self.T, self.counter = self.empty_memory_structure()
+        RMax.reset(self)
 
-        self.update_lipschitz_upper_bounds()
-
-    def end_of_episode(self):
-        """
-        Reset between episodes within the same MDP.
-        :return: None
-        """
-        self.prev_s = None
-        self.prev_a = None
-
-    def empty_memory_structure(self):
-        """
-        Empty memory structure:
-        U[s][a] (float): upper-bound on the Q-value
-        R[s][a] (list): list of collected rewards
-        T[s][a][s'] (int): number of times the transition has been observed
-        counter[s][a] (int): number of times the state action pair has been sampled
-        :return: R, T, counter
-        """
-        return defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma))), \
-               defaultdict(lambda: defaultdict(list)), \
-               defaultdict(lambda: defaultdict(lambda: defaultdict(int))), \
-               defaultdict(lambda: defaultdict(int))
-
-    def is_known(self, s, a):
-        return self.counter[s][a] >= self.count_threshold
-
-    def get_nb_known_sa(self):
-        return sum([self.is_known(s, a) for s, a in self.counter.keys()])
+        # self.update_lipschitz_upper_bounds()
 
     def act(self, s, r):
         """
@@ -82,7 +43,8 @@ class LRMax(Agent):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
-        a = self.greedy_action(s, self.min_upper_bound(s))
+        # a = self.greedy_action(s, self.min_upper_bound(s))  # TODO put back
+        a = self.greedy_action(s, self.U)  # TODO remove
 
         self.prev_a = a
         self.prev_s = s
@@ -102,27 +64,6 @@ class LRMax(Agent):
                 if u_lip[s][a] < u_min[s][a]:
                     u_min[s][a] = copy.deepcopy(u_lip[s][a])
         return u_min
-
-    def update(self, s, a, r, s_p):
-        """
-        Updates transition and reward dictionaries with the input transition
-        tuple if the corresponding state-action pair is not known enough.
-        If a new state-action pair is known, update both the R-Max upper-bound
-        and the Lipschitz upper-bounds.
-        :param s: state
-        :param a: action
-        :param r: reward
-        :param s_p: next state
-        :return: None
-        """
-        if s is not None and a is not None:
-            if self.counter[s][a] < self.count_threshold:
-                self.counter[s][a] += 1
-                self.R[s][a] += [r]
-                self.T[s][a][s_p] += 1
-                if self.counter[s][a] == self.count_threshold:
-                    self.update_rmax_upper_bound()
-                    self.update_lipschitz_upper_bounds()
 
     def update_memory(self):
         """
@@ -150,41 +91,6 @@ class LRMax(Agent):
         self.R_memory.append(new_r)
         self.T_memory.append(new_t)
         self.U_memory.append(new_u)
-
-    def greedy_action(self, s, upper_bound):
-        """
-        Compute the greedy action wrt the input upper bound.
-        :param s: state at which the upper-bound is evaluated
-        :param upper_bound: input upper-bound
-        :return: return the greedy action.
-        """
-        a_star = random.choice(self.actions)
-        u_star = upper_bound[s][a_star]
-        for a in self.actions:
-            u_s_a = upper_bound[s][a]
-            if u_s_a > u_star:
-                u_star = u_s_a
-                a_star = a
-        return a_star
-
-    def update_rmax_upper_bound(self):
-        """
-        Update the upper bound on the Q-value function.
-        Called when a new state-action pair is known.
-        :return: None
-        """
-        for i in range(self.vi_n_iter):
-            for s in self.R:
-                for a in self.R[s]:
-                    n_s_a = float(self.counter[s][a])
-                    r_s_a = sum(self.R[s][a]) / n_s_a
-
-                    weighted_next_upper_bound = 0.
-                    for s_p in self.T[s][a]:
-                        a_p = self.greedy_action(s_p, self.U)
-                        weighted_next_upper_bound += self.U[s_p][a_p] * self.T[s][a][s_p] / n_s_a
-
-                    self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
 
     def update_lipschitz_upper_bounds(self):
         """
