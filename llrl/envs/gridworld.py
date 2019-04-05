@@ -3,6 +3,7 @@ import random
 from simple_rl.tasks import GridWorldMDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
+
 class GridWorld(GridWorldMDP):
     """
     Tweaked version of GridWorldMDP from simple_rl.
