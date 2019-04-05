@@ -40,55 +40,45 @@ class LRMaxCT(LRMax):
             name=name
         )
 
-    def compute_lipschitz_upper_bound(self, U_mem, R_mem, T_mem):
+    def compute_lipschitz_upper_bound(self, u_mem, r_mem, t_mem):
         ''' Note: different from LRMax '''
         # 1. Separate state-action pairs
-        s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(R_mem)
+        s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
 
         # 2. Compute models distances upper-bounds
-        d_dict = self._models_distances(R_mem, s_a_kk, s_a_ku, s_a_uk)
+        distances_dict = self._models_distances(r_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 3. Compute the Q-values gap with dynamic programming
-        gap = self._q_values_gap(d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk)
+        gap = self._q_values_gap(distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk)
 
-        # 4. Deduce upper-bound from U_mem
-        return self.lipschitz_upper_bound(U_mem, gap)
+        # 4. Deduce upper-bound from u_mem
+        return self.lipschitz_upper_bound(u_mem, gap)
 
-    def models_distances(self, U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk):
+    def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         raise ValueError('Method models_distances not implemented in this class, see _models_distances method.')
 
-    def _models_distances(self, R_mem, s_a_kk, s_a_ku, s_a_uk):
-        ''' Note: different from LRMax '''
+    def _models_distances(self, r_mem, s_a_kk, s_a_ku, s_a_uk):
         # Initialize model's distances upper-bounds
-        d_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
+        distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
-            n_s_a = float(self.counter[s][a])
-            r_s_a = sum(self.R[s][a]) / n_s_a
-            r_s_a_mem = sum(R_mem[s][a]) / float(self.count_threshold)
-            d_dict[s][a] = abs(r_s_a - r_s_a_mem)
-            assert self.count_threshold == len(R_mem[s][a])  # TODO remove after testing
+            distances_dict[s][a] = abs(self.R[s][a] - r_mem[s][a])
 
         # Compute model's distances upper-bounds for known-unknown (s, a)
         for s, a in s_a_ku:
-            r_s_a = sum(self.R[s][a]) / float(self.count_threshold)
-            d_dict[s][a] = min(self.prior, max(self.r_max - r_s_a, r_s_a))
-            assert self.count_threshold == self.counter[s][a]  # TODO remove after testing
+            distances_dict[s][a] = min(self.prior, max(self.r_max - self.R[s][a], self.R[s][a]))
 
         # Compute model's distances upper-bounds for unknown-known (s, a)
         for s, a in s_a_uk:
-            r_s_a_mem = sum(R_mem[s][a]) / float(self.count_threshold)
-            d_dict[s][a] = min(self.prior, max(self.r_max - r_s_a_mem, r_s_a_mem))
-            assert self.count_threshold == len(R_mem[s][a])  # TODO remove after testing
+            distances_dict[s][a] = min(self.prior, max(self.r_max - r_mem[s][a], r_mem[s][a]))
 
-        return d_dict
+        return distances_dict
 
     def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):
         raise ValueError('Method q_values_gap not implemented in this class, see _q_values_gap method.')
 
-    def _q_values_gap(self, d_dict, T_mem, s_a_kk, s_a_ku, s_a_uk):
-        ''' Note: different from LRMax '''
+    def _q_values_gap(self, d_dict, t_mem, s_a_kk, s_a_ku, s_a_uk):
         gap_max = self.prior / (1. - self.gamma)
         gap = defaultdict(lambda: defaultdict(lambda: gap_max))
 
@@ -98,9 +88,9 @@ class LRMaxCT(LRMax):
         for i in range(self.vi_n_iter):
             for s, a in s_a_uk:  # Unknown (s, a) in current MDP
                 weighted_next_gap = 0.
-                for s_p in T_mem[s][a]:
+                for s_p in t_mem[s][a]:
                     a_p = self.greedy_action(s_p, gap)
-                    weighted_next_gap += gap[s_p][a_p] * T_mem[s][a][s_p] / float(self.count_threshold)
+                    weighted_next_gap += gap[s_p][a_p] * t_mem[s][a][s_p] / float(self.count_threshold)
 
                 gap[s][a] = d_dict[s][a] + self.gamma * weighted_next_gap
 

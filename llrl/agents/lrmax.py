@@ -44,7 +44,8 @@ class LRMax(RMax):
         self.R_memory = []
         self.T_memory = []
 
-        self.prior = prior
+        prior_max = (1. + gamma) / (1. - gamma)
+        self.prior = min(prior, prior_max)
 
         self.U_lip = []
         self.update_lipschitz_upper_bounds()
@@ -179,7 +180,7 @@ class LRMax(RMax):
 
         return s_a_kk, s_a_ku, s_a_uk
 
-    def models_distances(self, U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk):
+    def models_distances(self, U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk):  # TODO re-implement with prior
         # Initialize model's distances upper-bounds
         d_dict = defaultdict(lambda: defaultdict(lambda: self.r_max * (1. + self.gamma) / (1. - self.gamma)))
 
@@ -244,7 +245,7 @@ class LRMax(RMax):
 
         return d_dict
 
-    def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):
+    def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):  # TODO re-implement
         gap_max = self.r_max * (1. + self.gamma) / ((1. - self.gamma)**2)
         gap = defaultdict(lambda: defaultdict(lambda: gap_max))
 
@@ -262,7 +263,7 @@ class LRMax(RMax):
 
         return gap
 
-    def lipschitz_upper_bound(self, U_mem, gap):
+    def lipschitz_upper_bound(self, U_mem, gap):  # TODO re-implement
         U = defaultdict(lambda: defaultdict(lambda: 2. * self.r_max / ((1. - self.gamma)**2)))
         for s in gap:
             for a in gap[s]:
