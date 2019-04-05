@@ -165,10 +165,10 @@ class LRMaxCT(Agent):
 
         print('{:>17}  {:>17}  {:>17}  {:>17}  {:>17}'.format(
             str(s),
-            u_min[s]['up'],
-            u_min[s]['right'],
-            u_min[s]['down'],
-            u_min[s]['left']
+            round(u_min[s]['up'], 3),
+            round(u_min[s]['right'], 3),
+            round(u_min[s]['down'], 3),
+            round(u_min[s]['left'], 3)
         ))  # TODO remove
         print('{:>17}  {:>17}   {:>17}  {:>17}  {:>17}'.format(
             '',

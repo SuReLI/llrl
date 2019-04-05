@@ -1,11 +1,5 @@
-#!/usr/bin/env python
-
-# Python imports.
 import sys
 
-# Other imports
-#import srl_example_setup
-#from simple_rl.mdp import MDPDistribution
 #from simple_rl.tasks import GridWorldMDP, RandomMDP, ChainMDP, TaxiOOMDP, FourRoomMDP
 from simple_rl.agents import QLearningAgent, RandomAgent, RMaxAgent
 from simple_rl.run_experiments import run_agents_lifelong
