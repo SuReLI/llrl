@@ -28,6 +28,13 @@ class RMax(Agent):
     """
 
     def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-e"):
+        """
+        :param actions: action space of the environment
+        :param gamma: (float) discount factor
+        :param count_threshold: (int) count after which a state-action pair is considered known
+        :param epsilon: (float) precision of value iteration algorithm
+        :param name: (str)
+        """
         name = name + str(epsilon) if name[-2:] == "-e" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.r_max = 1.0

@@ -1,5 +1,6 @@
 import random
 import copy
+import numpy as np
 from collections import defaultdict
 
 from llrl.agents.rmax import RMax
@@ -10,13 +11,34 @@ class LRMax(RMax):
     Lipschitz R-Max agent
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="LRMax-e"):
+    def __init__(
+            self,
+            actions,
+            gamma=0.9,
+            count_threshold=1,
+            epsilon=0.1,
+            max_memory_size=None,
+            prior=np.Inf,
+            name="LRMax-e"
+    ):
+        """
+        :param actions: action space of the environment
+        :param gamma: (float) discount factor
+        :param count_threshold: (int) count after which a state-action pair is considered known
+        :param epsilon: (float) precision of value iteration algorithm
+        :param max_memory_size: (int) maximum number of saved models (infinity if None)
+        :param prior: (float) prior knowledge of maximum model's distance
+        :param name: (str)
+        """
         RMax.__init__(self, actions, gamma, count_threshold, epsilon, name)
 
         # Lifelong Learning memories
+        self.max_memory_size = max_memory_size
         self.U_memory = []
         self.R_memory = []
         self.T_memory = []
+
+        self.prior = prior
 
         self.U_lip = []
         self.update_lipschitz_upper_bounds()
@@ -27,12 +49,15 @@ class LRMax(RMax):
         Save the previous model.
         :return: None
         """
-        if len(self.counter) > 0:  # Save previously learned model
-            self.update_memory()
+        # Save previously learned model
+        if len(self.counter) > 0 and (self.max_memory_size is None or len(self.U_lip) < self.max_memory_size):
+                self.update_memory()
 
-        RMax.reset(self)
+        self.U, self.R, self.T, self.counter = self.empty_memory_structure()
+        self.prev_s = None
+        self.prev_a = None
 
-        # self.update_lipschitz_upper_bounds()
+        self.update_lipschitz_upper_bounds()
 
     def act(self, s, r):
         """
@@ -43,8 +68,7 @@ class LRMax(RMax):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
-        # a = self.greedy_action(s, self.min_upper_bound(s))  # TODO put back
-        a = self.greedy_action(s, self.U)  # TODO remove
+        a = self.greedy_action(s, self.min_upper_bound(s))
 
         self.prev_a = a
         self.prev_s = s
