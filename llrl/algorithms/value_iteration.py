@@ -107,24 +107,22 @@ def approximate_value_iteration(env, gamma=.9, epsilon=.1, delta=.05, verbose=Tr
     :param verbose:
     :return: the value function as a dictionary
     """
-    if verbose:
-        print('Running approximate value iteration.')
-        print('gamma   :', gamma)
-        print('epsilon :', epsilon)
-        print('delta   :', delta)
     states = env.states()
     actions = env.actions
-    reward_model, transition_model = approximate_model(env, epsilon, delta)
 
+    reward_model, transition_model = approximate_model(env, epsilon, delta)
     value_function = defaultdict(float)
-    # for s in states:
-    #     value_function[s] = 0.
 
     n_iter = int(np.log(1. / (epsilon * (1. - gamma))) / (1. - gamma))  # Nb of value iterations
 
+    if verbose:
+        print('Running approximate value iteration.')
+        print('gamma                :', gamma)
+        print('epsilon              :', epsilon)
+        print('delta                :', delta)
+        print('number of iterations :', n_iter)
+
     for i in range(n_iter):
-        if verbose:
-            print('Iteration', i, '/', n_iter)
         tmp = copy.deepcopy(value_function)
         for s in states:
             v_s = 0.

@@ -65,8 +65,11 @@ class GridWorld(GridWorldMDP):
         :return: list of states
         """
         states = []
-        for i in range(self.width):
-            for j in range(self.height):
-                states.append(GridWorldState(i + 1, j + 1))
+        for i in range(1, self.width + 1):
+            for j in range(1, self.height + 1):
+                s = GridWorldState(i, j)
+                if (i, j) in self.goal_locs and self.is_goal_terminal:
+                    s.set_terminal(True)
+                states.append(s)
         return states
 
