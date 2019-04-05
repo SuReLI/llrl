@@ -2,6 +2,7 @@ import numpy as np
 
 from llrl.envs.gridworld import GridWorld
 from llrl.algorithms.value_iteration import approximate_value_iteration
+from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 
 def example():
@@ -9,6 +10,7 @@ def example():
     gamma = .9
     epsilon = .1
     delta = .05
+    fancy_plot = True
 
     # Create environment
     env = GridWorld(
@@ -20,8 +22,15 @@ def example():
     value_function = approximate_value_iteration(env, gamma, epsilon, delta)
 
     # Print computed value function
-    for s in value_function:
-        print('V(', str(s), ') =', value_function[s])
+    print('Computed value function:')
+    if fancy_plot:
+        for j in range(size, 0, -1):
+            for i in range(1, size + 1):
+                print('{:>18}'.format(round(value_function[GridWorldState(i, j)], 2)), end=' ')
+            print()
+    else:
+        for s in value_function:
+            print('Value of', str(s), ':', value_function[s])
 
 
 if __name__ == '__main__':
