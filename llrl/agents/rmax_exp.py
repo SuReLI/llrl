@@ -1,15 +1,15 @@
-from llrl.agents.rmax_vi import RMaxVI
-from llrl.utils.utils import csv_write
+from llrl.agents.rmax import RMax
+from llrl.utils.save import csv_write
 
 
-class RMaxVIExp(RMaxVI):
+class RMaxExp(RMax):
     """
     Copy of RMaxVI for experiments:
     - Record number of time steps to convergence
     """
 
     def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-Exp", path="output.csv"):
-        RMaxVI.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon=epsilon, name=name)
+        RMax.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon=epsilon, name=name)
 
         self.n_time_steps = 0  # nb of time steps
         self.n_time_steps_cv = 0  # nb of time steps before convergence with high probability
@@ -22,7 +22,7 @@ class RMaxVIExp(RMaxVI):
         Save the previous model.
         :return: None
         """
-        RMaxVI.reset(self)
+        RMax.reset(self)
 
         csv_write([self.n_time_steps, self.n_time_steps_cv], self.path, 'a')
 

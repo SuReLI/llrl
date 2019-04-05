@@ -21,7 +21,7 @@ from collections import defaultdict
 from simple_rl.agents.AgentClass import Agent
 
 
-class RMaxVI(Agent):
+class RMax(Agent):
     """
     Implementation of an R-Max agent [Brafman and Tennenholtz 2003]
     Use Value Iteration to compute the R-Max upper-bound following [Strehl et al 2009].

@@ -15,7 +15,7 @@ from llrl.utils.utils import mean_confidence_interval
 from llrl.utils.save import csv_write
 from llrl.envs.gridworld import GridWorld
 from llrl.agents.lrmax_ct_exp import LRMaxCTExp
-from llrl.agents.rmax_vi_exp import RMaxVIExp
+from llrl.agents.rmax_exp import RMaxExp
 from simple_rl.run_experiments import run_agents_on_mdp
 
 
@@ -71,8 +71,8 @@ def bounds_test(verbose=False):
         csv_write(['rmax_n_time_steps', 'rmax_n_time_steps_cv'], RMAX_TMP_SAVE_PATH, 'w')
 
         for prior in PRIOR:
-            lrmaxct = LRMaxCTExp(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, delta_r=prior, path=LRMAX_TMP_SAVE_PATH)
-            rmaxvi = RMaxVIExp(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, path=RMAX_TMP_SAVE_PATH)
+            lrmaxct = LRMaxCTExp(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, prior=prior, path=LRMAX_TMP_SAVE_PATH)
+            rmaxvi = RMaxExp(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, path=RMAX_TMP_SAVE_PATH)
 
             # Run twice
             run_agents_on_mdp([lrmaxct], mdp1, instances=1, episodes=100, steps=30,
