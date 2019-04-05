@@ -1,3 +1,4 @@
+import copy
 from collections import defaultdict
 
 from llrl.agents.lrmax import LRMax
@@ -75,40 +76,35 @@ class LRMaxCT(LRMax):
 
         return distances_dict
 
-    def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):
+    def q_values_gap(self, distances_dict, s_a_kk, s_a_ku, s_a_uk):
         raise ValueError('Method q_values_gap not implemented in this class, see _q_values_gap method.')
 
-    def _q_values_gap(self, d_dict, t_mem, s_a_kk, s_a_ku, s_a_uk):
-        gap_max = self.prior / (1. - self.gamma)
-        gap = defaultdict(lambda: defaultdict(lambda: gap_max))
-
-        for s, a in s_a_uk:  # Unknown (s, a) in current MDP
-            gap[s][a] = d_dict[s][a] + self.gamma * gap_max
+    def _q_values_gap(self, distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk):
+        gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
 
         for i in range(self.vi_n_iter):
+            tmp = copy.deepcopy(gap)
+
             for s, a in s_a_uk:  # Unknown (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in t_mem[s][a]:
-                    a_p = self.greedy_action(s_p, gap)
-                    weighted_next_gap += gap[s_p][a_p] * t_mem[s][a][s_p] / float(self.count_threshold)
-
-                gap[s][a] = d_dict[s][a] + self.gamma * weighted_next_gap
+                    a_p = self.greedy_action(s_p, tmp)
+                    weighted_next_gap += tmp[s_p][a_p] * t_mem[s][a][s_p]
+                gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
 
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in self.T[s][a]:
-                    a_p = self.greedy_action(s_p, gap)
-                    weighted_next_gap += gap[s_p][a_p] * self.T[s][a][s_p] / float(self.count_threshold)
-                    assert self.count_threshold == self.counter[s][a]  # TODO remove after testing
-
-                gap[s][a] = d_dict[s][a] + self.gamma * weighted_next_gap
+                    a_p = self.greedy_action(s_p, tmp)
+                    weighted_next_gap += tmp[s_p][a_p] * self.T[s][a][s_p]
+                gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
 
         return gap
 
-    def lipschitz_upper_bound(self, U_mem, gap):
+    def lipschitz_upper_bound(self, u_mem, gap):
         ''' Note: different from LRMax '''
-        U = defaultdict(lambda: defaultdict(lambda: (self.prior + self.r_max) / (1. - self.gamma)))
+        u_lip = defaultdict(lambda: defaultdict(lambda: (self.prior + self.r_max) / (1. - self.gamma)))
         for s in gap:
             for a in gap[s]:
-                U[s][a] = U_mem[s][a] + gap[s][a]
-        return U
+                u_lip[s][a] = u_mem[s][a] + gap[s][a]
+        return u_lip
