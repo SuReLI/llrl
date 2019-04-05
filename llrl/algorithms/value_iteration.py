@@ -73,8 +73,7 @@ def approximate_model(env, epsilon=.1, delta=.05):
     for s in states:
         for a in actions:
             for i in range(n_samples):
-                r = env.reward_func(s, a)
-                s_p = env.transition_func(s, a)
+                r, s_p = env.transition(s, a)
                 sampled_rewards[s][a] += [r]
                 sampled_transitions[s][a][s_p] += 1
 
@@ -97,8 +96,7 @@ def approximate_value_iteration(env, gamma=.9, epsilon=.1, delta=.05, verbose=Tr
     Required features from the environment:
     env.states() (array-like containing each state of the environment)
     env.actions (array-like containing each action of the environment)
-    env.reward_func(s, a) (sample a r(s, a))
-    env.transition_func(s, a) (sample resulting state from application of a at s)
+    env.transition(s, a) (sample reward and state resulting state from application of a at s)
 
     :param env: environment object
     :param gamma: discount factor
