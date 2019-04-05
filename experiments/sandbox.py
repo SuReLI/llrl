@@ -13,7 +13,7 @@ def example():
     lrmax = LRMax(actions=env.get_actions(), gamma=.9, count_threshold=1)
 
     run_agents_on_mdp(
-        [rand, rmax, lrmax], env, instances=5, episodes=100, steps=20, reset_at_terminal=True, verbose=False
+        [rand, lrmax, rmax], env, instances=5, episodes=100, steps=20, reset_at_terminal=True, verbose=False
     )
 
 

@@ -30,7 +30,14 @@ class LRMax(RMax):
         :param prior: (float) prior knowledge of maximum model's distance
         :param name: (str)
         """
-        RMax.__init__(self, actions, gamma, count_threshold, epsilon, name)
+        RMax.__init__(
+            self,
+            actions=actions,
+            gamma=gamma,
+            count_threshold=count_threshold,
+            epsilon=epsilon,
+            name=name
+        )
 
         # Lifelong Learning memories
         self.max_memory_size = max_memory_size
@@ -86,39 +93,40 @@ class LRMax(RMax):
         for u_lip in self.U_lip:
             for a in self.actions:
                 if u_lip[s][a] < u_min[s][a]:
-                    u_min[s][a] = copy.deepcopy(u_lip[s][a])
+                    u_min[s][a] = copy.deepcopy(u_lip[s][a])  # TODO check is necessary
         return u_min
 
     def update_memory(self):
         """
-        Update the memory (called between each MDP change i.e. when the method reset is called).
+        Update the memory (called between each MDP change i.e. when the reset method is called).
         Store the rewards, transitions and upper-bounds for the known state-action pairs
         respectively in R_memory, T_memory and U_memory.
         All the data corresponding to partially known state-action pairs are discarded.
         Consequently, the saved state-action pairs only refer to known pairs.
         :return: None
         """
-        new_r = defaultdict(lambda: defaultdict(list))
-        new_t = defaultdict(lambda: defaultdict(lambda: defaultdict(int)))
         new_u = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
+        new_r = defaultdict(lambda: defaultdict(float))
+        new_t = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
 
         for s in self.R:
             for a in self.R[s]:
                 if self.is_known(s, a):
                     new_r[s][a] = self.R[s][a]
-                    new_t[s][a] = self.T[s][a]
+                    for s_p in self.T[s][a]:
+                        new_t[s][a][s_p] = self.T[s][a][s_p]
 
         for s in new_r:
             for a in new_r[s]:
                 new_u[s][a] = self.U[s][a]
 
+        self.U_memory.append(new_u)
         self.R_memory.append(new_r)
         self.T_memory.append(new_t)
-        self.U_memory.append(new_u)
 
     def update_lipschitz_upper_bounds(self):
         """
-        Update the Lipschitz upper-bound for all the previous tasks.
+        Update the Lipschitz upper-bound for each instance of the memory.
         Called at initialization and when a new state-action pair is known.
         :return: None
         """
@@ -130,18 +138,19 @@ class LRMax(RMax):
                     self.compute_lipschitz_upper_bound(self.U_memory[i], self.R_memory[i], self.T_memory[i])
                 )
 
-    def compute_lipschitz_upper_bound(self, U_mem, R_mem, T_mem):
+    def compute_lipschitz_upper_bound(self, u_mem, r_mem, t_mem):
+        # TODO here
         # 1. Separate state-action pairs
-        s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(R_mem)
+        s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
 
         # 2. Compute models distances upper-bounds
-        d_dict = self.models_distances(U_mem, R_mem, T_mem, s_a_kk, s_a_ku, s_a_uk)
+        d_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 3. Compute the Q-values gap with dynamic programming
         gap = self.q_values_gap(d_dict, s_a_kk, s_a_ku, s_a_uk)
 
-        # 4. Deduce upper-bound from U_mem
-        return self.lipschitz_upper_bound(U_mem, gap)
+        # 4. Deduce upper-bound from u_mem
+        return self.lipschitz_upper_bound(u_mem, gap)
 
     def separate_state_action_pairs(self, R_mem):
         """
