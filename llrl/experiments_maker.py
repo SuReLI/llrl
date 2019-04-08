@@ -58,11 +58,11 @@ def test_sample(samples):  # TODO remove
 
     m1 = GridWorld(
         width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)],
-        gamma=.9, slip_prob=0.0, goal_reward=.5, name="grid-world"
+        gamma=.9, slip_prob=0.0, goal_reward=1.0, name="grid-world"
     )
     m2 = GridWorld(
         width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)],
-        gamma=.9, slip_prob=0.0, goal_reward=.6, name="grid-world"
+        gamma=.9, slip_prob=0.0, goal_reward=0.8, name="grid-world"
     )
 
     return [m1, m2] * int(samples / 2 + 1)
@@ -70,7 +70,7 @@ def test_sample(samples):  # TODO remove
 
 def run_agents_lifelong(
         agents,
-        mdp_distr,
+        mdp_distribution,
         samples=5,
         episodes=1,
         steps=100,
@@ -90,10 +90,10 @@ def run_agents_lifelong(
     - Track and plot return for each task with confidence interval.
 
     Runs each agent on the MDP distribution according to the given parameters.
-    If @mdp_distr has a non-zero horizon, then gamma is set to 1 and @steps is ignored.
+    If @mdp_distribution has a non-zero horizon, then gamma is set to 1 and @steps is ignored.
 
     :param agents: (list)
-    :param mdp_distr: (MDPDistribution)
+    :param mdp_distribution: (MDPDistribution)
     :param samples: (int)
     :param episodes: (int)
     :param steps: (int)
@@ -112,10 +112,10 @@ def run_agents_lifelong(
         print('Warning: not implemented in this tweaked version of run_agents_lifelong')
 
     # Experiment (for reproducibility, plotting)
-    exp_params = {"samples":samples, "episodes":episodes, "steps":steps}
+    exp_params = {"samples": samples, "episodes": episodes, "steps":steps}
     experiment = Experiment(
         agents=agents,
-        mdp=mdp_distr,
+        mdp=mdp_distribution,
         params=exp_params,
         is_episodic=episodes > 1,
         is_lifelong=True,
@@ -132,7 +132,7 @@ def run_agents_lifelong(
     # Sample tasks at first so that agents experience the same sequence of tasks
     tasks = []
     for _ in range(samples):
-        tasks.append(mdp_distr.sample())
+        tasks.append(mdp_distribution.sample())
 
     tasks = test_sample(samples)  # TODO remove
 
@@ -158,7 +158,7 @@ def run_agents_lifelong(
 
             # If we re-sample at terminal, keep grabbing MDPs until we're done
             while resample_at_terminal and hit_terminal and total_steps_taken < steps:
-                mdp = mdp_distr.sample()
+                mdp = mdp_distribution.sample()
                 hit_terminal, steps_taken, _ = run_single_agent_on_mdp(
                     agent, mdp, episodes, steps - total_steps_taken, experiment, verbose,
                     track_disc_reward, reset_at_terminal, resample_at_terminal
@@ -180,5 +180,5 @@ def run_agents_lifelong(
     print("-------------\n")
 
     # Plot
-    save_and_plot_returns_vs_tasks(experiment.exp_directory, agents, returns_per_agent)
+    save_and_plot_returns_vs_tasks(experiment.exp_directory, agents, returns_per_agent, open_plot=open_plot)
     experiment.make_plots(open_plot=open_plot)

@@ -27,11 +27,11 @@ def experiment():
     agents_pool = [rmax, lrmax02]
 
     run_agents_lifelong(
-        agents_pool, env_distribution, samples=5, episodes=15, steps=100,
+        agents_pool, env_distribution, samples=2, episodes=100, steps=10,
         reset_at_terminal=False, open_plot=True, cumulative_plot=False
     )
 
 
 if __name__ == '__main__':
-    np.random.seed(1993)
+    np.random.seed(1995)
     experiment()

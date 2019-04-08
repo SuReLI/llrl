@@ -41,6 +41,73 @@ class LRMaxCT(LRMax):
             name=name
         )
 
+    def act(self, s, r):  # TODO remove - no override
+        """
+        Acting method called online during learning.
+        :param s: int current state of the agent
+        :param r: float received reward for the previous transition
+        :return: return the greedy action wrt the current learned model.
+        """
+        self.update(self.prev_s, self.prev_a, r, s)
+
+        a = self.greedy_action(s, self.min_upper_bound(s))
+
+        # TEST
+        # self.print_model()  # TODO remove
+        self.test(s, a)  # TODO remove
+
+        self.prev_a = a
+        self.prev_s = s
+
+        return a
+
+    def update(self, s, a, r, s_p):  # TODO remove - no override
+        """
+        Updates transition and reward dictionaries with the input transition
+        tuple if the corresponding state-action pair is not known enough.
+        :param s: int state
+        :param a: int action
+        :param r: float reward
+        :param s_p: int next state
+        :return: None
+        """
+        print('## Call on update ({} {} {} {})'.format(str(s), a, r, str(s_p)))  # TODO remove
+        if s is not None and a is not None:
+            if self.counter[s][a] < self.count_threshold:
+                print('## Updating ({} {} {} {})'.format(str(s), a, r, str(s_p)))  # TODO remove
+                self.counter[s][a] += 1
+                normalizer = 1. / float(self.counter[s][a])
+
+                self.R[s][a] = self.R[s][a] + normalizer * (r - self.R[s][a])
+                self.T[s][a][s_p] = self.T[s][a][s_p] + normalizer * (1. - self.T[s][a][s_p])
+                for _s_p in self.T[s][a]:
+                    if _s_p not in [s_p]:
+                        self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
+
+                if self.counter[s][a] == self.count_threshold:
+                    self.update_rmax_upper_bound()
+
+    def test(self, s, a):  # TODO remove
+        print(s, a)
+        for _a in self.R[s]:
+            print('    a = {}'.format(_a))
+            print('        U_rmax(s,a) = {}'.format(self.U[s][_a]))
+            if len(self.U_lip) > 0:
+                print('        U_lip(s,a)  = {}'.format(self.U_lip[0][s][_a]))
+            print('        R(s,a)      = {}'.format(self.R[s][_a]))
+            for sp in self.T[s][_a]:
+                print('        T({} | s,a) = {}'.format(str(sp), self.T[s][_a][sp]))
+
+    def print_model(self):  # TODO remove
+        print('    --- CURRENT MODEL ---')
+        for s in self.R:
+            for a in self.R[s]:
+                print('    {} a: {:>10} counter: {:>10}'.format(str(s), a, self.counter[s][a]))
+                print('        R(s,a) = {}'.format(self.R[s][a]))
+                for sp in self.T[s][a]:
+                    print('      T({}| s, a) = {}'.format(str(sp), self.T[s][a][sp]))
+        print('    ---------------------')
+
     def compute_lipschitz_upper_bound(self, u_mem, r_mem, t_mem):
         ''' Note: different from LRMax '''
         # 1. Separate state-action pairs
@@ -80,6 +147,7 @@ class LRMaxCT(LRMax):
         raise ValueError('Method q_values_gap not implemented in this class, see _q_values_gap method.')
 
     def _q_values_gap(self, distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk):
+        ''' Note: different from LRMax '''
         gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
 
         for i in range(self.vi_n_iter):
