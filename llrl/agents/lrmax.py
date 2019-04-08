@@ -49,6 +49,7 @@ class LRMax(RMax):
 
         self.U_lip = []
         self.update_lipschitz_upper_bounds()
+        self.update_upper_bound()
 
     def reset(self):
         """
@@ -65,6 +66,7 @@ class LRMax(RMax):
         self.prev_a = None
 
         self.update_lipschitz_upper_bounds()
+        self.update_upper_bound()
 
     def act(self, s, r):
         """
@@ -75,8 +77,8 @@ class LRMax(RMax):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
-        # a = self.greedy_action(s, self.min_upper_bound(s))  # TODO remove
-        a = self.greedy_action(s, self.U)  # TODO put this one only
+        # a = self.greedy_action(s, self.min_upper_bound(s))  # TODO eventually remove
+        a = self.greedy_action(s, self.U)  # TODO eventually put this one only
 
         self.prev_a = a
         self.prev_s = s
@@ -94,7 +96,7 @@ class LRMax(RMax):
         for u_lip in self.U_lip:
             for a in self.actions:
                 if u_lip[s][a] < u_min[s][a]:
-                    u_min[s][a] = copy.deepcopy(u_lip[s][a])  # TODO check is necessary
+                    u_min[s][a] = copy.deepcopy(u_lip[s][a])  # TODO check if necessary
         return u_min
 
     def update_memory(self):
@@ -157,8 +159,8 @@ class LRMax(RMax):
         :return: None
         """
         n_prev_mdps = len(self.U_memory)
-        self.U_lip = []
         if n_prev_mdps > 0:
+            self.U_lip = []
             for i in range(n_prev_mdps):
                 self.U_lip.append(
                     self.compute_lipschitz_upper_bound(self.U_memory[i], self.R_memory[i], self.T_memory[i])
@@ -167,9 +169,19 @@ class LRMax(RMax):
     def update_upper_bound(self):
         """
         Update the upper bound on the Q-value function.
-        Called when a new state-action pair is known.
+        Called at initialization and when a new state-action pair is known.
+
+        TODO if possible, merge update_lipschitz_upper_bounds with update_upper_bound (they are always called together)
         :return: None
         """
+        # Initialization
+        U = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
+        for u_lip in self.U_lip:
+            for s in u_lip:
+                for a in u_lip[s]:
+                    if u_lip[s][a] < U[s][a]:
+                        U[s][a] = u_lip[s][a]
+
         for i in range(self.vi_n_iter):
             for s in self.R:
                 for a in self.R[s]:
@@ -178,9 +190,27 @@ class LRMax(RMax):
 
                         weighted_next_upper_bound = 0.
                         for s_p in self.T[s][a]:
-                            weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p, self.U)] * self.T[s][a][s_p]
+                            '''
+                            # Previous method
+                            next_value = U[s_p][self.greedy_action(s_p, U)]
+                            '''
+                            # Method with min  # TODO check whether it brings something to do this
+                            next_value = U[s_p][self.greedy_action(s_p, U)]
+                            for _a in self.actions:
+                                candidate_a = U[s_p][_a]
+                                for u_lip in self.U_lip:
+                                    candidate_u_lip = u_lip[s_p][_a]
+                                    if candidate_u_lip < candidate_a:
+                                        candidate_a = candidate_u_lip
+                                if candidate_a > next_value:
+                                    print('There exist a bigger candidate')
+                                    exit()
 
-                        self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
+                            weighted_next_upper_bound += next_value * self.T[s][a][s_p]
+
+                        U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
+
+        self.U = U
 
     def compute_lipschitz_upper_bound(self, u_mem, r_mem, t_mem):
         # 1. Separate state-action pairs
@@ -307,9 +337,9 @@ class LRMax(RMax):
 
         return gap
 
-    def lipschitz_upper_bound(self, u_mem, gap):  # TODO re-implement
-        U = defaultdict(lambda: defaultdict(lambda: 2. * self.r_max / ((1. - self.gamma)**2)))
+    def lipschitz_upper_bound(self, u_mem, gap):  # TODO re-implement for the general case
+        u_lip = defaultdict(lambda: defaultdict(lambda: (self.prior + self.r_max) / (1. - self.gamma)))
         for s in gap:
             for a in gap[s]:
-                U[s][a] = u_mem[s][a] + gap[s][a]
-        return U
+                u_lip[s][a] = u_mem[s][a] + gap[s][a]
+        return u_lip

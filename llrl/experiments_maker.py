@@ -54,14 +54,16 @@ def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=Tr
 def test_sample(samples):  # TODO remove
     from llrl.envs.gridworld import GridWorld
 
-    sz = 3
+    w = 10
+    h = 1
+    mid = int(w / 2)
 
     m1 = GridWorld(
-        width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)],
+        width=w, height=h, init_loc=(mid, mid), goal_locs=[(w, h)],
         gamma=.9, slip_prob=0.0, goal_reward=1.0, name="grid-world"
     )
     m2 = GridWorld(
-        width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)],
+        width=w, height=h, init_loc=(mid, mid), goal_locs=[(w, h)],
         gamma=.9, slip_prob=0.0, goal_reward=0.8, name="grid-world"
     )
 

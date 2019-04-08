@@ -24,10 +24,10 @@ def experiment():
     lrmax07 = LRMaxCT(actions=env_distribution.get_actions(), gamma=GAMMA, count_threshold=1, prior=.7)
     lrmax1 = LRMaxCT(actions=env_distribution.get_actions(), gamma=GAMMA, count_threshold=1, prior=1.0)
 
-    agents_pool = [rmax, lrmax02]
+    agents_pool = [lrmax02, rmax]
 
     run_agents_lifelong(
-        agents_pool, env_distribution, samples=2, episodes=100, steps=10,
+        agents_pool, env_distribution, samples=10, episodes=100, steps=10,
         reset_at_terminal=False, open_plot=True, cumulative_plot=False
     )
 
