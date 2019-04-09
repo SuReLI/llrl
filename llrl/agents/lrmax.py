@@ -223,70 +223,71 @@ class LRMax(RMax):
 
         return s_a_kk, s_a_ku, s_a_uk
 
-    def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):  # TODO re-implement with prior
+    def _models_distances(self, r_mem, s_a_kk, s_a_ku, s_a_uk):
         # Initialize model's distances upper-bounds
-        d_dict = defaultdict(lambda: defaultdict(lambda: self.r_max * (1. + self.gamma) / (1. - self.gamma)))
+        distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
-            n_s_a = float(self.counter[s][a])
-            r_s_a = sum(self.R[s][a]) / n_s_a
-            r_s_a_mem = sum(r_mem[s][a]) / float(self.count_threshold)  # there should be count_threshold rewards
-
-            assert self.count_threshold == len(r_mem[s][a])  # TODO remove after testing
-
-            weighted_sum = 0.
-            for s_p in self.T[s][a]:
-                if s_p in t_mem[s][a]:
-                    a_p = self.greedy_action(s_p, u_mem)
-                    model_diff = abs(self.T[s][a][s_p] / n_s_a - t_mem[s][a][s_p] / float(self.count_threshold))
-                    # TODO check that t_mem[s][a][s_p] == 0 if s_p not in t_mem[s][a]
-                    weighted_sum += u_mem[s_p][a_p] * model_diff
-            for s_p in t_mem[s][a]:
-                if not s_p in self.T[s][a]:
-                    a_p = self.greedy_action(s_p, u_mem)
-                    model_diff = t_mem[s][a][s_p] / float(self.count_threshold)
-                    weighted_sum += u_mem[s_p][a_p] * model_diff
-            d_dict[s][a] = abs(r_s_a - r_s_a_mem) + self.gamma * weighted_sum
-            # TODO check this
+            distances_dict[s][a] = abs(self.R[s][a] - r_mem[s][a])
 
         # Compute model's distances upper-bounds for known-unknown (s, a)
         for s, a in s_a_ku:
-            n_s_a = float(self.counter[s][a])
-            r_s_a = sum(self.R[s][a]) / n_s_a
-
-            weighted_sum = 0.
-            for s_p in self.T[s][a]:
-                a_p = self.greedy_action(s_p, u_mem)
-                weighted_sum += u_mem[s_p][a_p] * self.T[s][a][s_p] / n_s_a
-
-            d_dict[s][a] = \
-                max(self.r_max - r_s_a, r_s_a) + \
-                self.gamma * weighted_sum + \
-                self.r_max * self.gamma / (1. - self.gamma)
-            # TODO check this
+            distances_dict[s][a] = min(self.prior, max(self.r_max - self.R[s][a], self.R[s][a]))
 
         # Compute model's distances upper-bounds for unknown-known (s, a)
         for s, a in s_a_uk:
-            r_s_a_mem = sum(r_mem[s][a]) / float(self.count_threshold)  # there should be count_threshold rewards
+            distances_dict[s][a] = min(self.prior, max(self.r_max - r_mem[s][a], r_mem[s][a]))
 
+        return distances_dict
+
+    def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
+        # Initialize model's distances upper-bounds
+        distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
+
+        # Compute model's distances upper-bounds for known-known (s, a)
+        for s, a in s_a_kk:
+            weighted_sum = 0.
+            for s_p in self.T[s][a]:
+                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * abs(self.T[s][a][s_p] - t_mem[s][a][s_p])
+                if s_p not in t_mem[s][a]:  # TODO remove after testing
+                    assert t_mem[s][a] == 0.
+            for s_p in t_mem[s][a]:
+                if s_p not in self.T[s][a]:
+                    weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
+
+            distances_dict[s][a] = min(
+                abs(self.R[s][a] - r_mem[s][a]) + self.gamma * weighted_sum,
+                self.prior
+            )
+
+        # Compute model's distances upper-bounds for known-unknown (s, a)
+        for s, a in s_a_ku:
+            weighted_sum = 0.
+            for s_p in self.T[s][a]:
+                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * self.T[s][a][s_p]
+
+            distances_dict[s][a] = min(
+                max(self.r_max - self.R[s][a], self.R[s][a]) +
+                self.gamma * weighted_sum +
+                self.gamma * self.r_max / (1. - self.gamma),
+                self.prior
+            )
+
+        # Compute model's distances upper-bounds for unknown-known (s, a)
+        for s, a in s_a_uk:
             weighted_sum = 0.
             for s_p in t_mem[s][a]:
-                a_p = self.greedy_action(s_p, u_mem)
-                weighted_sum += u_mem[s_p][a_p] * t_mem[s][a][s_p] / float(self.count_threshold)
+                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
 
-            d_dict[s][a] = \
-                max(self.r_max - r_s_a_mem, r_s_a_mem) + \
-                self.gamma * weighted_sum + \
-                self.r_max * self.gamma / (1. - self.gamma)
+            distances_dict[s][a] = min(
+                max(self.r_max - r_mem[s][a], r_mem[s][a]) +
+                self.gamma * weighted_sum +
+                self.gamma * self.r_max / (1. - self.gamma),
+                self.prior
+            )
 
-        '''
-        for s in d_dict:  # TODO investigate the large d_dict[s][a] when everything is unknown in new model
-            for a in d_dict[s]:
-                print(s, a, d_dict[s][a])
-        '''
-
-        return d_dict
+        return distances_dict
 
     def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):  # TODO re-implement
         gap_max = self.r_max * (1. + self.gamma) / ((1. - self.gamma)**2)
