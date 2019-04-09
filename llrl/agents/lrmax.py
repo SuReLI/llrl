@@ -77,27 +77,12 @@ class LRMax(RMax):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
-        # a = self.greedy_action(s, self.min_upper_bound(s))  # TODO eventually remove
-        a = self.greedy_action(s, self.U)  # TODO eventually put this one only
+        a = self.greedy_action(s, self.U)
 
         self.prev_a = a
         self.prev_s = s
 
         return a
-
-    def min_upper_bound(self, s):
-        """
-        Choose the minimum local upper-bound between the one provided by R-Max and
-        those provided by each Lipschitz bound.
-        :param s: input state for which the bound is derived
-        :return: return the minimum upper-bound.
-        """
-        u_min = copy.deepcopy(self.U)
-        for u_lip in self.U_lip:
-            for a in self.actions:
-                if u_lip[s][a] < u_min[s][a]:
-                    u_min[s][a] = copy.deepcopy(u_lip[s][a])  # TODO check if necessary
-        return u_min
 
     def update_memory(self):
         """
@@ -190,23 +175,7 @@ class LRMax(RMax):
 
                         weighted_next_upper_bound = 0.
                         for s_p in self.T[s][a]:
-                            '''
-                            # Previous method
-                            next_value = U[s_p][self.greedy_action(s_p, U)]
-                            '''
-                            # Method with min  # TODO check whether it brings something to do this
-                            next_value = U[s_p][self.greedy_action(s_p, U)]
-                            for _a in self.actions:
-                                candidate_a = U[s_p][_a]
-                                for u_lip in self.U_lip:
-                                    candidate_u_lip = u_lip[s_p][_a]
-                                    if candidate_u_lip < candidate_a:
-                                        candidate_a = candidate_u_lip
-                                if candidate_a > next_value:
-                                    print('There exist a bigger candidate')
-                                    exit()
-
-                            weighted_next_upper_bound += next_value * self.T[s][a][s_p]
+                            weighted_next_upper_bound += U[s_p][self.greedy_action(s_p, U)] * self.T[s][a][s_p]
 
                         U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
 
