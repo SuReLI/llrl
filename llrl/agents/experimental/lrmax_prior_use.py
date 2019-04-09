@@ -30,6 +30,8 @@ class LRMaxExp(LRMax):
             gamma=gamma,
             count_threshold=count_threshold,
             epsilon=epsilon,
+            max_memory_size=max_memory_size,
+            prior=prior,
             name=name
         )
 
