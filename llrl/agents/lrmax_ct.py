@@ -97,10 +97,3 @@ class LRMaxCT(LRMax):
                 gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
 
         return gap
-
-    def lipschitz_upper_bound(self, u_mem, gap):
-        u_lip = defaultdict(lambda: defaultdict(lambda: (self.prior + self.r_max) / (1. - self.gamma)))
-        for s in gap:
-            for a in gap[s]:
-                u_lip[s][a] = u_mem[s][a] + gap[s][a]
-        return u_lip

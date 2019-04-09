@@ -287,7 +287,7 @@ class LRMax(RMax):
 
         return gap
 
-    def lipschitz_upper_bound(self, u_mem, gap):  # TODO re-implement for the general case
+    def lipschitz_upper_bound(self, u_mem, gap):
         u_lip = defaultdict(lambda: defaultdict(lambda: (self.prior + self.r_max) / (1. - self.gamma)))
         for s in gap:
             for a in gap[s]:
