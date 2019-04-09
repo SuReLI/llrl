@@ -51,25 +51,6 @@ def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=Tr
     )
 
 
-def test_sample(samples):  # TODO remove
-    from llrl.envs.gridworld import GridWorld
-
-    w = 10
-    h = 1
-    mid = int(w / 2)
-
-    m1 = GridWorld(
-        width=w, height=h, init_loc=(mid, mid), goal_locs=[(w, h)],
-        gamma=.9, slip_prob=0.0, goal_reward=1.0, name="grid-world"
-    )
-    m2 = GridWorld(
-        width=w, height=h, init_loc=(mid, mid), goal_locs=[(w, h)],
-        gamma=.9, slip_prob=0.0, goal_reward=0.8, name="grid-world"
-    )
-
-    return [m1, m2] * int(samples / 2 + 1)
-
-
 def run_agents_lifelong(
         agents,
         mdp_distribution,
@@ -135,8 +116,6 @@ def run_agents_lifelong(
     tasks = []
     for _ in range(samples):
         tasks.append(mdp_distribution.sample())
-
-    tasks = test_sample(samples)  # TODO remove
 
     for agent in agents:
         print(str(agent) + " is learning.")
