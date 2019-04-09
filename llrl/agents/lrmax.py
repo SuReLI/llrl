@@ -270,21 +270,20 @@ class LRMax(RMax):
 
         return distances_dict
 
-    def q_values_gap(self, d_dict, s_a_kk, s_a_ku, s_a_uk):  # TODO re-implement
-        gap_max = self.r_max * (1. + self.gamma) / ((1. - self.gamma)**2)
-        gap = defaultdict(lambda: defaultdict(lambda: gap_max))
+    def q_values_gap(self, distances_dict, s_a_kk, s_a_ku, s_a_uk):
+        gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
 
         for s, a in s_a_uk:  # Unknown (s, a) in current MDP
-            gap[s][a] = d_dict[s][a] + self.gamma * gap_max
+            gap[s][a] = distances_dict[s][a] + self.gamma * self.prior / (1. - self.gamma)
 
         for i in range(self.vi_n_iter):
+            tmp = copy.deepcopy(gap)
+
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in self.T[s][a]:
-                    a_p = self.greedy_action(s_p, gap)
-                    weighted_next_gap += gap[s_p][a_p] * self.T[s][a][s_p] / float(self.counter[s][a])
-
-                gap[s][a] = d_dict[s][a] + self.gamma * weighted_next_gap
+                    weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * self.T[s][a][s_p]
+                gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
 
         return gap
 

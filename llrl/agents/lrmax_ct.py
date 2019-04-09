@@ -87,15 +87,13 @@ class LRMaxCT(LRMax):
             for s, a in s_a_uk:  # Unknown (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in t_mem[s][a]:
-                    a_p = self.greedy_action(s_p, tmp)
-                    weighted_next_gap += tmp[s_p][a_p] * t_mem[s][a][s_p]
+                    weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * t_mem[s][a][s_p]
                 gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
 
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in self.T[s][a]:
-                    a_p = self.greedy_action(s_p, tmp)
-                    weighted_next_gap += tmp[s_p][a_p] * self.T[s][a][s_p]
+                    weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * self.T[s][a][s_p]
                 gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
 
         return gap
