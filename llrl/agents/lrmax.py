@@ -18,7 +18,7 @@ class LRMax(RMax):
             epsilon=0.1,
             max_memory_size=None,
             prior=np.Inf,
-            name="LRMax"
+            name="LRMax-prior"
     ):
         """
         :param actions: action space of the environment
@@ -29,7 +29,7 @@ class LRMax(RMax):
         :param prior: (float) prior knowledge of maximum model's distance
         :param name: (str)
         """
-        name = name + "-prior" + prior
+        name = name + str(prior) if name[-6:] == "-prior" else name
         RMax.__init__(
             self,
             actions=actions,

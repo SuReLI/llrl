@@ -18,12 +18,12 @@ class LRMaxExp(LRMax):
             epsilon=0.1,
             max_memory_size=None,
             prior=np.Inf,
-            name="LRMax"
+            name="LRMax-prior"
     ):
         """
         See LRMax class.
         """
-        name = name + "-prior" + prior
+        name = name + str(prior) if name[-6:] == "-prior" else name
         LRMax.__init__(
             self,
             actions=actions,
