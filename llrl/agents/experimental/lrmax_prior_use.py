@@ -49,7 +49,7 @@ class LRMaxExp(LRMax):
         else:
             self._update_counters(False)
             return dsa
-        
+
     def get_results(self):
         return self.n_computation, self.n_prior_use
 
