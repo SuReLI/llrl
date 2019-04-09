@@ -23,6 +23,8 @@ SAVE_PATH = 'results/bounds_comparison_results.csv'
 LRMAX_TMP_SAVE_PATH = 'results/tmp/bounds_comparison_results_LRMAX.csv'
 RMAX_TMP_SAVE_PATH = 'results/tmp/bounds_comparison_results_RMAX.csv'
 
+GAMMA = 0.9
+
 N_INSTANCES = 100
 PRIOR = [.0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.]
 
@@ -60,9 +62,9 @@ def plot_results(path):
 
 def bounds_test(verbose=False):
     # MDP
-    sz = 3
-    mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=1.0)
-    mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=0.8)
+    sz = 2
+    mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=0.8)
+    mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=1.0)
 
     results = []
 
@@ -71,8 +73,8 @@ def bounds_test(verbose=False):
         csv_write(['rmax_n_time_steps', 'rmax_n_time_steps_cv'], RMAX_TMP_SAVE_PATH, 'w')
 
         for prior in PRIOR:
-            lrmaxct = LRMaxCTExp(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, prior=prior, path=LRMAX_TMP_SAVE_PATH)
-            rmaxvi = RMaxExp(actions=mdp1.get_actions(), gamma=.9, count_threshold=1, path=RMAX_TMP_SAVE_PATH)
+            lrmaxct = LRMaxCTExp(actions=mdp1.get_actions(), gamma=GAMMA, count_threshold=1, prior=prior, path=LRMAX_TMP_SAVE_PATH)
+            rmaxvi = RMaxExp(actions=mdp1.get_actions(), gamma=GAMMA, count_threshold=1, path=RMAX_TMP_SAVE_PATH)
 
             # Run twice
             run_agents_on_mdp([lrmaxct], mdp1, instances=1, episodes=100, steps=30,

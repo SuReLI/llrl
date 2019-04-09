@@ -59,7 +59,6 @@ class LRMaxCT(LRMax):
         raise ValueError('Method models_distances not implemented in this class, see _models_distances method.')
 
     def _models_distances(self, r_mem, s_a_kk, s_a_ku, s_a_uk):
-        # Initialize model's distances upper-bounds
         distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         # Compute model's distances upper-bounds for known-known (s, a)

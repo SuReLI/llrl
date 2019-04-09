@@ -39,6 +39,8 @@ def sample_corridor(gamma, w, verbose=False):
         gamma=gamma, slip_prob=0.0, goal_reward=sampled_reward, name="corridor"
     )
 
+    env.actions = ['left', 'right']
+
     if verbose:
         print('Sampled corridor - goal location:', sampled_goal, '- goal reward:', sampled_reward)
 

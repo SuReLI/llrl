@@ -223,26 +223,7 @@ class LRMax(RMax):
 
         return s_a_kk, s_a_ku, s_a_uk
 
-    def _models_distances(self, r_mem, s_a_kk, s_a_ku, s_a_uk):
-        # Initialize model's distances upper-bounds
-        distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
-
-        # Compute model's distances upper-bounds for known-known (s, a)
-        for s, a in s_a_kk:
-            distances_dict[s][a] = abs(self.R[s][a] - r_mem[s][a])
-
-        # Compute model's distances upper-bounds for known-unknown (s, a)
-        for s, a in s_a_ku:
-            distances_dict[s][a] = min(self.prior, max(self.r_max - self.R[s][a], self.R[s][a]))
-
-        # Compute model's distances upper-bounds for unknown-known (s, a)
-        for s, a in s_a_uk:
-            distances_dict[s][a] = min(self.prior, max(self.r_max - r_mem[s][a], r_mem[s][a]))
-
-        return distances_dict
-
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
-        # Initialize model's distances upper-bounds
         distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         # Compute model's distances upper-bounds for known-known (s, a)
