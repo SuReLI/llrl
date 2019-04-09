@@ -182,6 +182,14 @@ class LRMax(RMax):
         self.U = U
 
     def compute_lipschitz_upper_bound(self, u_mem, r_mem, t_mem):
+        """
+        Compute the Lipschitz upper-bound from a previous MDP given an upper-bound on its Q-value function and
+        a (possibly partial) model of its reward and transition functions.
+        :param u_mem: (dictionary) upper-bound on the Q-value function of the previous MDP.
+        :param r_mem: (dictionary) learned expected reward function of the previous MDP.
+        :param t_mem: (dictionary) learned transition function of the previous MDP.
+        :return: (dictionary) Lipschitz upper-bound
+        """
         # 1. Separate state-action pairs
         s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
 
@@ -224,6 +232,16 @@ class LRMax(RMax):
         return s_a_kk, s_a_ku, s_a_uk
 
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
+        """
+        Compute the model's local distances between two MDPs.
+        :param u_mem: (dictionary) upper-bound on the Q-value function of the previous MDP.
+        :param r_mem: (dictionary) learned expected reward function of the previous MDP.
+        :param t_mem: (dictionary) learned transition function of the previous MDP.
+        :param s_a_kk: (list) state-actions pairs known in both MDPs
+        :param s_a_ku: (list) state-actions pairs known in the current MDP - unknown in the previous MDP
+        :param s_a_uk: (list) state-actions pairs unknown in the current MDP - known in the previous MDP
+        :return: (dictionary) model's local distances
+        """
         distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         # Compute model's distances upper-bounds for known-known (s, a)
@@ -271,6 +289,14 @@ class LRMax(RMax):
         return distances_dict
 
     def q_values_gap(self, distances_dict, s_a_kk, s_a_ku, s_a_uk):
+        """
+        Compute the Q-values gap based on model's distances between two MDPs.
+        :param distances_dict:
+        :param s_a_kk: (list) state-actions pairs known in both MDPs
+        :param s_a_ku: (list) state-actions pairs known in the current MDP - unknown in the previous MDP
+        :param s_a_uk: (list) state-actions pairs unknown in the current MDP - known in the previous MDP
+        :return: (dictionary) computed Q-values gap
+        """
         gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
 
         for s, a in s_a_uk:  # Unknown (s, a) in current MDP
@@ -288,6 +314,14 @@ class LRMax(RMax):
         return gap
 
     def lipschitz_upper_bound(self, u_mem, gap):
+        """
+        Compute the Lipschitz upper-bound based on:
+        1) The upper-bound on the Q-value of the previous MDP;
+        2) The computed Q-values gap based on model's distances between the two MDPs.
+        :param u_mem: (dictionary) upper-bound on the Q-value of the previous MDP
+        :param gap: (dictionary) computed Q-values gap
+        :return: (dictionary) Lipschitz upper-bound
+        """
         u_lip = defaultdict(lambda: defaultdict(lambda: (self.prior + self.r_max) / (1. - self.gamma)))
         for s in gap:
             for a in gap[s]:

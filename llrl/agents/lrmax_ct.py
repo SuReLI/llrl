@@ -43,6 +43,9 @@ class LRMaxCT(LRMax):
         )
 
     def compute_lipschitz_upper_bound(self, u_mem, r_mem, t_mem):
+        """
+        See parent class LRMax.
+        """
         # 1. Separate state-action pairs
         s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
 
@@ -59,6 +62,9 @@ class LRMaxCT(LRMax):
         raise ValueError('Method models_distances not implemented in this class, see _models_distances method.')
 
     def _models_distances(self, r_mem, s_a_kk, s_a_ku, s_a_uk):
+        """
+        See parent class LRMax.
+        """
         distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         # Compute model's distances upper-bounds for known-known (s, a)
@@ -79,6 +85,9 @@ class LRMaxCT(LRMax):
         raise ValueError('Method q_values_gap not implemented in this class, see _q_values_gap method.')
 
     def _q_values_gap(self, distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk):
+        """
+        See parent class LRMax.
+        """
         gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
 
         for i in range(self.vi_n_iter):
