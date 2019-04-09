@@ -30,6 +30,7 @@ class LRMaxCT(LRMax):
         :param prior: (float) prior knowledge of maximum model's distance
         :param name: (str)
         """
+        name = name + '-prior' + str(prior)
         LRMax.__init__(
             self,
             actions=actions,

@@ -17,7 +17,7 @@ def sample_grid_world(gamma, w, h, verbose=False):
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
         width=w, height=h, init_loc=(1, 1), goal_locs=[sampled_goal],
-        gamma=gamma, slip_prob=0.0, goal_reward=sampled_reward, name="Grid-World"
+        gamma=gamma, slip_prob=0.0, goal_reward=sampled_reward, name="grid-world"
     )
 
     if verbose:
@@ -26,17 +26,17 @@ def sample_grid_world(gamma, w, h, verbose=False):
     return env
 
 
-def sample_corridor(gamma, w, h=1, verbose=False):
+def sample_corridor(gamma, w, verbose=False):
     r_min = 0.8
     r_max = 1.0
-    possible_goals = [(w, h)]
-    init_loc = (int(w / 2.), h)
+    possible_goals = [(w, 1)]
+    init_loc = (int(w / 2.), 1)
 
     sampled_reward = np.random.uniform(r_min, r_max)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
-        width=w, height=h, init_loc=init_loc, goal_locs=[sampled_goal],
-        gamma=gamma, slip_prob=0.0, goal_reward=sampled_reward, name="Corridor"
+        width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal],
+        gamma=gamma, slip_prob=0.0, goal_reward=sampled_reward, name="corridor"
     )
 
     if verbose:
@@ -68,7 +68,7 @@ def make_env_distribution(env_class='grid-world', n_env=10, gamma=.9, w=5, h=5, 
         if env_class == 'grid-world':
             new_env = sample_grid_world(gamma, w, h, verbose)
         elif env_class == 'corridor':
-            new_env = sample_corridor(gamma, w, 1, verbose)
+            new_env = sample_corridor(gamma, w, verbose)
         else:
             raise ValueError('Environment class not implemented.')
         env_dist_dict[new_env] = sampling_probability
