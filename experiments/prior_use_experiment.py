@@ -155,7 +155,7 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
                     agent, env2, episodes=N_EPISODES, steps=N_STEPS, experiment=None, verbose=False,
                     track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False
                 )
-                
+
                 results.append(agent.get_results())
 
         names.append(name)
