@@ -1,4 +1,3 @@
-import copy
 import numpy as np
 from collections import defaultdict
 
@@ -36,13 +35,15 @@ class LRMaxExp(LRMax):
         )
 
         # Counter for prior-use
-        self.n_computation = 0  # Number of times the model's distances is computed
-        self.n_prior_use = 0  # Number of times the prior is used for the computation
+        self.prior_use_counter = [
+            ['n_computation', 'n_prior_use'],
+            [0, 0]
+        ]
 
     def _update_counters(self, is_prior_used):
-        self.n_computation += 1
+        self.prior_use_counter[-1][0] += 1
         if is_prior_used:
-            self.n_prior_use += 1
+            self.prior_use_counter[-1][1] += 1
 
     def _set_distance(self, dsa):
         if dsa > self.prior:
@@ -53,7 +54,7 @@ class LRMaxExp(LRMax):
             return dsa
 
     def get_results(self):
-        return self.n_computation, self.n_prior_use
+        return self.prior_use_counter
 
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """
@@ -102,5 +103,7 @@ class LRMaxExp(LRMax):
                   self.gamma * weighted_sum + \
                   self.gamma * self.r_max / (1. - self.gamma)
             distances_dict[s][a] = self._set_distance(dsa)
+
+        self.prior_use_counter.append([0, 0])  # Add a new counter for the next computation
 
         return distances_dict
