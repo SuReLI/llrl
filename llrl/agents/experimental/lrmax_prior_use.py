@@ -63,15 +63,17 @@ class LRMaxExp(LRMax):
         See LRMax class.
         Overrides method of LRMax for prior use counter.
         """
+
         distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
+
+        if len(self.U_memory) > 1:  # No computation after the second environment
+            return distances_dict
 
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
             weighted_sum = 0.
             for s_p in self.T[s][a]:
                 weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * abs(self.T[s][a][s_p] - t_mem[s][a][s_p])
-                if s_p not in t_mem[s][a]:  # TODO remove after testing
-                    assert t_mem[s][a] == 0.
             for s_p in t_mem[s][a]:
                 if s_p not in self.T[s][a]:
                     weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]

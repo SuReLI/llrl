@@ -49,7 +49,7 @@ class LRMax(RMax):
         self.prior = min(prior, prior_max)
 
         self.U_lip = []
-        self.update_lipschitz_upper_bounds()
+        # self.update_lipschitz_upper_bounds()  # TODO check if I can remove that
         self.update_upper_bound()
 
     def reset(self):
@@ -156,8 +156,6 @@ class LRMax(RMax):
         """
         Update the upper bound on the Q-value function.
         Called at initialization and when a new state-action pair is known.
-
-        TODO if possible, merge update_lipschitz_upper_bounds with update_upper_bound (they are always called together)
         :return: None
         """
         # Initialization

@@ -23,20 +23,19 @@ from llrl.utils.chart_utils import COLOR_SHIFT
 from llrl.envs.gridworld import GridWorld
 from llrl.agents.experimental.lrmax_prior_use import LRMaxExp
 from simple_rl.run_experiments import run_agents_on_mdp
+from simple_rl.run_experiments import run_single_agent_on_mdp
 
 ROOT_PATH = 'results/prior_use/'
 
 GAMMA = 0.9
 
-N_INSTANCES = 3  # 100 TODO put back
-N_EPISODES = 10  # 100 TODO put back
-N_STEPS = 100  # 1000 TODO put back
+N_INSTANCES = 3
+N_EPISODES = 1000
+N_STEPS = 1000
 
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
-PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=3)]
-
-PRIORS = [10.]  # TODO remove
+PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=5)]
 
 
 def get_path(name):
@@ -46,10 +45,6 @@ def get_path(name):
 def save_result(results, name):
     path = get_path(name)
     csv_write(['prior_use_ratio_mean', 'prior_use_ratio_lo', 'prior_use_ratio_up'], path, mode='w')
-
-    for i in range(len(results)):  # TODO remove
-        if i == 0:
-            results[i].remove(100.)
 
     length = max([len(r) for r in results])
     for i in range(length):
@@ -94,7 +89,7 @@ def plot_results(names, open_plot=True):
     # plt.title('')
 
     # Save
-    plot_file_name = os.path.join('results/prior_use/prior_use.pdf')
+    plot_file_name = os.path.join(ROOT_PATH + 'prior_use.pdf')
     plt.savefig(plot_file_name, format='pdf')
 
     # Open
@@ -107,10 +102,24 @@ def plot_results(names, open_plot=True):
     plt.close()
 
 
-def prior_use_experiment(only_plot=False, open_plot=True):
-    size = 2
-    env1 = GridWorld(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], slip_prob=0.1, goal_reward=0.9)
-    env2 = GridWorld(width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)], slip_prob=0.2, goal_reward=1.0)
+def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
+    """
+    Prior use experiment:
+    Record the ratio of prior use during the model's distance computation in the simple setting of interacting
+    sequentially with two different environments.
+    :param run_experiment: set to False for plot only
+    :param open_plot: set to False to disable plot (only saving)
+    :return: None
+    """
+    size = 3
+    env1 = GridWorld(
+        width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)],
+        slip_prob=0.1, goal_reward=0.9, is_goal_terminal=False
+    )
+    env2 = GridWorld(
+        width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)],
+        slip_prob=0.2, goal_reward=1.0, is_goal_terminal=False
+    )
 
     # Compute needed number of samples for L-R-MAX to achieve epsilon optimal behavior with probability (1 - delta)
     epsilon = .1
@@ -118,7 +127,6 @@ def prior_use_experiment(only_plot=False, open_plot=True):
     m_r = np.log(2. / delta) / (2. * epsilon ** 2)
     m_t = 2. * (np.log(2 ** (float(size * size)) - 2.) - np.log(delta)) / (epsilon ** 2)
     m = int(max(m_r, m_t))
-    m = 10  # TODO remove
 
     names = []
 
@@ -135,17 +143,35 @@ def prior_use_experiment(only_plot=False, open_plot=True):
             )
             name = agent.name
 
-            if not only_plot:
-                run_agents_on_mdp([agent], env1, instances=1, episodes=N_EPISODES, steps=N_STEPS,
-                                  reset_at_terminal=True, verbose=False, open_plot=False)
-                run_agents_on_mdp([agent], env2, instances=1, episodes=N_EPISODES, steps=N_STEPS,
-                                  reset_at_terminal=True, verbose=False, open_plot=False)
+            if run_experiment:
+                if verbose:
+                    print('Running instance', i, 'of', N_INSTANCES, 'for agent', name)
+
+                run_single_agent_on_mdp(
+                    agent, env1, episodes=N_EPISODES, steps=N_STEPS, experiment=None, verbose=False,
+                    track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False
+                )
+                agent.reset()
+                run_single_agent_on_mdp(
+                    agent, env2, episodes=N_EPISODES, steps=N_STEPS, experiment=None, verbose=False,
+                    track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False
+                )
+                '''
+                run_agents_on_mdp(
+                    [agent], env1, instances=1, episodes=N_EPISODES, steps=N_STEPS,
+                    reset_at_terminal=False, verbose=False, open_plot=False
+                )
+                run_agents_on_mdp(
+                    [agent], env2, instances=1, episodes=N_EPISODES, steps=N_STEPS,
+                    reset_at_terminal=False, verbose=False, open_plot=False
+                )
+                '''
                 results.append(agent.get_results())
 
         names.append(name)
 
         # Save results
-        if not only_plot:
+        if run_experiment:
             save_result(results, name)
 
     # Plot
@@ -154,4 +180,4 @@ def prior_use_experiment(only_plot=False, open_plot=True):
 
 if __name__ == '__main__':
     np.random.seed(1993)
-    prior_use_experiment(True)
+    prior_use_experiment(run_experiment=True, open_plot=True, verbose=True)
