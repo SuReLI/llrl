@@ -24,30 +24,44 @@ from llrl.envs.gridworld import GridWorld
 from llrl.agents.experimental.lrmax_prior_use import LRMaxExp
 from simple_rl.run_experiments import run_agents_on_mdp
 
+ROOT_PATH = 'results/prior_use/'
+
 GAMMA = 0.9
 
-N_EPISODES = 100
-N_STEPS = 1000
+N_INSTANCES = 3  # 100 TODO put back
+N_EPISODES = 10  # 100 TODO put back
+N_STEPS = 100  # 1000 TODO put back
 
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
 PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=3)]
 
-
-def get_path(agent):
-    return 'results/prior_use/' + agent.name + '.csv'
+PRIORS = [10.]  # TODO remove
 
 
-def save_results(agents):
-    for agent in agents:
-        path = 'results/prior_use/' + agent.name + '.csv'
-        csv_write(agent.prior_use_counter[0], path, mode='w')
-        for i in range(1, len(agent.prior_use_counter) - 1):
-            row = agent.prior_use_counter[i]
-            csv_write(row, path, mode='a')
+def get_path(name):
+    return ROOT_PATH + name + '.csv'
 
 
-def plot_results(agents, open_plot=True):
+def save_result(results, name):
+    path = get_path(name)
+    csv_write(['prior_use_ratio_mean', 'prior_use_ratio_lo', 'prior_use_ratio_up'], path, mode='w')
+
+    for i in range(len(results)):  # TODO remove
+        if i == 0:
+            results[i].remove(100.)
+
+    length = max([len(r) for r in results])
+    for i in range(length):
+        data_i = []
+        for r in results:
+            if len(r) > i:
+                data_i.append(r[i])
+        mean, lo, up = mean_confidence_interval(data_i)
+        csv_write([mean, lo, up], path, mode='a')
+
+
+def plot_results(names, open_plot=True):
     # LaTeX rendering
     rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
     plt.rc('text', usetex=True)
@@ -61,14 +75,18 @@ def plot_results(agents, open_plot=True):
     colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
     ax.set_prop_cycle(cycler('color', colors))
 
-    for i in range(len(agents)):
-        df = pd.read_csv(get_path(agents[i]))
-        n_computation = df.n_computation
-        n_prior_use = df.n_prior_use
-        ratio = round(100. * n_prior_use / n_computation, 2)
+    for i in range(len(names)):
+        df = pd.read_csv(get_path(names[i]))
+        prior_use_ratio_mean = df.prior_use_ratio_mean
+        prior_use_ratio_lo = df.prior_use_ratio_lo
+        prior_use_ratio_up = df.prior_use_ratio_up
 
-        plt.plot(range(len(ratio)), ratio, '-o', label=agents[i].name, marker=markers[i])
+        x = range(len(prior_use_ratio_mean))
 
+        plt.plot(x, prior_use_ratio_mean, '-o', label=names[i], marker=markers[i])
+        plt.fill_between(x, prior_use_ratio_lo, prior_use_ratio_up, alpha=.25, facecolor=colors[i], edgecolor=colors[i])
+
+    plt.ylim((-6., 106.))
     plt.xlabel(r'Computation Number')
     plt.ylabel(r'\% Prior Use')
     plt.legend(loc='best')
@@ -100,31 +118,38 @@ def prior_use_experiment(only_plot=False, open_plot=True):
     m_r = np.log(2. / delta) / (2. * epsilon ** 2)
     m_t = 2. * (np.log(2 ** (float(size * size)) - 2.) - np.log(delta)) / (epsilon ** 2)
     m = int(max(m_r, m_t))
+    m = 10  # TODO remove
 
-    agents = []
+    names = []
 
     for p in PRIORS:
-        agent = LRMaxExp(
-            actions=env1.get_actions(),
-            gamma=GAMMA,
-            count_threshold=m,
-            epsilon=epsilon,
-            prior=p
-        )
-        agents.append(agent)
+        results = []
+        name = 'default'
+        for i in range(N_INSTANCES):
+            agent = LRMaxExp(
+                actions=env1.get_actions(),
+                gamma=GAMMA,
+                count_threshold=m,
+                epsilon=epsilon,
+                prior=p
+            )
+            name = agent.name
 
+            if not only_plot:
+                run_agents_on_mdp([agent], env1, instances=1, episodes=N_EPISODES, steps=N_STEPS,
+                                  reset_at_terminal=True, verbose=False, open_plot=False)
+                run_agents_on_mdp([agent], env2, instances=1, episodes=N_EPISODES, steps=N_STEPS,
+                                  reset_at_terminal=True, verbose=False, open_plot=False)
+                results.append(agent.get_results())
+
+        names.append(name)
+
+        # Save results
         if not only_plot:
-            run_agents_on_mdp([agent], env1, instances=1, episodes=N_EPISODES, steps=N_STEPS,
-                              reset_at_terminal=True, verbose=False, open_plot=False)
-            run_agents_on_mdp([agent], env2, instances=1, episodes=N_EPISODES, steps=N_STEPS,
-                              reset_at_terminal=True, verbose=False, open_plot=False)
-
-    # Save results
-    if not only_plot:
-        save_results(agents)
+            save_result(results, name)
 
     # Plot
-    plot_results(agents, open_plot)
+    plot_results(names, open_plot)
 
 
 if __name__ == '__main__':

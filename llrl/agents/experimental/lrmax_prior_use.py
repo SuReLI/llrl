@@ -36,8 +36,7 @@ class LRMaxExp(LRMax):
 
         # Counter for prior-use
         self.prior_use_counter = [
-            ['n_computation', 'n_prior_use'],
-            [0, 0]
+            [0, 0]  # ['n_computation', 'n_prior_use']
         ]
 
     def _update_counters(self, is_prior_used):
@@ -54,7 +53,10 @@ class LRMaxExp(LRMax):
             return dsa
 
     def get_results(self):
-        return self.prior_use_counter
+        result = []
+        for i in range(len(self.prior_use_counter) - 1):
+            result.append(round(100. * float(self.prior_use_counter[i][1]) / float(self.prior_use_counter[i][0]), 2))
+        return result
 
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """
