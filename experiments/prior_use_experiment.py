@@ -22,7 +22,6 @@ from llrl.utils.chart_utils import color_ls
 from llrl.utils.chart_utils import COLOR_SHIFT
 from llrl.envs.gridworld import GridWorld
 from llrl.agents.experimental.lrmax_prior_use import LRMaxExp
-from simple_rl.run_experiments import run_agents_on_mdp
 from simple_rl.run_experiments import run_single_agent_on_mdp
 
 ROOT_PATH = 'results/prior_use/'
@@ -35,7 +34,7 @@ N_STEPS = 1000
 
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
-PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=5)]
+PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=10)]
 
 
 def get_path(name):
@@ -156,16 +155,7 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
                     agent, env2, episodes=N_EPISODES, steps=N_STEPS, experiment=None, verbose=False,
                     track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False
                 )
-                '''
-                run_agents_on_mdp(
-                    [agent], env1, instances=1, episodes=N_EPISODES, steps=N_STEPS,
-                    reset_at_terminal=False, verbose=False, open_plot=False
-                )
-                run_agents_on_mdp(
-                    [agent], env2, instances=1, episodes=N_EPISODES, steps=N_STEPS,
-                    reset_at_terminal=False, verbose=False, open_plot=False
-                )
-                '''
+                
                 results.append(agent.get_results())
 
         names.append(name)
