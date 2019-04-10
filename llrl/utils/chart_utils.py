@@ -45,7 +45,7 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
 
     for i in range(len(agents)):
         if y_lo is not None and y_up is not None:
-            plt.fill_between(x, y_lo[i], y_up[i], alpha=0.25)
+            plt.fill_between(x, y_lo[i], y_up[i], alpha=0.25, facecolor=colors[i], edgecolor=colors[i])
         plt.plot(x, y[i], '-o', label=agents[i], marker=markers[i])
 
     plt.xlabel(x_label)
