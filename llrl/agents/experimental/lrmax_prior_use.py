@@ -90,11 +90,6 @@ class LRMaxExp(LRMax):
                 if s_p not in self.T[s][a]:
                     weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
 
-            distances_dict[s][a] = min(
-                abs(self.R[s][a] - r_mem[s][a]) + self.gamma * weighted_sum,
-                self.prior
-            )
-
             dsa = abs(self.R[s][a] - r_mem[s][a]) + self.gamma * weighted_sum
             distances_dict[s][a] = self._set_distance(dsa)
 
