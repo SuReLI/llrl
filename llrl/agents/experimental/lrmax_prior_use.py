@@ -34,7 +34,8 @@ class LRMaxExp(LRMax):
             name=name
         )
 
-        # Counter for prior-use
+        self.time_step = 0
+        self.time_step_counter = []
         self.prior_use_counter = [
             [0, 0]  # ['n_computation', 'n_prior_use']
         ]
@@ -55,8 +56,19 @@ class LRMaxExp(LRMax):
     def get_results(self):
         result = []
         for i in range(len(self.prior_use_counter) - 1):
-            result.append(round(100. * float(self.prior_use_counter[i][1]) / float(self.prior_use_counter[i][0]), 2))
+            recorded_time_step = self.time_step_counter[i]
+            prior_use_ratio = round(100. * float(self.prior_use_counter[i][1]) / float(self.prior_use_counter[i][0]), 2)
+            result.append([recorded_time_step, prior_use_ratio])
         return result
+
+    def reset(self):
+        self.time_step = 0
+        self.time_step_counter = []
+        LRMax.reset(self)
+
+    def act(self, s, r):
+        self.time_step += 1
+        LRMax.act(self, s, r)
 
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """
@@ -108,6 +120,7 @@ class LRMaxExp(LRMax):
                   self.gamma * self.r_max / (1. - self.gamma)
             distances_dict[s][a] = self._set_distance(dsa)
 
+        self.time_step_counter.append(self.time_step)
         self.prior_use_counter.append([0, 0])  # Add a new counter for the next computation
 
         return distances_dict

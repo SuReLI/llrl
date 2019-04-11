@@ -34,15 +34,25 @@ N_STEPS = 1000
 
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
-PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=10)]
+# PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=10)]
+PRIORS = [19.0, 18.0, 17.0, 15.0, 10.0, 5.0, 0.0]
+
+N_INSTANCES = 2  # TODO remove
+N_EPISODES = 100  # TODO remove
+N_STEPS = 100  # TODO remove
+PRIORS = [17.0, 16.9, 1.0]  # TODO remove
 
 
-def get_path(name):
-    return ROOT_PATH + name + '.csv'
+def get_path_computation_number(agent_name):
+    return ROOT_PATH + agent_name + 'computation_number.csv'
+
+
+def get_path_time_step(agent_name):
+    return ROOT_PATH + agent_name + 'time_step.csv'
 
 
 def save_result(results, name):
-    path = get_path(name)
+    path = get_path_computation_number(name)
     csv_write(['prior_use_ratio_mean', 'prior_use_ratio_lo', 'prior_use_ratio_up'], path, mode='w')
 
     length = max([len(r) for r in results])
@@ -50,12 +60,18 @@ def save_result(results, name):
         data_i = []
         for r in results:
             if len(r) > i:
-                data_i.append(r[i])
+                data_i.append(r[i][1])
         mean, lo, up = mean_confidence_interval(data_i)
         csv_write([mean, lo, up], path, mode='a')
 
+    path = get_path_time_step(name)
+    csv_write(['time_step', 'prior_use_ratio'], path, mode='w')
+    for r in results:
+        for row in r:
+            csv_write([row[0], row[1]], path, mode='a')
 
-def plot_results(names, open_plot=True):
+
+def plot_time_step_results(names, open_plot=True):
     # LaTeX rendering
     rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
     plt.rc('text', usetex=True)
@@ -70,7 +86,48 @@ def plot_results(names, open_plot=True):
     ax.set_prop_cycle(cycler('color', colors))
 
     for i in range(len(names)):
-        df = pd.read_csv(get_path(names[i]))
+        df = pd.read_csv(get_path_time_step(names[i]))
+        time_step = df.time_step
+        prior_use_ratio = df.prior_use_ratio
+
+        plt.scatter(time_step, prior_use_ratio, label=names[i], marker=markers[i])
+
+    plt.xlabel(r'Time Step')
+    plt.ylabel(r'\% Prior Use')
+    plt.legend(loc='best')
+    plt.grid(True)
+    # plt.title('')
+
+    # Save
+    plot_file_name = os.path.join(ROOT_PATH + 'prior_use_vs_time_step.pdf')
+    plt.savefig(plot_file_name, format='pdf')
+
+    # Open
+    if open_plot:
+        open_prefix = 'gnome-' if sys.platform == 'linux' or sys.platform == 'linux2' else ''
+        os.system(open_prefix + 'open ' + plot_file_name)
+
+    # Clear and close
+    plt.cla()
+    plt.close()
+
+
+def plot_computation_number_results(names, open_plot=True):
+    # LaTeX rendering
+    rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    # Set markers and colors
+    markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
+    colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
+    colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
+    ax.set_prop_cycle(cycler('color', colors))
+
+    for i in range(len(names)):
+        df = pd.read_csv(get_path_computation_number(names[i]))
         prior_use_ratio_mean = df.prior_use_ratio_mean
         prior_use_ratio_lo = df.prior_use_ratio_lo
         prior_use_ratio_up = df.prior_use_ratio_up
@@ -88,7 +145,7 @@ def plot_results(names, open_plot=True):
     # plt.title('')
 
     # Save
-    plot_file_name = os.path.join(ROOT_PATH + 'prior_use.pdf')
+    plot_file_name = os.path.join(ROOT_PATH + 'prior_use_vs_computation_number.pdf')
     plt.savefig(plot_file_name, format='pdf')
 
     # Open
@@ -110,13 +167,14 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
     :param open_plot: set to False to disable plot (only saving)
     :return: None
     """
-    size = 3
+    w = 4
+    h = 3
     env1 = GridWorld(
-        width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)],
+        width=w, height=h, init_loc=(2, 1), goal_locs=[(w, h)],
         slip_prob=0.1, goal_reward=0.9, is_goal_terminal=False
     )
     env2 = GridWorld(
-        width=size, height=size, init_loc=(1, 1), goal_locs=[(size, size)],
+        width=w, height=h, init_loc=(2, 1), goal_locs=[(w, h)],
         slip_prob=0.2, goal_reward=1.0, is_goal_terminal=False
     )
 
@@ -124,8 +182,10 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
     epsilon = .1
     delta = .05
     m_r = np.log(2. / delta) / (2. * epsilon ** 2)
-    m_t = 2. * (np.log(2 ** (float(size * size)) - 2.) - np.log(delta)) / (epsilon ** 2)
+    m_t = 2. * (np.log(2 ** (float(w * h)) - 2.) - np.log(delta)) / (epsilon ** 2)
     m = int(max(m_r, m_t))
+
+    m = 100   # TODO remove
 
     names = []
 
@@ -144,7 +204,7 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
 
             if run_experiment:
                 if verbose:
-                    print('Running instance', i, 'of', N_INSTANCES, 'for agent', name)
+                    print('Running instance', i + 1, 'of', N_INSTANCES, 'for agent', name)
 
                 run_single_agent_on_mdp(
                     agent, env1, episodes=N_EPISODES, steps=N_STEPS, experiment=None, verbose=False,
@@ -165,7 +225,8 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
             save_result(results, name)
 
     # Plot
-    plot_results(names, open_plot)
+    plot_computation_number_results(names, open_plot)
+    plot_time_step_results(names, open_plot)
 
 
 if __name__ == '__main__':
