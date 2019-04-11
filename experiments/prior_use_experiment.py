@@ -35,12 +35,8 @@ N_STEPS = 1000
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
 # PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=10)]
-PRIORS = [19.0, 18.0, 17.0, 15.0, 10.0, 5.0, 0.0]
-
-N_INSTANCES = 2  # TODO remove
-N_EPISODES = 100  # TODO remove
-N_STEPS = 100  # TODO remove
-PRIORS = [17.0, 16.9, 1.0]  # TODO remove
+PRIORS = [19.0, 15.0, 11.0, 10.0, 0.0]
+PRIORS = [10.9, 10.6, 10.3]
 
 
 def get_path_computation_number(agent_name):
@@ -92,6 +88,7 @@ def plot_time_step_results(names, open_plot=True):
 
         plt.scatter(time_step, prior_use_ratio, label=names[i], marker=markers[i])
 
+    plt.xlim((0, 10000))
     plt.xlabel(r'Time Step')
     plt.ylabel(r'\% Prior Use')
     plt.legend(loc='best')
@@ -184,8 +181,6 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
     m_r = np.log(2. / delta) / (2. * epsilon ** 2)
     m_t = 2. * (np.log(2 ** (float(w * h)) - 2.) - np.log(delta)) / (epsilon ** 2)
     m = int(max(m_r, m_t))
-
-    m = 100   # TODO remove
 
     names = []
 

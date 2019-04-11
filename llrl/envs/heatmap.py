@@ -89,9 +89,12 @@ class HeatMap(GridWorld):
             r = - self.lava_cost
         else:
             heat_reward = 0.
-            for g in self.goal_locs:
-                heat_reward += np.exp(- ((s_p.x - g[0])**2 + (s_p.y - g[1])**2) / (2. * self.reward_span**2))
+            if self.reward_span > 0.:
+                for g in self.goal_locs:
+                    heat_reward += np.exp(- ((s_p.x - g[0])**2 + (s_p.y - g[1])**2) / (2. * self.reward_span**2))
             r = heat_reward - self.step_cost
+
+        print('{:>20} {:>20} {:>20} {:>20}'.format(str(s), a, r, str(s_p)))  # TODO remove
 
         return r, s_p
 
