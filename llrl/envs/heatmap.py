@@ -94,8 +94,6 @@ class HeatMap(GridWorld):
                     heat_reward += np.exp(- ((s_p.x - g[0])**2 + (s_p.y - g[1])**2) / (2. * self.reward_span**2))
             r = heat_reward - self.step_cost
 
-        print('{:>20} {:>20} {:>20} {:>20}'.format(str(s), a, r, str(s_p)))  # TODO remove
-
         return r, s_p
 
     def _reward_func(self, state, action):

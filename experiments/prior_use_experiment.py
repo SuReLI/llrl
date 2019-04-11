@@ -34,9 +34,8 @@ N_STEPS = 1000
 
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
-# PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=10)]
-PRIORS = [19.0, 15.0, 11.0, 10.0, 0.0]
-PRIORS = [10.9, 10.6, 10.3]
+PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=7)]
+PRIORS = [0.0]
 
 
 def get_path_computation_number(agent_name):
@@ -67,6 +66,14 @@ def save_result(results, name):
             csv_write([row[0], row[1]], path, mode='a')
 
 
+def moving_average(x, y, window=2):
+    x_ma, y_ma = [], []
+    for i in range(window, len(x) + 1):
+        x_ma.append(sum(x[i - window: i]) / float(window))
+        y_ma.append(sum(y[i - window: i]) / float(window))
+    return x_ma, y_ma
+
+
 def plot_time_step_results(names, open_plot=True):
     # LaTeX rendering
     rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
@@ -86,7 +93,11 @@ def plot_time_step_results(names, open_plot=True):
         time_step = df.time_step
         prior_use_ratio = df.prior_use_ratio
 
-        plt.scatter(time_step, prior_use_ratio, label=names[i], marker=markers[i])
+        time_step, prior_use_ratio = zip(*sorted(zip(time_step, prior_use_ratio)))
+        x_ma, ma = moving_average(time_step, prior_use_ratio)
+
+        plt.plot(x_ma, ma, '-o', label=names[i])
+        plt.scatter(time_step, prior_use_ratio, marker=markers[i])
 
     plt.xlim((0, 10000))
     plt.xlabel(r'Time Step')
@@ -226,4 +237,4 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
 
 if __name__ == '__main__':
     np.random.seed(1993)
-    prior_use_experiment(run_experiment=True, open_plot=True, verbose=True)
+    prior_use_experiment(run_experiment=False, open_plot=True, verbose=True)
