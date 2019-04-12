@@ -44,7 +44,7 @@ def save_result(results, root_path, name):
             csv_write([row[0], row[1]], path, mode='a')
 
 
-def moving_average(x, y, window=2):
+def moving_average(x, y, window=3):
     x_ma, y_ma = [], []
     for i in range(window, len(x) + 1):
         x_ma.append(sum(x[i - window: i]) / float(window))
@@ -61,6 +61,7 @@ def plot_time_step_results(root_path, names, open_plot=True):
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_prop_cycle(cycler('color', COLORS))
 
+    x_max = 0
     for i in range(len(names)):
         df = pd.read_csv(get_path_time_step(root_path, names[i]))
         time_step = df.time_step
@@ -69,10 +70,14 @@ def plot_time_step_results(root_path, names, open_plot=True):
         time_step, prior_use_ratio = zip(*sorted(zip(time_step, prior_use_ratio)))
         x_ma, ma = moving_average(time_step, prior_use_ratio)
 
-        plt.plot(x_ma, ma, '-o', marker=None)
-        plt.scatter(time_step, prior_use_ratio, label=names[i], marker=MARKERS[i])
+        plt.plot(x_ma, ma, '-o', marker=None, label=names[i])
+        plt.scatter(time_step, prior_use_ratio, marker=MARKERS[i], alpha=0.25)
 
-    plt.xlim((0, 20000))
+        if x_max < time_step[-1]:
+            x_max = time_step[-1]
+
+    plt.xlim((0, x_max + 1000))
+    plt.xlim((0, 200000))
     plt.xlabel(r'Time Step')
     plt.ylabel(r'\% Prior Use')
     plt.legend(loc='best')
