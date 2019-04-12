@@ -69,8 +69,8 @@ def plot_time_step_results(root_path, names, open_plot=True):
         time_step, prior_use_ratio = zip(*sorted(zip(time_step, prior_use_ratio)))
         x_ma, ma = moving_average(time_step, prior_use_ratio)
 
-        plt.plot(x_ma, ma, '-o', label=names[i])
-        plt.scatter(time_step, prior_use_ratio, marker=MARKERS[i])
+        plt.plot(x_ma, ma, '-o', marker=None)
+        plt.scatter(time_step, prior_use_ratio, label=names[i], marker=MARKERS[i])
 
     plt.xlim((0, 20000))
     plt.xlabel(r'Time Step')
