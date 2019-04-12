@@ -21,6 +21,7 @@ from llrl.utils.save import csv_write
 from llrl.utils.chart_utils import color_ls
 from llrl.utils.chart_utils import COLOR_SHIFT
 from llrl.envs.gridworld import GridWorld
+from llrl.envs.heatmap import HeatMap
 from llrl.agents.experimental.lrmax_prior_use import LRMaxExp
 from simple_rl.run_experiments import run_single_agent_on_mdp
 
@@ -28,14 +29,14 @@ ROOT_PATH = 'results/prior_use/'
 
 GAMMA = 0.9
 
-N_INSTANCES = 3
+N_INSTANCES = 4
 N_EPISODES = 1000
-N_STEPS = 1000
+N_STEPS = 500
 
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
 PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=7)]
-PRIORS = [0.0]
+# PRIORS = [0.0]
 
 
 def get_path_computation_number(agent_name):
@@ -99,7 +100,7 @@ def plot_time_step_results(names, open_plot=True):
         plt.plot(x_ma, ma, '-o', label=names[i])
         plt.scatter(time_step, prior_use_ratio, marker=markers[i])
 
-    plt.xlim((0, 10000))
+    plt.xlim((0, 20000))
     plt.xlabel(r'Time Step')
     plt.ylabel(r'\% Prior Use')
     plt.legend(loc='best')
@@ -176,7 +177,16 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
     :return: None
     """
     w = 4
-    h = 3
+    h = 4
+    env1 = HeatMap(
+        width=w, height=h, init_loc=(1, 1), goal_locs=[(w, h)], is_goal_terminal=False,
+        slip_prob=0.1, goal_reward=1.0, reward_span=1.0
+    )
+    env2 = HeatMap(
+        width=w, height=h, init_loc=(1, 1), goal_locs=[(w-1, h)], is_goal_terminal=False,
+        slip_prob=0.05, goal_reward=0.6, reward_span=1.5
+    )
+    '''
     env1 = GridWorld(
         width=w, height=h, init_loc=(2, 1), goal_locs=[(w, h)],
         slip_prob=0.1, goal_reward=0.9, is_goal_terminal=False
@@ -185,6 +195,7 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
         width=w, height=h, init_loc=(2, 1), goal_locs=[(w, h)],
         slip_prob=0.2, goal_reward=1.0, is_goal_terminal=False
     )
+    '''
 
     # Compute needed number of samples for L-R-MAX to achieve epsilon optimal behavior with probability (1 - delta)
     epsilon = .1
@@ -237,4 +248,4 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
 
 if __name__ == '__main__':
     np.random.seed(1993)
-    prior_use_experiment(run_experiment=False, open_plot=True, verbose=True)
+    prior_use_experiment(run_experiment=True, open_plot=True, verbose=True)

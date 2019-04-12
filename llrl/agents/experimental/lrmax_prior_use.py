@@ -36,9 +36,7 @@ class LRMaxExp(LRMax):
 
         self.time_step = 0
         self.time_step_counter = []
-        self.prior_use_counter = [
-            [0, 0]  # ['n_computation', 'n_prior_use']
-        ]
+        self.prior_use_counter = [[0, 0]]  # 'n_computation', 'n_prior_use'
 
     def _update_counters(self, is_prior_used):
         self.prior_use_counter[-1][0] += 1
