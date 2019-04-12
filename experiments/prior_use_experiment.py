@@ -21,7 +21,7 @@ GAMMA = 0.9
 
 N_INSTANCES = 5
 N_EPISODES = 1000
-N_STEPS = 100
+N_STEPS = 1000
 
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
@@ -96,9 +96,6 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
                     track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False
                 )
 
-                if verbose:  # TODO remove
-                    print('    Getting result history of length', len(agent.get_results()))
-
                 results.append(agent.get_results())
 
         names.append(name)
@@ -114,4 +111,4 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
 
 if __name__ == '__main__':
     np.random.seed(1993)
-    prior_use_experiment(run_experiment=False, open_plot=True, verbose=True)
+    prior_use_experiment(run_experiment=True, open_plot=True, verbose=True)

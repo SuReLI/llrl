@@ -38,17 +38,12 @@ class LRMaxExp(LRMax):
         self.time_step_counter = []
         self.prior_use_counter = [[0, 0]]  # 'n_computation', 'n_prior_use'
 
-    def _update_counters(self, is_prior_used):
-        self.prior_use_counter[-1][0] += 1
-        if is_prior_used:
-            self.prior_use_counter[-1][1] += 1
-
     def _set_distance(self, dsa):
+        self.prior_use_counter[-1][0] += 1
         if dsa > self.prior:
-            self._update_counters(True)
+            self.prior_use_counter[-1][1] += 1
             return self.prior
         else:
-            self._update_counters(False)
             return dsa
 
     def get_results(self):
@@ -66,14 +61,13 @@ class LRMaxExp(LRMax):
 
     def act(self, s, r):
         self.time_step += 1
-        LRMax.act(self, s, r)
+        return LRMax.act(self, s, r)
 
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """
         See LRMax class.
         Overrides method of LRMax for prior use counter.
         """
-
         distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         if len(self.U_memory) > 1:  # No computation after the second environment
