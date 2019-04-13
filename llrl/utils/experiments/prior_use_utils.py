@@ -44,8 +44,8 @@ def save_result(results, root_path, name):
             csv_write([row[0], row[1]], path, mode='a')
 
 
-def moving_average(x, y, window=3):
-    x_ma, y_ma = [], []
+def moving_average(x, y, window=10):
+    x_ma, y_ma = [x[0]], [y[0]]
     for i in range(window, len(x) + 1):
         x_ma.append(sum(x[i - window: i]) / float(window))
         y_ma.append(sum(y[i - window: i]) / float(window))
@@ -77,7 +77,6 @@ def plot_time_step_results(root_path, names, open_plot=True):
             x_max = time_step[-1]
 
     plt.xlim((0, x_max + 1000))
-    plt.xlim((0, 200000))
     plt.xlabel(r'Time Step')
     plt.ylabel(r'\% Prior Use')
     plt.legend(loc='best')

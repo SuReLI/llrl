@@ -112,4 +112,4 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
 
 if __name__ == '__main__':
     np.random.seed(1993)
-    prior_use_experiment(run_experiment=True, open_plot=True, verbose=True)
+    prior_use_experiment(run_experiment=False, open_plot=True, verbose=True)
