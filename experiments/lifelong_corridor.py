@@ -14,8 +14,6 @@ GAMMA = .9
 
 
 def experiment():
-    # Create environments distribution
-    # env_distribution = make_env_distribution(env_class='grid-world', n_env=10, gamma=GAMMA, w=3, h=3)
     env_distribution = make_env_distribution(env_class='corridor', n_env=10, gamma=GAMMA, w=20, h=1)
     actions = env_distribution.get_actions()
 
@@ -30,10 +28,10 @@ def experiment():
 
     run_agents_lifelong(
         agents_pool, env_distribution, samples=30, episodes=30, steps=10,
-        reset_at_terminal=False, open_plot=True, cumulative_plot=False
+        reset_at_terminal=False, open_plot=True, cumulative_plot=False, is_tracked_value_discounted=False
     )
 
 
 if __name__ == '__main__':
-    np.random.seed(1995)
+    np.random.seed(1993)
     experiment()

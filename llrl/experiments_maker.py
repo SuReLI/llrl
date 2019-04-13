@@ -12,7 +12,7 @@ from simple_rl.experiments import Experiment
 from simple_rl.run_experiments import run_single_agent_on_mdp
 
 
-def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=True):
+def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, is_tracked_value_discounted, open_plot=True):
     n_tasks = len(returns_per_agent[0])
     x = range(1, n_tasks + 1)
 
@@ -26,14 +26,26 @@ def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=Tr
                 returns_per_agent[agent][task][1],
                 returns_per_agent[agent][task][2]
             ])
+
+    # Naming
+    labels = [
+        'task_number',
+        'average_discounted_return',
+        'average_discounted_return_lo',
+        'average_discounted_return_up'
+    ] if is_tracked_value_discounted else [
+        'task_number',
+        'average_return',
+        'average_return_lo',
+        'average_return_up'
+    ]
+    file_name = 'average_discounted_return' if is_tracked_value_discounted else 'average_return'
+    y_label = r'Average Discounted Reward' if is_tracked_value_discounted else r'Average Reward'
+    title_prefix = r'Average Discounted Reward: ' if is_tracked_value_discounted else r'Average Reward: '
+
     save(
-        path, csv_name='average_discounted_return', agents=agents, data=data,
-        labels=[
-            'task_number',
-            'average_discounted_return',
-            'average_discounted_return_lo',
-            'average_discounted_return_up'
-        ]
+        path, csv_name=file_name, agents=agents, data=data,
+        labels=labels
     )
 
     returns = []
@@ -45,8 +57,8 @@ def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, open_plot=Tr
         returns_up.append([returns_per_agent[i][j][2] for j in range(n_tasks)])
 
     plot(
-        path, pdf_name='average_discounted_return', agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=r'Task Number', y_label=r'Average Discounted Return', title_prefix='Average Discounted Return: ',
+        path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
+        x_label=r'Task Number', y_label=y_label, title_prefix=title_prefix,
         open_plot=open_plot
     )
 
@@ -64,6 +76,7 @@ def run_agents_lifelong(
         reset_at_terminal=False,
         resample_at_terminal=False,
         cumulative_plot=True,
+        is_tracked_value_discounted=False,
         dir_for_plot='results'
 ):
     """
@@ -88,6 +101,7 @@ def run_agents_lifelong(
     :param reset_at_terminal: (bool)
     :param resample_at_terminal: (bool) (not implemented in this tweaked version of run_agents_lifelong)
     :param cumulative_plot: (bool)
+    :param is_tracked_value_discounted: (bool)
     :param dir_for_plot: (str)
     :return:
     """
@@ -132,7 +146,8 @@ def run_agents_lifelong(
             # Run the agent
             hit_terminal, total_steps_taken, return_per_episode = run_single_agent_on_mdp(
                 agent, mdp, episodes, steps, experiment, verbose=verbose, track_disc_reward=track_disc_reward,
-                reset_at_terminal=reset_at_terminal, resample_at_terminal=resample_at_terminal
+                reset_at_terminal=reset_at_terminal, resample_at_terminal=resample_at_terminal,
+                is_tracked_value_discounted=is_tracked_value_discounted
             )
 
             return_per_task[i] = mean_confidence_interval(return_per_episode)
@@ -142,7 +157,8 @@ def run_agents_lifelong(
                 mdp = mdp_distribution.sample()
                 hit_terminal, steps_taken, _ = run_single_agent_on_mdp(
                     agent, mdp, episodes, steps - total_steps_taken, experiment, verbose,
-                    track_disc_reward, reset_at_terminal, resample_at_terminal
+                    track_disc_reward, reset_at_terminal, resample_at_terminal,
+                    is_tracked_value_discounted=is_tracked_value_discounted
                 )
                 total_steps_taken += steps_taken
 
@@ -161,5 +177,8 @@ def run_agents_lifelong(
     print("-------------\n")
 
     # Plot
-    save_and_plot_returns_vs_tasks(experiment.exp_directory, agents, returns_per_agent, open_plot=open_plot)
+    save_and_plot_returns_vs_tasks(
+        experiment.exp_directory, agents, returns_per_agent,
+        is_tracked_value_discounted=is_tracked_value_discounted, open_plot=open_plot
+    )
     experiment.make_plots(open_plot=open_plot)

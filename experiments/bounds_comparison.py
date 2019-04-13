@@ -7,6 +7,7 @@ Setting:
 - Plotting percentage of bound use vs amount of prior knowledge + speed-up.
 """
 
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
@@ -26,10 +27,12 @@ RMAX_TMP_SAVE_PATH = 'results/tmp/bounds_comparison_results_RMAX.csv'
 GAMMA = 0.9
 
 N_INSTANCES = 100
-PRIOR = [.0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1.]
+PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
+PRIOR_MAX = 0.
+PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=5)]
 
 
-def plot_results(path):
+def plot_bound_use(path):
     # 1. Results in terms of bound-use
     df = pd.read_csv(path)
     prior = df.prior
@@ -60,7 +63,7 @@ def plot_results(path):
     plt.show()
 
 
-def bounds_test(verbose=False):
+def bounds_comparison_experiment(verbose=False):
     # MDP
     sz = 2
     mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=0.8)
@@ -72,7 +75,7 @@ def bounds_test(verbose=False):
         csv_write(['prior', 'ratio_rmax_bound_use', 'ratio_lip_bound_use', 'lrmax_n_time_steps', 'lrmax_n_time_steps_cv'], LRMAX_TMP_SAVE_PATH, 'w')
         csv_write(['rmax_n_time_steps', 'rmax_n_time_steps_cv'], RMAX_TMP_SAVE_PATH, 'w')
 
-        for prior in PRIOR:
+        for prior in PRIORS:
             lrmaxct = LRMaxCTExp(actions=mdp1.get_actions(), gamma=GAMMA, count_threshold=1, prior=prior, path=LRMAX_TMP_SAVE_PATH)
             rmaxvi = RMaxExp(actions=mdp1.get_actions(), gamma=GAMMA, count_threshold=1, path=RMAX_TMP_SAVE_PATH)
 
@@ -106,7 +109,7 @@ def bounds_test(verbose=False):
          'speed_up_lower'],
         SAVE_PATH, 'w'
     )
-    for i in range(len(PRIOR)):
+    for i in range(len(PRIORS)):
         rlbu = []
         su = []
         for result in results:
@@ -114,13 +117,13 @@ def bounds_test(verbose=False):
             su.append(result[i][2])
         rlbu_mci = mean_confidence_interval(rlbu)
         su_mci = mean_confidence_interval(su)
-        csv_write([PRIOR[i]] + list(rlbu_mci) + list(su_mci), SAVE_PATH, 'a')
+        csv_write([PRIORS[i]] + list(rlbu_mci) + list(su_mci), SAVE_PATH, 'a')
     if verbose:
         for result in results:
             print(result)
 
 
 if __name__ == '__main__':
-    # bounds_test()
-    # plot_results(SAVE_PATH)
-    plot_results('results/bounds-use-and-speed-up/gridworld_h-2_w-2/data.csv')
+    # bounds_comparison_experiment()
+    # plot_bound_use(SAVE_PATH)
+    plot_bound_use('results/bounds-use-and-speed-up/gridworld_h-2_w-2/data.csv')
