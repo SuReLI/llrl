@@ -10,7 +10,6 @@ Setting:
 import numpy as np
 
 from llrl.utils.experiments import prior_use_utils as utils
-from llrl.envs.gridworld import GridWorld
 from llrl.envs.heatmap import HeatMap
 from llrl.agents.experimental.lrmax_prior_use import LRMaxExp
 from simple_rl.run_experiments import run_single_agent_on_mdp
@@ -50,16 +49,6 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
         width=w, height=h, init_loc=(1, 1), goal_locs=[(w-1, h)], is_goal_terminal=False,
         walls=walls, slip_prob=0.05, goal_reward=0.6, reward_span=1.5
     )
-    '''
-    env1 = GridWorld(
-        width=w, height=h, init_loc=(2, 1), goal_locs=[(w, h)],
-        slip_prob=0.1, goal_reward=0.9, is_goal_terminal=False
-    )
-    env2 = GridWorld(
-        width=w, height=h, init_loc=(2, 1), goal_locs=[(w, h)],
-        slip_prob=0.2, goal_reward=1.0, is_goal_terminal=False
-    )
-    '''
 
     # Compute needed number of samples for L-R-MAX to achieve epsilon optimal behavior with probability (1 - delta)
     epsilon = .1
