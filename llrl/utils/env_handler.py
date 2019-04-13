@@ -48,15 +48,17 @@ def sample_corridor(gamma, w, verbose=False):
     return env
 
 
-def sample_heat_map(gamma, w, h, verbose=False):
-    possible_goals = [(1, h), (w, 1)]
+def sample_heat_map(gamma, verbose=False):
+    w = 11
+    h = 11
+    possible_goals = [(w - 1, h), (w, h - 1), (w, h)]
 
     sampled_reward = np.random.uniform(0.8, 1.0)
     sampled_span = np.random.uniform(0.5, 1.5)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
 
     env = HeatMap(
-        width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=[(5, 3)], lava_locs=[()], walls=[],
+        width=w, height=h, init_loc=(5, 5), rand_init=False, goal_locs=[sampled_goal], lava_locs=[()], walls=[],
         is_goal_terminal=False, gamma=gamma, slip_prob=0.0, step_cost=0.0, lava_cost=0.01,
         goal_reward=sampled_reward, reward_span=sampled_span, name="Heat-map"
     )
@@ -65,6 +67,35 @@ def sample_heat_map(gamma, w, h, verbose=False):
         print(
             'Sampled heat-map - goal location:', sampled_goal, '- goal reward:', sampled_reward,
             '- reward span:', sampled_span
+        )
+
+    return env
+
+
+def sample_maze(gamma, verbose=False):
+    w = 6
+    h = 6
+
+    maze_type = 1
+    walls = [
+        (2, 2), (3, 2), (4, 2), (5, 2), (6, 2), (4, 3),
+        (2, 4), (2, 5), (2, 6), (4, 5), (5, 5)
+    ]
+    if np.random.random() < 0.5:
+        walls.append((5, 6))
+    else:
+        walls.append((4, 4))
+        maze_type = 2
+
+    env = GridWorld(
+        width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=[(w, h)], lava_locs=[()], walls=walls,
+        is_goal_terminal=False, gamma=gamma, slip_prob=0.0, step_cost=0.0, lava_cost=0.01,
+        goal_reward=1, name="Maze"
+    )
+
+    if verbose:
+        print(
+            'Sampled maze - type:', maze_type
         )
 
     return env
@@ -95,7 +126,9 @@ def make_env_distribution(env_class='grid-world', n_env=10, gamma=.9, w=5, h=5, 
         elif env_class == 'corridor':
             new_env = sample_corridor(gamma, w, verbose)
         elif env_class == 'heat-map':
-            new_env = sample_heat_map(gamma, w, h, verbose)
+            new_env = sample_heat_map(gamma, verbose)
+        elif env_class == 'maze':
+            new_env = sample_maze(gamma, verbose)
         else:
             raise ValueError('Environment class not implemented.')
         env_dist_dict[new_env] = sampling_probability
