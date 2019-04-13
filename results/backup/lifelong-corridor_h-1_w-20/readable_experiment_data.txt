@@ -7,6 +7,6 @@
 	LRMax-CT-prior1.0,3
 (Params)
 	steps : 10
-	track_disc_reward : False
 	episodes : 30
+	track_disc_reward : False
 	samples : 30
