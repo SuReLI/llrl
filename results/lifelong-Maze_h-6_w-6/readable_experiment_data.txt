@@ -1,0 +1,11 @@
+(MDP)
+	lifelong-Maze_h-6_w-6
+(Agents)
+	RMax,0
+	LRMax-prior1.0,1
+	LRMax-prior0.18,2
+(Params)
+	steps : 1000
+	track_disc_reward : False
+	samples : 50
+	episodes : 50
