@@ -69,7 +69,32 @@ class LRMax(RMax):
         self.update_lipschitz_upper_bounds()
         self.update_upper_bound()
 
-    def act(self, s, r):
+        self.print_upper_bound()  # TODO remove
+
+    def print_upper_bound(self):  # TODO remove
+        from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
+
+        w, h = 6, 6
+
+        print('Memory size:', len(self.U_lip))
+
+        print('Upper-bound:')
+        for j in range(6, 0, -1):
+            for i in range(1, 6 + 1):
+                s = GridWorldState(i, j)
+                print('{:>18}'.format(round(self.U[s]['left'], 6)), end=' ')
+            print()
+
+        u_mem, r_mem, t_mem = self.U_memory[0], self.R_memory[0], self.T_memory[0]
+        s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
+        distances_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
+        print('Models distances:', len(distances_dict), 'items')
+        for s in distances_dict:
+            print(str(s), '   left  ', distances_dict[s]['left'])
+
+        # exit()
+
+    def act(self, s, r, verbose=False):  # TODO remove verbose
         """
         Acting method called online during learning.
         :param s: int current state of the agent
@@ -77,6 +102,10 @@ class LRMax(RMax):
         :return: return the greedy action wrt the current learned model.
         """
         self.update(self.prev_s, self.prev_a, r, s)
+
+        if verbose:
+            if self.prev_s is not None and self.prev_a is not None:  # TODO remove
+                print('{:>20} {:>20} {:>20} {:>20}'.format(str(self.prev_s), self.prev_a, r, str(s)))  # TODO remove
 
         a = self.greedy_action(s, self.U)
 
