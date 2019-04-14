@@ -69,7 +69,7 @@ class LRMax(RMax):
         self.update_lipschitz_upper_bounds()
         self.update_upper_bound()
 
-        self.print_upper_bound()  # TODO remove
+        # self.print_upper_bound()  # TODO remove
 
     def print_upper_bound(self):  # TODO remove
         from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState

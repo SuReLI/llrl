@@ -12,54 +12,97 @@ from simple_rl.experiments import Experiment
 from simple_rl.run_experiments import run_single_agent_on_mdp
 
 
-def save_and_plot_returns_vs_tasks(path, agents, returns_per_agent, is_tracked_value_discounted, open_plot=True):
-    n_tasks = len(returns_per_agent[0])
-    x = range(1, n_tasks + 1)
+def save_and_plot_return_per_episode(
+        path,
+        agents,
+        avg_return_per_episode_per_agent,
+        is_tracked_value_discounted,
+        open_plot=True
+):
+    # Set names
+    labels = [
+        'episode_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
+    ] if is_tracked_value_discounted else [
+        'episode_number', 'average_return', 'average_return_lo', 'average_return_up'
+    ]
+    file_name = 'average_discounted_return_per_episode' if is_tracked_value_discounted else 'average_return_per_episode'
+    x_label = r'Episode Number'
+    y_label = r'Average Discounted Return' if is_tracked_value_discounted else r'Average Return'
+    title_prefix = r'Average Discounted Return: ' if is_tracked_value_discounted else r'Average Return: '
 
+    # Save
+    n_episodes = len(avg_return_per_episode_per_agent[0])
+    x = range(n_episodes)
+    data = []
+    for agent in range(len(agents)):
+        data.append([])
+        for episode in range(n_episodes):
+            data[-1].append([
+                x[episode],
+                avg_return_per_episode_per_agent[agent][episode][0],
+                avg_return_per_episode_per_agent[agent][episode][1],
+                avg_return_per_episode_per_agent[agent][episode][2]
+            ])
+    save(path, csv_name=file_name, agents=agents, data=data, labels=labels)
+
+    # Plot
+    returns = []
+    returns_lo = []
+    returns_up = []
+    for i in range(len(agents)):
+        returns.append([avg_return_per_episode_per_agent[i][j][0] for j in range(n_episodes)])
+        returns_lo.append([avg_return_per_episode_per_agent[i][j][1] for j in range(n_episodes)])
+        returns_up.append([avg_return_per_episode_per_agent[i][j][2] for j in range(n_episodes)])
+    plot(
+        path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
+        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot
+    )
+
+
+def save_and_plot_return_per_task(
+        path,
+        agents,
+        avg_return_per_task_per_agent,
+        is_tracked_value_discounted,
+        open_plot=True
+):
+    # Set names
+    labels = [
+        'task_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
+    ] if is_tracked_value_discounted else [
+        'task_number', 'average_return', 'average_return_lo', 'average_return_up'
+    ]
+    file_name = 'average_discounted_return_per_task' if is_tracked_value_discounted else 'average_return_per_task'
+    x_label = r'Task Number'
+    y_label = r'Average Discounted Return' if is_tracked_value_discounted else r'Average Return'
+    title_prefix = r'Average Discounted Return: ' if is_tracked_value_discounted else r'Average Return: '
+
+    # Save
+    n_tasks = len(avg_return_per_task_per_agent[0])
+    x = range(n_tasks)
     data = []
     for agent in range(len(agents)):
         data.append([])
         for task in range(n_tasks):
             data[-1].append([
                 x[task],
-                returns_per_agent[agent][task][0],
-                returns_per_agent[agent][task][1],
-                returns_per_agent[agent][task][2]
+                avg_return_per_task_per_agent[agent][task][0],
+                avg_return_per_task_per_agent[agent][task][1],
+                avg_return_per_task_per_agent[agent][task][2]
             ])
+    save(path, csv_name=file_name, agents=agents, data=data, labels=labels)
 
-    # Naming
-    labels = [
-        'task_number',
-        'average_discounted_return',
-        'average_discounted_return_lo',
-        'average_discounted_return_up'
-    ] if is_tracked_value_discounted else [
-        'task_number',
-        'average_return',
-        'average_return_lo',
-        'average_return_up'
-    ]
-    file_name = 'average_discounted_return' if is_tracked_value_discounted else 'average_return'
-    y_label = r'Average Discounted Reward' if is_tracked_value_discounted else r'Average Reward'
-    title_prefix = r'Average Discounted Reward: ' if is_tracked_value_discounted else r'Average Reward: '
-
-    save(
-        path, csv_name=file_name, agents=agents, data=data,
-        labels=labels
-    )
-
+    # Plot
     returns = []
     returns_lo = []
     returns_up = []
     for i in range(len(agents)):
-        returns.append([returns_per_agent[i][j][0] for j in range(n_tasks)])
-        returns_lo.append([returns_per_agent[i][j][1] for j in range(n_tasks)])
-        returns_up.append([returns_per_agent[i][j][2] for j in range(n_tasks)])
-
+        returns.append([avg_return_per_task_per_agent[i][j][0] for j in range(n_tasks)])
+        returns_lo.append([avg_return_per_task_per_agent[i][j][1] for j in range(n_tasks)])
+        returns_up.append([avg_return_per_task_per_agent[i][j][2] for j in range(n_tasks)])
     plot(
         path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=r'Task Number', y_label=y_label, title_prefix=title_prefix,
-        open_plot=open_plot
+        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot
     )
 
 
@@ -124,7 +167,8 @@ def run_agents_lifelong(
 
     print("Running experiment: \n" + str(experiment))
     times = defaultdict(float)
-    returns_per_agent = []
+    avg_return_per_task_per_agent = []
+    avg_return_per_episode_per_agent = []
 
     # Sample tasks at first so that agents experience the same sequence of tasks
     tasks = []
@@ -135,7 +179,8 @@ def run_agents_lifelong(
         print(str(agent) + " is learning.")
         start = time.clock()
 
-        return_per_task = [(0., 0., 0.)] * samples  # Mean, lower confidence interval bound, upper
+        # return_per_task = [(0., 0., 0.)] * samples  # Mean, lower confidence interval bound, upper
+        returns = []
 
         for i in range(samples):
             print("  Experience task " + str(i + 1) + " of " + str(samples) + ".")
@@ -150,7 +195,8 @@ def run_agents_lifelong(
                 is_tracked_value_discounted=is_tracked_value_discounted
             )
 
-            return_per_task[i] = mean_confidence_interval(return_per_episode)
+            returns.append(return_per_episode)
+            # return_per_task[i] = mean_confidence_interval(return_per_episode)
 
             # If we re-sample at terminal, keep grabbing MDPs until we're done
             while resample_at_terminal and hit_terminal and total_steps_taken < steps:
@@ -164,7 +210,18 @@ def run_agents_lifelong(
 
             # Reset the agent
             agent.reset()
-        returns_per_agent.append(return_per_task)
+
+        # Store results
+        avg_return_per_task = [(0., 0., 0.)] * samples  # Mean, lower, upper
+        avg_return_per_episode = [(0., 0., 0.)] * episodes  # Mean, lower, upper
+        for i in range(samples):
+            avg_return_per_task[i] = mean_confidence_interval(returns[i])
+        for j in range(episodes):
+            return_per_task = [returns[i][j] for i in range(samples)]
+            avg_return_per_episode[j] = mean_confidence_interval(return_per_task)
+
+        avg_return_per_task_per_agent.append(avg_return_per_task)
+        avg_return_per_episode_per_agent.append(avg_return_per_episode)
 
         # Track how much time this agent took
         end = time.clock()
@@ -177,8 +234,12 @@ def run_agents_lifelong(
     print("-------------\n")
 
     # Plot
-    save_and_plot_returns_vs_tasks(
-        experiment.exp_directory, agents, returns_per_agent,
+    save_and_plot_return_per_task(
+        experiment.exp_directory, agents, avg_return_per_task_per_agent,
+        is_tracked_value_discounted=is_tracked_value_discounted, open_plot=open_plot
+    )
+    save_and_plot_return_per_episode(
+        experiment.exp_directory, agents, avg_return_per_episode_per_agent,
         is_tracked_value_discounted=is_tracked_value_discounted, open_plot=open_plot
     )
     experiment.make_plots(open_plot=open_plot)
