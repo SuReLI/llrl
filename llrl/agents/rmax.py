@@ -27,7 +27,7 @@ class RMax(Agent):
     Use Value Iteration to compute the R-Max upper-bound following [Strehl et al 2009].
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax-e"):
+    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax"):
         """
         :param actions: action space of the environment
         :param gamma: (float) discount factor
@@ -35,7 +35,6 @@ class RMax(Agent):
         :param epsilon: (float) precision of value iteration algorithm
         :param name: (str)
         """
-        name = name + str(epsilon) if name[-2:] == "-e" else name
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.r_max = 1.0
         self.count_threshold = count_threshold
