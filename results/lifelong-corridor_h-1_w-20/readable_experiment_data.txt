@@ -1,12 +1,12 @@
 (MDP)
 	lifelong-corridor_h-1_w-20
 (Agents)
-	RMax-e0.1,0
+	RMax,0
 	LRMax-CT-prior0.2,1
 	LRMax-CT-prior0.6,2
 	LRMax-CT-prior1.0,3
 (Params)
-	steps : 10
+	samples : 50
 	track_disc_reward : False
-	episodes : 30
-	samples : 30
+	steps : 10
+	episodes : 50

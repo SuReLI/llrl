@@ -69,9 +69,9 @@ def plot_return_per_episode(
     returns_lo = []
     returns_up = []
     for df in data_frames:
-        returns.append(df[labels[1]])
-        returns_lo.append(df[labels[2]])
-        returns_up.append(df[labels[3]])
+        returns.append(df[labels[1]][0:n_episodes])
+        returns_lo.append(df[labels[2]][0:n_episodes])
+        returns_up.append(df[labels[3]][0:n_episodes])
     plot(
         path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
         x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot
@@ -135,9 +135,9 @@ def plot_return_per_task(
     returns_lo = []
     returns_up = []
     for df in data_frames:
-        returns.append(df[labels[1]])
-        returns_lo.append(df[labels[2]])
-        returns_up.append(df[labels[3]])
+        returns.append(df[labels[1]][0:n_tasks])
+        returns_lo.append(df[labels[2]][0:n_tasks])
+        returns_up.append(df[labels[3]][0:n_tasks])
     plot(
         path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
         x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot
