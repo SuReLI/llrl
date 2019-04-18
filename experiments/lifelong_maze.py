@@ -22,10 +22,11 @@ def experiment():
     rmax = RMax(actions=actions, gamma=GAMMA, count_threshold=m)
     lrmax1 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=1.)
     lrmax030 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.30)
+    lrmax020 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.20)
     lrmax018 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.18)
 
-    agents_pool = [rmax, lrmax1, lrmax030, lrmax018]
-    agents_pool = [lrmax030]  # TODO remove
+    # agents_pool = [rmax, lrmax1, lrmax030, lrmax018]
+    agents_pool = [lrmax020]  # TODO remove
 
     run_agents_lifelong(
         agents_pool, env_distribution, samples=50, episodes=50, steps=1000, reset_at_terminal=False,

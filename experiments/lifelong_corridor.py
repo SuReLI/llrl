@@ -28,7 +28,7 @@ def experiment():
 
     run_agents_lifelong(
         agents_pool, env_distribution, samples=50, episodes=50, steps=10, reset_at_terminal=False,
-        open_plot=True, cumulative_plot=False, is_tracked_value_discounted=False, plot_only=False
+        open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 
 
