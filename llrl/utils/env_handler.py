@@ -60,7 +60,7 @@ def sample_heat_map(gamma, verbose=False):
     env = HeatMap(
         width=w, height=h, init_loc=(5, 5), rand_init=False, goal_locs=[sampled_goal], lava_locs=[()], walls=[],
         is_goal_terminal=False, gamma=gamma, slip_prob=0.0, step_cost=0.0, lava_cost=0.01,
-        goal_reward=sampled_reward, reward_span=sampled_span, name="Heat-map"
+        goal_reward=sampled_reward, reward_span=sampled_span, name="heat-map"
     )
 
     if verbose:
@@ -81,12 +81,12 @@ def sample_maze(gamma, verbose=False):
         (2, 4), (2, 5), (2, 6),
         (4, 5), (4, 4), (5, 4), (6, 4),
     ]
-    sampled_slip_prob = np.random.uniform(0., 0.1)
+    sampled_slip_prob = np.random.uniform(0.3, 0.7)
 
     env = GridWorld(
         width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=goals, lava_locs=[()], walls=walls,
         is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip_prob, step_cost=0.0, lava_cost=0.01,
-        goal_reward=1, name="Maze"
+        goal_reward=1, name="maze"
     )
 
     if verbose:

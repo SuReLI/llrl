@@ -45,6 +45,7 @@ class GridWorld(GridWorldMDP):
             name=name
         )
         self.goal_reward = goal_reward
+        self.slip_unidirectional = True
 
     def transition(self, s, a):
         """
@@ -60,13 +61,13 @@ class GridWorld(GridWorldMDP):
         
         if self.slip_prob > random.random():  # Flip direction
             if a == "up":
-                a = random.choice(["left", "right"])
+                a = random.choice(["left", "right"]) if self.slip_unidirectional else "right"
             elif a == "down":
-                a = random.choice(["left", "right"])
+                a = random.choice(["left", "right"]) if self.slip_unidirectional else "left"
             elif a == "left":
-                a = random.choice(["up", "down"])
+                a = random.choice(["up", "down"]) if self.slip_unidirectional else "up"
             elif a == "right":
-                a = random.choice(["up", "down"])
+                a = random.choice(["up", "down"]) if self.slip_unidirectional else "down"
 
         if a == "up" and s.y < self.height and not self.is_wall(s.x, s.y + 1):
             s_p = GridWorldState(s.x, s.y + 1)
