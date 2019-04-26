@@ -17,7 +17,7 @@ class LRMax(RMax):
             count_threshold=1,
             epsilon=0.1,
             max_memory_size=None,
-            prior=np.Inf,
+            prior=None,
             name="LRMax-prior"
     ):
         """
@@ -45,11 +45,16 @@ class LRMax(RMax):
         self.R_memory = []
         self.T_memory = []
 
-        prior_max = (1. + gamma) / (1. - gamma)
-        self.prior = min(prior, prior_max)
+        if prior is None:
+            self.estimate_distances_online = True
+            self.prior = (1. + gamma) / (1. - gamma)
+            self.D = defaultdict(lambda: defaultdict(lambda: self.prior))
+        else:
+            self.estimate_distances_online = False
+            prior_max = (1. + gamma) / (1. - gamma)
+            self.prior = min(prior, prior_max)
 
         self.U_lip = []
-        # self.update_lipschitz_upper_bounds()  # TODO check if I can remove that
         self.update_upper_bound()
 
     def reset(self):
@@ -69,32 +74,10 @@ class LRMax(RMax):
         self.update_lipschitz_upper_bounds()
         self.update_upper_bound()
 
-        # self.print_upper_bound()  # TODO remove
+        if self.estimate_distances_online:
+            self.update_max_distances()
 
-    def print_upper_bound(self):  # TODO remove
-        from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
-
-        w, h = 6, 6
-
-        print('Memory size:', len(self.U_lip))
-
-        print('Upper-bound:')
-        for j in range(6, 0, -1):
-            for i in range(1, 6 + 1):
-                s = GridWorldState(i, j)
-                print('{:>18}'.format(round(self.U[s]['left'], 6)), end=' ')
-            print()
-
-        u_mem, r_mem, t_mem = self.U_memory[0], self.R_memory[0], self.T_memory[0]
-        s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
-        distances_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
-        print('Models distances:', len(distances_dict), 'items')
-        for s in distances_dict:
-            print(str(s), '   left  ', distances_dict[s]['left'])
-
-        # exit()
-
-    def act(self, s, r, verbose=False):  # TODO remove verbose
+    def act(self, s, r):
         """
         Acting method called online during learning.
         :param s: int current state of the agent
@@ -102,10 +85,6 @@ class LRMax(RMax):
         :return: return the greedy action wrt the current learned model.
         """
         self.update(self.prev_s, self.prev_a, r, s)
-
-        if verbose:
-            if self.prev_s is not None and self.prev_a is not None:  # TODO remove
-                print('{:>20} {:>20} {:>20} {:>20}'.format(str(self.prev_s), self.prev_a, r, str(s)))  # TODO remove
 
         a = self.greedy_action(s, self.U)
 
@@ -166,6 +145,13 @@ class LRMax(RMax):
                 if self.counter[s][a] == self.count_threshold:
                     self.update_lipschitz_upper_bounds()
                     self.update_upper_bound()
+
+    def update_max_distances(self):
+        """
+        Update the maximum model's distance for each state-action pair.
+        :return: None
+        """
+        n_prev_mdps = len(self.U_memory)
 
     def update_lipschitz_upper_bounds(self):
         """
@@ -261,7 +247,7 @@ class LRMax(RMax):
 
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """
-        Compute the model's local distances between two MDPs.
+        Compute the model's local distances between the current MDP and the input memory unit.
         :param u_mem: (dictionary) upper-bound on the Q-value function of the previous MDP.
         :param r_mem: (dictionary) learned expected reward function of the previous MDP.
         :param t_mem: (dictionary) learned transition function of the previous MDP.
@@ -277,8 +263,6 @@ class LRMax(RMax):
             weighted_sum = 0.
             for s_p in self.T[s][a]:
                 weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * abs(self.T[s][a][s_p] - t_mem[s][a][s_p])
-                if s_p not in t_mem[s][a]:  # TODO remove after testing
-                    assert t_mem[s][a] == 0.
             for s_p in t_mem[s][a]:
                 if s_p not in self.T[s][a]:
                     weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
