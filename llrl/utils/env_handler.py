@@ -72,7 +72,25 @@ def sample_heat_map(gamma, verbose=False):
     return env
 
 
+def sample_test_maze(gamma):  # TODO remove
+    w, h = 3, 3
+
+    goals = [(3, 3)]
+    walls = [(2, 2), (3, 2)]
+    sampled_slip_prob = np.random.uniform(0.0, 0.1)
+
+    env = GridWorld(
+        width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=goals, lava_locs=[()], walls=walls,
+        is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip_prob, step_cost=0.0, lava_cost=0.01,
+        goal_reward=1, name="maze"
+    )
+    print('Sampled maze - slip_prob:', sampled_slip_prob)
+    return env
+
+
 def sample_maze(gamma, verbose=False):
+    return sample_test_maze(gamma)  # TODO remove
+
     w, h = 6, 6
 
     goals = [(5, 5)]

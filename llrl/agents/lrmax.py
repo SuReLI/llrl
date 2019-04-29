@@ -88,6 +88,14 @@ class LRMax(RMax):
 
         a = self.greedy_action(s, self.U)
 
+        print('{:>20} {:>20} {:>20} {:>20} {:>20} {:>20}'.format(  # TODO remove
+            str(s), a,
+            self.U[s]['up'],
+            self.U[s]['right'],
+            self.U[s]['down'],
+            self.U[s]['left']
+        ))
+
         self.prev_a = a
         self.prev_s = s
 
@@ -169,11 +177,10 @@ class LRMax(RMax):
 
     def update_upper_bound(self):
         """
-        Update the upper bound on the Q-value function.
+        Update the total upper bound on the Q-value function.
         Called at initialization and when a new state-action pair is known.
         :return: None
         """
-        # Initialization
         U = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
         for u_lip in self.U_lip:
             for s in u_lip:
