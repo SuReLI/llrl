@@ -45,14 +45,8 @@ class LRMax(RMax):
         self.R_memory = []
         self.T_memory = []
 
-        if prior is None:
-            self.estimate_distances_online = True
-            self.prior = (1. + gamma) / (1. - gamma)
-            self.D = defaultdict(lambda: defaultdict(lambda: self.prior))
-        else:
-            self.estimate_distances_online = False
-            prior_max = (1. + gamma) / (1. - gamma)
-            self.prior = min(prior, prior_max)
+        self.prior = (1. + gamma) / (1. - gamma)
+        self.D = defaultdict(lambda: defaultdict(lambda: self.prior))
 
         self.U_lip = []
         self.update_upper_bound()
@@ -73,9 +67,6 @@ class LRMax(RMax):
 
         self.update_lipschitz_upper_bounds()
         self.update_upper_bound()
-
-        if self.estimate_distances_online:
-            self.update_max_distances()
 
     def act(self, s, r):
         """
@@ -145,13 +136,6 @@ class LRMax(RMax):
                 if self.counter[s][a] == self.count_threshold:
                     self.update_lipschitz_upper_bounds()
                     self.update_upper_bound()
-
-    def update_max_distances(self):
-        """
-        Update the maximum model's distance for each state-action pair.
-        :return: None
-        """
-        n_prev_mdps = len(self.U_memory)
 
     def update_lipschitz_upper_bounds(self):
         """
