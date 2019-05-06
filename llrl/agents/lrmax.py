@@ -194,15 +194,17 @@ class LRMax(RMax):
                     for i in range(n_prev_mdps):
                         if s in self.R_memory[i] and a in self.R_memory[i][s]:  # s, a is known in ith
                             indices.append(i)
+                    print('{:>10} {:>10} {:>10} {:>10}'.format(str(s), a, len(indices), round(self.D[s][a], 2)))   # TODO remove
                     if probability_of_success(len(indices), self.min_sampling_probability) >= 1. - self.delta:  # enough
                         distances = []
                         for p in permutations(indices, 2):
                             distances.append(self.models_upper_bound(p[0], p[1], s, a))
                         self.D[s][a] = max(distances)
 
+        print('Distances with high probability:')  # TODO remove
         for s in self.D:  # TODO remove
             for a in self.D[s]:
-                print('{:>10} {:>10} {:>10}'.format(str(s), a, self.D[s][a]))
+                print('{:>10} {:>10} {:>10}'.format(str(s), a, round(self.D[s][a], 2)))
 
     def update_lipschitz_upper_bounds(self):
         """
