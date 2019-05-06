@@ -100,13 +100,14 @@ class LRMax(RMax):
         for s in self.R:
             for a in self.R[s]:
                 if self.is_known(s, a):
+                    new_u[s][a] = self.U[s][a]
                     new_r[s][a] = self.R[s][a]
                     for s_p in self.T[s][a]:
                         new_t[s][a][s_p] = self.T[s][a][s_p]
 
-        for s in new_r:
+        for s in new_r:  # TODO remove
             for a in new_r[s]:
-                new_u[s][a] = self.U[s][a]
+                assert new_u[s][a] == self.U[s][a]
 
         self.U_memory.append(new_u)
         self.R_memory.append(new_r)

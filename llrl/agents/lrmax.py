@@ -5,6 +5,16 @@ from collections import defaultdict
 from llrl.agents.rmax import RMax
 
 
+def probability_of_success(n_samples, p_min):
+    """
+    Compute a lower bound on the probability of successful distance estimation.
+    :param n_samples: (int) number of samples
+    :param p_min: (float) minimum sampling probability of an environment
+    :return: Return the probability of successful estimation.
+    """
+    return 1. - 2. * (1. - p_min) ** float(n_samples) + (1. - 2. * p_min) ** float(n_samples)
+
+
 class LRMax(RMax):
     """
     Lipschitz R-Max agent
@@ -18,6 +28,8 @@ class LRMax(RMax):
             epsilon=0.1,
             max_memory_size=None,
             prior=None,
+            min_sampling_probability=0.1,
+            delta=0.05,
             name="LRMax-prior"
     ):
         """
@@ -27,6 +39,8 @@ class LRMax(RMax):
         :param epsilon: (float) precision of value iteration algorithm
         :param max_memory_size: (int) maximum number of saved models (infinity if None)
         :param prior: (float) prior knowledge of maximum model's distance
+        :param min_sampling_probability: (float) minimum sampling probability of an environment
+        :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
         :param name: (str)
         """
         name = name + str(prior) if name[-6:] == "-prior" else name
@@ -45,13 +59,15 @@ class LRMax(RMax):
         self.R_memory = []
         self.T_memory = []
 
+        prior_max = (1. + gamma) / (1. - gamma)
         if prior is None:
             self.estimate_distances_online = True
-            self.prior = (1. + gamma) / (1. - gamma)
-            self.D = defaultdict(lambda: defaultdict(lambda: self.prior))
+            self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances
+            self.min_sampling_probability = min_sampling_probability
+            self.delta = delta
+            self.prior = prior_max
         else:
             self.estimate_distances_online = False
-            prior_max = (1. + gamma) / (1. - gamma)
             self.prior = min(prior, prior_max)
 
         self.U_lip = []
@@ -109,13 +125,11 @@ class LRMax(RMax):
         for s in self.R:
             for a in self.R[s]:
                 if self.is_known(s, a):
+                    new_u[s][a] = self.U[s][a]
                     new_r[s][a] = self.R[s][a]
                     for s_p in self.T[s][a]:
                         new_t[s][a][s_p] = self.T[s][a][s_p]
-
-        for s in new_r:
-            for a in new_r[s]:
-                new_u[s][a] = self.U[s][a]
+                    # self.SA_memory[s][a] = True
 
         self.U_memory.append(new_u)
         self.R_memory.append(new_r)
@@ -149,9 +163,27 @@ class LRMax(RMax):
     def update_max_distances(self):
         """
         Update the maximum model's distance for each state-action pair.
+        Called after each interaction with an environment.
         :return: None
         """
         n_prev_mdps = len(self.U_memory)
+        p = probability_of_success(n_prev_mdps, self.min_sampling_probability)
+
+        print(p)
+        if p >= 1. - self.delta:
+            for i in range(n_prev_mdps):
+                print('Memory env nb:', i)  # TODO remove
+                for s in self.R_memory[i]:
+                    for a in self.R_memory[i][s]:
+                        counter = 0
+                        for j in range(n_prev_mdps):
+                            if j != i:
+                                if s in self.R_memory[j] and a in self.R_memory[j][s]:  # s, a is known in i and j
+                                    counter += 1
+                        print('Has', s, a, 'in common with', counter, 'environments')  # TODO remove
+
+            exit()  # TODO remove
+
 
     def update_lipschitz_upper_bounds(self):
         """
