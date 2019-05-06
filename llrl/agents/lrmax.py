@@ -1,6 +1,7 @@
 import copy
 import numpy as np
 from collections import defaultdict
+from itertools import permutations
 
 from llrl.agents.rmax import RMax
 
@@ -66,6 +67,7 @@ class LRMax(RMax):
             self.min_sampling_probability = min_sampling_probability
             self.delta = delta
             self.prior = prior_max
+            self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
         else:
             self.estimate_distances_online = False
             self.prior = min(prior, prior_max)
@@ -129,7 +131,7 @@ class LRMax(RMax):
                     new_r[s][a] = self.R[s][a]
                     for s_p in self.T[s][a]:
                         new_t[s][a][s_p] = self.T[s][a][s_p]
-                    # self.SA_memory[s][a] = True
+                    self.SA_memory[s][a] = True
 
         self.U_memory.append(new_u)
         self.R_memory.append(new_r)
@@ -160,6 +162,24 @@ class LRMax(RMax):
                     self.update_lipschitz_upper_bounds()
                     self.update_upper_bound()
 
+    def models_upper_bound(self, i, j, s, a):
+        """
+        Compute the distance between memory models at (s, a)
+        :param i: (int) index of the first model, whose Q-value upper-bound is used
+        :param j: (int) index of the second model
+        :param s: state
+        :param a: action
+        :return: Return the distance
+        """
+        dr = abs(self.R_memory[i][s][a] - self.R_memory[j][s][a])
+        weighted_sum = 0.
+        for s_p in self.T_memory[i][s][a]:
+            weighted_sum += self.U_memory[i][s][a] * abs(self.T_memory[i][s][a][s_p] - self.T_memory[j][s][a][s_p])
+        for s_p in self.T_memory[j][s][a]:
+            if not s_p in self.T_memory[i][s][a]:
+                weighted_sum += self.U_memory[i][s][a] * self.T_memory[j][s][a][s_p]
+        return dr + self.gamma * weighted_sum
+
     def update_max_distances(self):
         """
         Update the maximum model's distance for each state-action pair.
@@ -167,23 +187,19 @@ class LRMax(RMax):
         :return: None
         """
         n_prev_mdps = len(self.U_memory)
-        p = probability_of_success(n_prev_mdps, self.min_sampling_probability)
 
-        print(p)
-        if p >= 1. - self.delta:
-            for i in range(n_prev_mdps):
-                print('Memory env nb:', i)  # TODO remove
-                for s in self.R_memory[i]:
-                    for a in self.R_memory[i][s]:
-                        counter = 0
-                        for j in range(n_prev_mdps):
-                            if j != i:
-                                if s in self.R_memory[j] and a in self.R_memory[j][s]:  # s, a is known in i and j
-                                    counter += 1
-                        print('Has', s, a, 'in common with', counter, 'environments')  # TODO remove
-
-            exit()  # TODO remove
-
+        if probability_of_success(n_prev_mdps, self.min_sampling_probability) >= 1. - self.delta:  # Potentially enough
+            for s in self.SA_memory:
+                for a in self.SA_memory[s]:
+                    indices = []
+                    for i in range(n_prev_mdps):
+                        if s in self.R_memory[i] and a in self.R_memory[i][s]:  # s, a is known in ith
+                            indices.append(i)
+                    print('{} {:>6}'.format(str(s), a), 'is known in', len(indices), 'MDPs:', indices)  # TODO remove
+                    if probability_of_success(len(indices), self.min_sampling_probability) >= 1. - self.delta:  # enough
+                        print('  ENOUGH, combinations are:')
+                        for p in permutations(indices, 2):
+                            print('D(i, j)(s, a) = ', self.models_upper_bound(p[0], p[1], s, a))
 
     def update_lipschitz_upper_bounds(self):
         """
