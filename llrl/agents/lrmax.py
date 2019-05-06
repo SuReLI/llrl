@@ -63,7 +63,7 @@ class LRMax(RMax):
         prior_max = (1. + gamma) / (1. - gamma)
         if prior is None:
             self.estimate_distances_online = True
-            self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances
+            self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances (high probability)
             self.min_sampling_probability = min_sampling_probability
             self.delta = delta
             self.prior = prior_max
@@ -187,7 +187,6 @@ class LRMax(RMax):
         :return: None
         """
         n_prev_mdps = len(self.U_memory)
-
         if probability_of_success(n_prev_mdps, self.min_sampling_probability) >= 1. - self.delta:  # Potentially enough
             for s in self.SA_memory:
                 for a in self.SA_memory[s]:
@@ -195,11 +194,15 @@ class LRMax(RMax):
                     for i in range(n_prev_mdps):
                         if s in self.R_memory[i] and a in self.R_memory[i][s]:  # s, a is known in ith
                             indices.append(i)
-                    print('{} {:>6}'.format(str(s), a), 'is known in', len(indices), 'MDPs:', indices)  # TODO remove
                     if probability_of_success(len(indices), self.min_sampling_probability) >= 1. - self.delta:  # enough
-                        print('  ENOUGH, combinations are:')
+                        distances = []
                         for p in permutations(indices, 2):
-                            print('D(i, j)(s, a) = ', self.models_upper_bound(p[0], p[1], s, a))
+                            distances.append(self.models_upper_bound(p[0], p[1], s, a))
+                        self.D[s][a] = max(distances)
+
+        for s in self.D:  # TODO remove
+            for a in self.D[s]:
+                print('{:>10} {:>10} {:>10}'.format(str(s), a, self.D[s][a]))
 
     def update_lipschitz_upper_bounds(self):
         """
