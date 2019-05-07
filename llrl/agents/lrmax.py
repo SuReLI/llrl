@@ -162,7 +162,7 @@ class LRMax(RMax):
                     self.update_lipschitz_upper_bounds()
                     self.update_upper_bound()
 
-    def models_upper_bound(self, i, j, s, a):
+    def model_upper_bound(self, i, j, s, a):
         """
         Compute the distance between memory models at (s, a)
         :param i: (int) index of the first model, whose Q-value upper-bound is used
@@ -171,13 +171,13 @@ class LRMax(RMax):
         :param a: action
         :return: Return the distance
         """
-        dr = abs(self.R_memory[i][s][a] - self.R_memory[j][s][a])
         weighted_sum = 0.
         for s_p in self.T_memory[i][s][a]:
             weighted_sum += self.U_memory[i][s][a] * abs(self.T_memory[i][s][a][s_p] - self.T_memory[j][s][a][s_p])
         for s_p in self.T_memory[j][s][a]:
             if not s_p in self.T_memory[i][s][a]:
                 weighted_sum += self.U_memory[i][s][a] * self.T_memory[j][s][a][s_p]
+        dr = abs(self.R_memory[i][s][a] - self.R_memory[j][s][a])
         return dr + self.gamma * weighted_sum
 
     def update_max_distances(self):
@@ -194,17 +194,11 @@ class LRMax(RMax):
                     for i in range(n_prev_mdps):
                         if s in self.R_memory[i] and a in self.R_memory[i][s]:  # s, a is known in ith
                             indices.append(i)
-                    print('{:>10} {:>10} {:>10} {:>10}'.format(str(s), a, len(indices), round(self.D[s][a], 2)))   # TODO remove
                     if probability_of_success(len(indices), self.min_sampling_probability) >= 1. - self.delta:  # enough
                         distances = []
                         for p in permutations(indices, 2):
-                            distances.append(self.models_upper_bound(p[0], p[1], s, a))
+                            distances.append(self.model_upper_bound(p[0], p[1], s, a))
                         self.D[s][a] = max(distances)
-
-        print('Distances with high probability:')  # TODO remove
-        for s in self.D:  # TODO remove
-            for a in self.D[s]:
-                print('{:>10} {:>10} {:>10}'.format(str(s), a, round(self.D[s][a], 2)))
 
     def update_lipschitz_upper_bounds(self):
         """

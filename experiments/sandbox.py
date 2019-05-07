@@ -14,7 +14,7 @@ def example():
     env_distribution = make_env_distribution(env_class='grid-world', n_env=n_env, gamma=GAMMA, w=3, h=3)
     actions = env_distribution.get_actions()
 
-    m = 100
+    m = 1
     max_mem = None
     p_min = 1. / float(n_env)
     lrmax = LRMax(
