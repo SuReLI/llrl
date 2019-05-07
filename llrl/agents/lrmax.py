@@ -1,5 +1,4 @@
 import copy
-import numpy as np
 from collections import defaultdict
 from itertools import permutations
 
@@ -14,6 +13,24 @@ def probability_of_success(n_samples, p_min):
     :return: Return the probability of successful estimation.
     """
     return 1. - 2. * (1. - p_min) ** float(n_samples) + (1. - 2. * p_min) ** float(n_samples)
+
+
+def compute_n_samples_high_confidence(p_min, delta):
+    """
+    Compute the number of samples required for an accurate estimate with high probability.
+    :param p_min: (float) minimum sampling probability
+    :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
+    :return: Return the number of samples
+    """
+    hc = 1. - delta
+    n_max = 100000
+    for i in range(n_max):
+        if probability_of_success(i, p_min) >= hc:
+            return i
+    raise ValueError(
+        'Could not compute the required number of samples for accurate estimates with high probability. ' +
+        'Reached end of loop for {} samples.'.format(n_max)
+    )
 
 
 class LRMax(RMax):
@@ -64,8 +81,7 @@ class LRMax(RMax):
         if prior is None:
             self.estimate_distances_online = True
             self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances (high probability)
-            self.min_sampling_probability = min_sampling_probability
-            self.delta = delta
+            self.n_samples_high_confidence = compute_n_samples_high_confidence(min_sampling_probability, delta)
             self.prior = prior_max
             self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
         else:
@@ -189,14 +205,14 @@ class LRMax(RMax):
         :return: None
         """
         n_prev_mdps = len(self.U_memory)
-        if probability_of_success(n_prev_mdps, self.min_sampling_probability) >= 1. - self.delta:  # Potentially enough
+        if n_prev_mdps >= self.n_samples_high_confidence:
             for s in self.SA_memory:
                 for a in self.SA_memory[s]:
                     indices = []
                     for i in range(n_prev_mdps):
                         if s in self.R_memory[i] and a in self.R_memory[i][s]:  # s, a is known in ith
                             indices.append(i)
-                    if probability_of_success(len(indices), self.min_sampling_probability) >= 1. - self.delta:  # enough
+                    if len(indices) >= self.n_samples_high_confidence:
                         distances = []
                         for p in permutations(indices, 2):
                             distances.append(self.model_upper_bound(p[0], p[1], s, a))
