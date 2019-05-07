@@ -10,7 +10,7 @@ def probability_of_success(n_samples, p_min):
     Compute a lower bound on the probability of successful distance estimation.
     :param n_samples: (int) number of samples
     :param p_min: (float) minimum sampling probability of an environment
-    :return: Return the probability of successful estimation.
+    :return: Return the probability of successful estimation
     """
     return 1. - 2. * (1. - p_min) ** float(n_samples) + (1. - 2. * p_min) ** float(n_samples)
 
@@ -23,7 +23,7 @@ def compute_n_samples_high_confidence(p_min, delta):
     :return: Return the number of samples
     """
     hc = 1. - delta
-    n_max = 100000
+    n_max = int(1e6)
     for i in range(n_max):
         if probability_of_success(i, p_min) >= hc:
             return i
@@ -48,7 +48,7 @@ class LRMax(RMax):
             prior=None,
             min_sampling_probability=0.1,
             delta=0.05,
-            name="LRMax-prior"
+            name="LRMax"
     ):
         """
         :param actions: action space of the environment
@@ -61,7 +61,7 @@ class LRMax(RMax):
         :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
         :param name: (str)
         """
-        name = name + str(prior) if name[-6:] == "-prior" else name
+        name = name if prior is None else name + '-prior' + str(prior)
         RMax.__init__(
             self,
             actions=actions,
@@ -249,13 +249,10 @@ class LRMax(RMax):
             for s in self.R:
                 for a in self.R[s]:
                     if self.is_known(s, a):
-                        r_s_a = self.R[s][a]
-
                         weighted_next_upper_bound = 0.
                         for s_p in self.T[s][a]:
                             weighted_next_upper_bound += U[s_p][self.greedy_action(s_p, U)] * self.T[s][a][s_p]
-
-                        U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
+                        U[s][a] = self.R[s][a] + self.gamma * weighted_next_upper_bound
 
         self.U = U
 
