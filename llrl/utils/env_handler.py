@@ -10,11 +10,11 @@ from llrl.envs.heatmap import HeatMap
 
 
 def sample_grid_world(gamma, w, h, verbose=False):
-    r_min = 0.8
+    r_min = 0.9
     r_max = 1.0
-    possible_goals = [(w, h)]  # [(1, h), (w, 1)]
+    possible_goals = [(w, h), (w-1, h), (w, h-1), (w-2, h)]
 
-    sampled_reward = np.random.uniform(r_min, r_max)
+    sampled_reward = 1.0  # np.random.uniform(r_min, r_max)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
         width=w, height=h, init_loc=(1, 1), goal_locs=[sampled_goal],
@@ -33,7 +33,7 @@ def sample_corridor(gamma, w, verbose=False):
     possible_goals = [(w, 1)]
     init_loc = (int(w / 2.), 1)
 
-    sampled_reward = np.random.uniform(r_min, r_max)
+    sampled_reward = 1.0  # np.random.uniform(r_min, r_max)  # TODO put back
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
         width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal],

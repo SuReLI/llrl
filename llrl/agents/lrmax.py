@@ -218,6 +218,10 @@ class LRMax(RMax):
                             distances.append(self.model_upper_bound(p[0], p[1], s, a))
                         self.D[s][a] = max(distances)
 
+        for s in self.D:  # TODO remove
+            for a in self.D[s]:
+                print('{:>10} {:>10} {:>10}'.format(str(s), a, self.D[s][a]))
+
     def update_lipschitz_upper_bounds(self):
         """
         Update the Lipschitz upper-bound for each instance of the memory.
@@ -256,6 +260,15 @@ class LRMax(RMax):
 
         self.U = U
 
+    def integrate_distances_knowledge(self, distances):
+        for s in distances:
+            for a in distances[s]:
+                distances[s][a] = min(distances[s][a], self.D[s][a])
+        for s in self.D:
+            for a in self.D[s]:
+                distances[s][a] = min(distances[s][a], self.D[s][a])
+        return distances
+
     def compute_lipschitz_upper_bound(self, u_mem, r_mem, t_mem):
         """
         Compute the Lipschitz upper-bound from a previous MDP given an upper-bound on its Q-value function and
@@ -270,6 +283,7 @@ class LRMax(RMax):
 
         # 2. Compute models distances upper-bounds
         distances_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
+        distances_dict = self.integrate_distances_knowledge(distances_dict)
 
         # 3. Compute the Q-values gap with dynamic programming
         gap = self.q_values_gap(distances_dict, s_a_kk, s_a_ku, s_a_uk)
@@ -377,7 +391,6 @@ class LRMax(RMax):
 
         for i in range(self.vi_n_iter):
             tmp = copy.deepcopy(gap)
-
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in self.T[s][a]:
