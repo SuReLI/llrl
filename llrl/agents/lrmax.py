@@ -218,6 +218,7 @@ class LRMax(RMax):
                             distances.append(self.model_upper_bound(p[0], p[1], s, a))
                         self.D[s][a] = max(distances)
 
+        print('Displaying distances:')  # TODO remove
         for s in self.D:  # TODO remove
             for a in self.D[s]:
                 print('{:>10} {:>10} {:>10}'.format(str(s), a, self.D[s][a]))
@@ -282,11 +283,12 @@ class LRMax(RMax):
         s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
 
         # 2. Compute models distances upper-bounds
-        _, distances_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
-        distances_dict = self.integrate_distances_knowledge(distances_dict)
+        distances_cur, distances_mem = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
+        distances_cur = self.integrate_distances_knowledge(distances_cur)
+        distances_mem = self.integrate_distances_knowledge(distances_mem)
 
         # 3. Compute the Q-values gap with dynamic programming
-        gap = self.q_values_gap(distances_dict, s_a_kk, s_a_ku, s_a_uk)
+        gap = self.env_local_dist(distances_cur, distances_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 4. Deduce upper-bound from u_mem
         return self.lipschitz_upper_bound(u_mem, gap)
@@ -331,8 +333,8 @@ class LRMax(RMax):
         :param s_a_uk: (list) state-actions pairs unknown in the current MDP - known in the previous MDP
         :return: (dictionary) model's local distances
         """
-        distances_wrt_cur = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt current MDP
-        distances_wrt_mem = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt memory MDP
+        distances_cur = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt current MDP
+        distances_mem = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt memory MDP
 
         # TODO use max([]) for greedy
 
@@ -350,8 +352,8 @@ class LRMax(RMax):
                     weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
 
             dr = abs(self.R[s][a] - r_mem[s][a])
-            distances_wrt_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur, self.prior)
-            distances_wrt_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem, self.prior)
+            distances_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur, self.prior)
+            distances_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem, self.prior)
 
         ma = self.gamma * self.r_max / (1. - self.gamma)
 
@@ -364,8 +366,8 @@ class LRMax(RMax):
                 weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * self.T[s][a][s_p]
 
             dr = max(self.r_max - self.R[s][a], self.R[s][a])
-            distances_wrt_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + ma, self.prior)
-            distances_wrt_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + ma, self.prior)
+            distances_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + ma, self.prior)
+            distances_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + ma, self.prior)
 
         # Compute model's distances upper-bounds for unknown-known (s, a)
         for s, a in s_a_uk:
@@ -376,32 +378,52 @@ class LRMax(RMax):
                 weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
 
             dr = max(self.r_max - r_mem[s][a], r_mem[s][a])
-            distances_wrt_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + ma, self.prior)
-            distances_wrt_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + ma, self.prior)
+            distances_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + ma, self.prior)
+            distances_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + ma, self.prior)
 
-        return distances_wrt_cur, distances_wrt_mem
+        return distances_cur, distances_mem
 
-    def q_values_gap(self, distances_dict, s_a_kk, s_a_ku, s_a_uk):
+    def env_local_dist(self, distances_cur, distances_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """
-        Compute the Q-values gap based on model's distances between two MDPs.
-        :param distances_dict:
+        Compute the environment's local distances based on model's distances between two MDPs.
+        :param distances_cur: distances dictionary computed wrt current MDP
+        :param distances_mem: distances dictionary computed wrt memory MDP
         :param s_a_kk: (list) state-actions pairs known in both MDPs
         :param s_a_ku: (list) state-actions pairs known in the current MDP - unknown in the previous MDP
         :param s_a_uk: (list) state-actions pairs unknown in the current MDP - known in the previous MDP
         :return: (dictionary) computed Q-values gap
         """
-        gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
+
+        # TODO use max([]) for greedy
+        # TODO remove deepcopy?
+
+        gap_mem = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
+        gap_cur = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
 
         for s, a in s_a_uk:  # Unknown (s, a) in current MDP
-            gap[s][a] = distances_dict[s][a] + self.gamma * self.prior / (1. - self.gamma)
-
+            gap_mem[s][a] = distances_mem[s][a] + self.gamma * self.prior / (1. - self.gamma)
         for i in range(self.vi_n_iter):
-            tmp = copy.deepcopy(gap)
+            tmp = copy.deepcopy(gap_mem)
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in self.T[s][a]:
                     weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * self.T[s][a][s_p]
-                gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
+                gap_mem[s][a] = distances_mem[s][a] + self.gamma * weighted_next_gap
+
+        for s, a in s_a_ku:  # Unknown (s, a) in memory MDP
+            gap_cur[s][a] = distances_cur[s][a] + self.gamma * self.prior / (1. - self.gamma)
+        for i in range(self.vi_n_iter):
+            tmp = copy.deepcopy(gap_cur)
+            for s, a in s_a_kk + s_a_uk:  # Known (s, a) in memory MDP
+                weighted_next_gap = 0.
+                for s_p in t_mem[s][a]:
+                    weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * t_mem[s][a][s_p]
+                gap_cur[s][a] = distances_mem[s][a] + self.gamma * weighted_next_gap
+
+        gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
+        for s in gap_mem:
+            for a in gap_mem[s]:
+                gap[s][a] = min(gap_mem[s][a], gap_cur[s][a])
 
         return gap
 
