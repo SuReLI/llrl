@@ -9,7 +9,7 @@ GAMMA = .9
 
 def example():
     n_env = 5
-    env_distribution = make_env_distribution(env_class='corridor', n_env=n_env, gamma=GAMMA, w=20, h=20)
+    env_distribution = make_env_distribution(env_class='corridor', n_env=n_env, gamma=GAMMA, w=60, h=20)
     actions = env_distribution.get_actions()
 
     m = 1
