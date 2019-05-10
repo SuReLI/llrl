@@ -344,14 +344,10 @@ class LRMax(RMax):
             weighted_sum_wrt_mem = 0.
             for s_p in self.T[s][a]:
                 dt = abs(self.T[s][a][s_p] - t_mem[s][a][s_p])
-                # weighted_sum_wrt_cur += self.U[s_p][self.greedy_action(s_p, self.U)] * dt
-                # weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * dt
                 weighted_sum_wrt_cur += max([self.U[s_p][a] for a in self.actions]) * dt
                 weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * dt
             for s_p in t_mem[s][a]:
                 if s_p not in self.T[s][a]:
-                    # weighted_sum_wrt_cur += self.U[s_p][self.greedy_action(s_p, self.U)] * t_mem[s][a][s_p]
-                    # weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
                     weighted_sum_wrt_cur += max([self.U[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
                     weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
 
@@ -366,8 +362,6 @@ class LRMax(RMax):
             weighted_sum_wrt_cur = 0.
             weighted_sum_wrt_mem = 0.
             for s_p in self.T[s][a]:
-                # weighted_sum_wrt_cur += self.U[s_p][self.greedy_action(s_p, self.U)] * self.T[s][a][s_p]
-                # weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * self.T[s][a][s_p]
                 weighted_sum_wrt_cur += max([self.U[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
                 weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
 
@@ -380,8 +374,6 @@ class LRMax(RMax):
             weighted_sum_wrt_cur = 0.
             weighted_sum_wrt_mem = 0.
             for s_p in t_mem[s][a]:
-                # weighted_sum_wrt_cur += self.U[s_p][self.greedy_action(s_p, self.U)] * t_mem[s][a][s_p]
-                # weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
                 weighted_sum_wrt_cur += max([self.U[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
                 weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
 
@@ -404,6 +396,7 @@ class LRMax(RMax):
 
         # TODO use max([]) for greedy
         # TODO remove deepcopy?
+        # TODO cache calculation
 
         gap_mem = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
         gap_cur = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
@@ -415,7 +408,6 @@ class LRMax(RMax):
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
                 weighted_next_gap = 0.
                 for s_p in self.T[s][a]:
-                    # weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * self.T[s][a][s_p]
                     weighted_next_gap += max([tmp[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
                 gap_mem[s][a] = distances_mem[s][a] + self.gamma * weighted_next_gap
 
@@ -426,7 +418,6 @@ class LRMax(RMax):
             for s, a in s_a_kk + s_a_uk:  # Known (s, a) in memory MDP
                 weighted_next_gap = 0.
                 for s_p in t_mem[s][a]:
-                    # weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * t_mem[s][a][s_p]
                     weighted_next_gap += max([tmp[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
                 gap_cur[s][a] = distances_mem[s][a] + self.gamma * weighted_next_gap
 
