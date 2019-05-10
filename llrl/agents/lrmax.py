@@ -282,7 +282,7 @@ class LRMax(RMax):
         s_a_kk, s_a_ku, s_a_uk = self.separate_state_action_pairs(r_mem)
 
         # 2. Compute models distances upper-bounds
-        distances_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
+        _, distances_dict = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
         distances_dict = self.integrate_distances_knowledge(distances_dict)
 
         # 3. Compute the Q-values gap with dynamic programming
@@ -331,49 +331,55 @@ class LRMax(RMax):
         :param s_a_uk: (list) state-actions pairs unknown in the current MDP - known in the previous MDP
         :return: (dictionary) model's local distances
         """
-        distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
+        distances_wrt_cur = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt current MDP
+        distances_wrt_mem = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt memory MDP
+
+        # TODO use max([]) for greedy
 
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
-            weighted_sum = 0.
+            weighted_sum_wrt_cur = 0.
+            weighted_sum_wrt_mem = 0.
             for s_p in self.T[s][a]:
-                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * abs(self.T[s][a][s_p] - t_mem[s][a][s_p])
+                dt = abs(self.T[s][a][s_p] - t_mem[s][a][s_p])
+                weighted_sum_wrt_cur += self.U[s_p][self.greedy_action(s_p, self.U)] * dt
+                weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * dt
             for s_p in t_mem[s][a]:
                 if s_p not in self.T[s][a]:
-                    weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
+                    weighted_sum_wrt_cur += self.U[s_p][self.greedy_action(s_p, self.U)] * t_mem[s][a][s_p]
+                    weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
 
-            distances_dict[s][a] = min(
-                abs(self.R[s][a] - r_mem[s][a]) + self.gamma * weighted_sum,
-                self.prior
-            )
+            dr = abs(self.R[s][a] - r_mem[s][a])
+            distances_wrt_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur, self.prior)
+            distances_wrt_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem, self.prior)
+
+        ma = self.gamma * self.r_max / (1. - self.gamma)
 
         # Compute model's distances upper-bounds for known-unknown (s, a)
         for s, a in s_a_ku:
-            weighted_sum = 0.
+            weighted_sum_wrt_cur = 0.
+            weighted_sum_wrt_mem = 0.
             for s_p in self.T[s][a]:
-                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * self.T[s][a][s_p]
+                weighted_sum_wrt_cur += self.U[s_p][self.greedy_action(s_p, self.U)] * self.T[s][a][s_p]
+                weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * self.T[s][a][s_p]
 
-            distances_dict[s][a] = min(
-                max(self.r_max - self.R[s][a], self.R[s][a]) +
-                self.gamma * weighted_sum +
-                self.gamma * self.r_max / (1. - self.gamma),
-                self.prior
-            )
+            dr = max(self.r_max - self.R[s][a], self.R[s][a])
+            distances_wrt_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + ma, self.prior)
+            distances_wrt_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + ma, self.prior)
 
         # Compute model's distances upper-bounds for unknown-known (s, a)
         for s, a in s_a_uk:
-            weighted_sum = 0.
+            weighted_sum_wrt_cur = 0.
+            weighted_sum_wrt_mem = 0.
             for s_p in t_mem[s][a]:
-                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
+                weighted_sum_wrt_cur += self.U[s_p][self.greedy_action(s_p, self.U)] * t_mem[s][a][s_p]
+                weighted_sum_wrt_mem += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
 
-            distances_dict[s][a] = min(
-                max(self.r_max - r_mem[s][a], r_mem[s][a]) +
-                self.gamma * weighted_sum +
-                self.gamma * self.r_max / (1. - self.gamma),
-                self.prior
-            )
+            dr = max(self.r_max - r_mem[s][a], r_mem[s][a])
+            distances_wrt_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + ma, self.prior)
+            distances_wrt_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + ma, self.prior)
 
-        return distances_dict
+        return distances_wrt_cur, distances_wrt_mem
 
     def q_values_gap(self, distances_dict, s_a_kk, s_a_ku, s_a_uk):
         """
