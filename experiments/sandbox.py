@@ -7,7 +7,7 @@ from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments_maker import run_agents_lifelong
 
 
-GAMMA = .9
+GAMMA = .99
 
 
 def example():
@@ -29,7 +29,7 @@ def example():
     rmax = RMax(actions=actions, gamma=GAMMA, count_threshold=m)
 
     run_agents_lifelong(
-        [rmax_max_q_init, lrmax, rmax], env_distribution, samples=15, episodes=15, steps=100, reset_at_terminal=False,
+        [rmax_max_q_init, lrmax, rmax], env_distribution, samples=10, episodes=10, steps=100, reset_at_terminal=False,
         open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 
