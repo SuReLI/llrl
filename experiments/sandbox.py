@@ -1,5 +1,6 @@
 from llrl.agents.rmax import RMax
 from llrl.agents.lrmax import LRMax
+from llrl.agents.rmax_maxqinit import RMaxMaxQInit
 from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments_maker import run_agents_lifelong
 
@@ -15,14 +16,18 @@ def example():
     m = 1
     max_mem = None
     p_min = 1. / float(n_env)
+    delta = 0.99
     lrmax = LRMax(
         actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem,
-        prior=None, min_sampling_probability=p_min, delta=0.99
+        prior=None, min_sampling_probability=p_min, delta=delta
+    )
+    rmax_maxqinit = RMaxMaxQInit(
+        actions=actions, gamma=GAMMA, count_threshold=m, min_sampling_probability=p_min, delta=delta
     )
     rmax = RMax(actions=actions, gamma=GAMMA, count_threshold=m)
 
     run_agents_lifelong(
-        [lrmax, rmax], env_distribution, samples=10, episodes=100, steps=10, reset_at_terminal=False,
+        [lrmax, rmax_maxqinit, rmax], env_distribution, samples=10, episodes=100, steps=10, reset_at_terminal=False,
         open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 
