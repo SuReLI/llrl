@@ -52,7 +52,7 @@ class RMaxMaxQInit(Agent):
         self.prev_s = None
         self.prev_a = None
 
-        if len(self.U_memory > self.n_required_mdps):
+        if len(self.U_memory) > self.n_required_mdps:
             self.update_max_q_init_upper_bound()
 
     def end_of_episode(self):

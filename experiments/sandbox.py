@@ -21,13 +21,13 @@ def example():
         actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem,
         prior=None, min_sampling_probability=p_min, delta=delta
     )
-    rmax_maxqinit = RMaxMaxQInit(
+    rmax_max_q_init = RMaxMaxQInit(
         actions=actions, gamma=GAMMA, count_threshold=m, min_sampling_probability=p_min, delta=delta
     )
     rmax = RMax(actions=actions, gamma=GAMMA, count_threshold=m)
 
     run_agents_lifelong(
-        [lrmax, rmax_maxqinit, rmax], env_distribution, samples=10, episodes=100, steps=10, reset_at_terminal=False,
+        [rmax_max_q_init, lrmax, rmax], env_distribution, samples=10, episodes=100, steps=10, reset_at_terminal=False,
         open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 
