@@ -14,7 +14,7 @@ def sample_grid_world(gamma, w, h, verbose=False):
     r_max = 1.0
     possible_goals = [(w, h), (w-1, h), (w, h-1), (w-2, h)]
 
-    sampled_reward = 1.0  # np.random.uniform(r_min, r_max)
+    sampled_reward = np.random.uniform(r_min, r_max)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
         width=w, height=h, init_loc=(1, 1), goal_locs=[sampled_goal],
@@ -33,7 +33,7 @@ def sample_corridor(gamma, w, verbose=False):
     possible_goals = [(w, 1)]
     init_loc = (int(w / 2.), 1)
 
-    sampled_reward = 1.0  # np.random.uniform(r_min, r_max)  # TODO put back
+    sampled_reward = np.random.uniform(r_min, r_max)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
         width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal],
@@ -73,19 +73,23 @@ def sample_heat_map(gamma, verbose=False):
 
 
 def sample_test_environment(gamma):
-    w, h = 3, 3
+    w, h = 5, 5
 
-    init_loc = (2, 2)
-    goals = [(3, 3)]
-    walls = []  # [(2, 2), (3, 2)]
-    sampled_slip_prob = 0.0  # np.random.uniform(0.0, 0.1)
+    init_loc = (3, 3)
+    goals = [(1, 5), (5, 5)]
+    slip_probabilities = [0., 1.]
+    walls = []
+
+    index = np.random.randint(0, len(goals))
+    g = goals[index]
+    s = slip_probabilities[index]
 
     env = GridWorld(
-        width=w, height=h, init_loc=init_loc, rand_init=False, goal_locs=goals, lava_locs=[()], walls=walls,
-        is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip_prob, step_cost=0.0, lava_cost=0.01,
-        goal_reward=1, name="maze"
+        width=w, height=h, init_loc=init_loc, rand_init=False, goal_locs=[g], lava_locs=[()], walls=walls,
+        is_goal_terminal=True, gamma=gamma, slip_prob=s, step_cost=0.0, lava_cost=0.01,
+        goal_reward=1, name="test"
     )
-    print('Sampled maze - slip_prob:', sampled_slip_prob)
+    print('Goal:', g, 'slip probability:', s)
     return env
 
 

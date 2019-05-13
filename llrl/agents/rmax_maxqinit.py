@@ -39,6 +39,7 @@ class RMaxMaxQInit(Agent):
         self.prev_s = None
         self.prev_a = None
 
+        self.SA_memory = []
         self.U_memory = []  # Upper-bounds on the Q-values of previous MDPs
         self.n_required_mdps = np.log(delta) / np.log(1. - min_sampling_probability)
 
@@ -47,7 +48,12 @@ class RMaxMaxQInit(Agent):
         Reset the attributes to initial state (called between instances).
         :return: None
         """
+        for s in self.R:
+            for a in self.R[s]:
+                if self.is_known(s, a):
+                    self.SA_memory.append((s, a))
         self.U_memory.append(copy.deepcopy(self.U))
+
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
         self.prev_s = None
         self.prev_a = None
@@ -154,6 +160,7 @@ class RMaxMaxQInit(Agent):
 
                         weighted_next_upper_bound = 0.
                         for s_p in self.T[s][a]:
+                            # TODO use max
                             weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p, self.U)] * self.T[s][a][s_p]
 
                         self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
@@ -163,8 +170,5 @@ class RMaxMaxQInit(Agent):
         Update the bound on the Q-value with the MaxQInit method.
         :return: None
         """
-        for u in self.U_memory:
-            for s in u:
-                for a in u[s]:
-                    if self.U[s][a] > u[s][a]:
-                        self.U[s][a] = u[s][a]
+        for s, a in self.SA_memory:
+            self.U[s][a] = max([u[s][a] for u in self.U_memory])

@@ -27,7 +27,7 @@ def example():
     rmax = RMax(actions=actions, gamma=GAMMA, count_threshold=m)
 
     run_agents_lifelong(
-        [rmax_max_q_init, lrmax, rmax], env_distribution, samples=10, episodes=100, steps=10, reset_at_terminal=False,
+        [rmax_max_q_init, lrmax, rmax], env_distribution, samples=30, episodes=30, steps=100, reset_at_terminal=False,
         open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 
