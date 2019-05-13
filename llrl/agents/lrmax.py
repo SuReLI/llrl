@@ -76,6 +76,7 @@ class LRMax(RMax):
         self.U_memory = []
         self.R_memory = []
         self.T_memory = []
+        self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
 
         prior_max = (1. + gamma) / (1. - gamma)
         if prior is None:
@@ -83,7 +84,6 @@ class LRMax(RMax):
             self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances (high probability)
             self.n_samples_high_confidence = compute_n_samples_high_confidence(min_sampling_probability, delta)
             self.prior = prior_max
-            self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
         else:
             self.estimate_distances_online = False
             self.prior = min(prior, prior_max)
@@ -218,11 +218,6 @@ class LRMax(RMax):
                             distances.append(self.model_upper_bound(p[0], p[1], s, a))
                         self.D[s][a] = max(distances)
 
-        #print('Displaying distances:')  # TODO remove
-        #for s in self.D:  # TODO remove
-        #    for a in self.D[s]:
-        #        print('{:>10} {:>10} {:>10}'.format(str(s), a, self.D[s][a]))
-
     def update_lipschitz_upper_bounds(self):
         """
         Update the Lipschitz upper-bound for each instance of the memory.
@@ -284,8 +279,9 @@ class LRMax(RMax):
 
         # 2. Compute models distances upper-bounds
         distances_cur, distances_mem = self.models_distances(u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)
-        distances_cur = self.integrate_distances_knowledge(distances_cur)
-        distances_mem = self.integrate_distances_knowledge(distances_mem)
+        if self.estimate_distances_online:
+            distances_cur = self.integrate_distances_knowledge(distances_cur)
+            distances_mem = self.integrate_distances_knowledge(distances_mem)
 
         # 3. Compute the Q-values gap with dynamic programming
         gap = self.env_local_dist(distances_cur, distances_mem, t_mem, s_a_kk, s_a_ku, s_a_uk)

@@ -7,7 +7,7 @@ from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments_maker import run_agents_lifelong
 
 
-GAMMA = .99
+GAMMA = .9
 
 
 def example():

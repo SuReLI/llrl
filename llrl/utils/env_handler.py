@@ -107,23 +107,67 @@ def sample_maze(gamma, env_name, verbose=False):
     if env_name is None:
         env_name = "maze"
 
-    w, h = 6, 6
-    goals = [(5, 5)]
+    w, h = 11, 11
+    goals = coord_from_binary_list(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    )
     walls = [
-        (2, 2), (3, 2), (4, 2), (5, 2),
-        (2, 4), (2, 5), (2, 6),
-        (4, 5), (4, 4), (5, 4), (6, 4),
+        coord_from_binary_list(
+            [
+                [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                [1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0],
+                [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+                [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+                [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                [1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
+                [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0],
+                [0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0],
+                [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+            ]
+        ),
+        coord_from_binary_list(
+            [
+                [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+                [0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1],
+                [0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+                [1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+                [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                [1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
+                [0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0],
+                [0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0],
+                [0, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0],
+                [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+            ]
+        )
     ]
-    sampled_slip_prob = np.random.uniform(0.3, 0.7)
+
+    index = np.random.randint(0, len(walls))
+    sl = 0.
+    wa = walls[index]
 
     env = GridWorld(
-        width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=goals, lava_locs=[()], walls=walls,
-        is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip_prob, step_cost=0.0, lava_cost=0.01,
+        width=w, height=h, init_loc=(6, 6), rand_init=False, goal_locs=goals, lava_locs=[()], walls=wa,
+        is_goal_terminal=True, gamma=gamma, slip_prob=sl, step_cost=0.0, lava_cost=0.01,
         goal_reward=1, name=env_name
     )
 
     if verbose:
-        print('Sampled maze - slip_prob:', sampled_slip_prob)
+        print('Sampled maze - index:', index)
 
     return env
 
