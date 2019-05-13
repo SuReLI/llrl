@@ -4,6 +4,18 @@ from simple_rl.tasks import GridWorldMDP
 from simple_rl.tasks.grid_world.GridWorldStateClass import GridWorldState
 
 
+def coord_from_binary_list(l):
+    coord = []
+    for i in range(len(l)):
+        for j in range(len(l[i])):
+            if l[i][j] == 1:
+                coord.append((i + 1, j + 1))
+            else:
+                if l[i][j] != 0:
+                    raise ValueError('List elements should be either 0 or 1.')
+    return coord
+
+
 class GridWorld(GridWorldMDP):
     """
     Tweaked version of GridWorldMDP from simple_rl.

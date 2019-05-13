@@ -6,6 +6,7 @@ import numpy as np
 
 from simple_rl.mdp import MDPDistribution
 from llrl.envs.gridworld import GridWorld
+from llrl.envs.gridworld import coord_from_binary_list
 from llrl.envs.heatmap import HeatMap
 
 
@@ -76,13 +77,24 @@ def sample_test_environment(gamma):
     w, h = 5, 5
 
     init_loc = (3, 3)
-    goals = [(1, 5), (5, 5)]
+    goals = [(1, 5), (5, 5), (1, 1), (5, 1)]
+    goals = coord_from_binary_list(
+        [
+            [1, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 1]
+        ]
+    )
+    print(goals)
+    exit()
     slip_probabilities = [0., 1.]
     walls = []
 
     index = np.random.randint(0, len(goals))
     g = goals[index]
-    s = slip_probabilities[index]
+    s = 0.  # slip_probabilities[index]
 
     env = GridWorld(
         width=w, height=h, init_loc=init_loc, rand_init=False, goal_locs=[g], lava_locs=[()], walls=walls,
