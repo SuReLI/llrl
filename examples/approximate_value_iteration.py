@@ -26,7 +26,7 @@ def example():
     if fancy_plot:
         for j in range(size, 0, -1):
             for i in range(1, size + 1):
-                print('{:>18}'.format(round(value_function[GridWorldState(i, j)], 2)), end=' ')
+                print('{:>9}'.format(round(value_function[GridWorldState(i, j)], 2)), end=' ')
             print()
     else:
         for s in value_function:

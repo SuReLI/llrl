@@ -72,15 +72,16 @@ def sample_heat_map(gamma, verbose=False):
     return env
 
 
-def sample_test_maze(gamma):  # TODO remove
+def sample_test_environment(gamma):
     w, h = 3, 3
 
+    init_loc = (2, 2)
     goals = [(3, 3)]
-    walls = [(2, 2), (3, 2)]
-    sampled_slip_prob = np.random.uniform(0.0, 0.1)
+    walls = []  # [(2, 2), (3, 2)]
+    sampled_slip_prob = 0.0  # np.random.uniform(0.0, 0.1)
 
     env = GridWorld(
-        width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=goals, lava_locs=[()], walls=walls,
+        width=w, height=h, init_loc=init_loc, rand_init=False, goal_locs=goals, lava_locs=[()], walls=walls,
         is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip_prob, step_cost=0.0, lava_cost=0.01,
         goal_reward=1, name="maze"
     )
@@ -89,8 +90,6 @@ def sample_test_maze(gamma):  # TODO remove
 
 
 def sample_maze(gamma, verbose=False):
-    return sample_test_maze(gamma)  # TODO remove
-
     w, h = 6, 6
 
     goals = [(5, 5)]
@@ -141,6 +140,8 @@ def make_env_distribution(env_class='grid-world', n_env=10, gamma=.9, w=5, h=5, 
             new_env = sample_heat_map(gamma, verbose)
         elif env_class == 'maze':
             new_env = sample_maze(gamma, verbose)
+        elif env_class == 'test':
+            new_env = sample_test_environment(gamma)
         else:
             raise ValueError('Environment class not implemented.')
         env_dist_dict[new_env] = sampling_probability

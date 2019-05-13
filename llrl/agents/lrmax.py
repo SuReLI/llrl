@@ -218,10 +218,10 @@ class LRMax(RMax):
                             distances.append(self.model_upper_bound(p[0], p[1], s, a))
                         self.D[s][a] = max(distances)
 
-        print('Displaying distances:')  # TODO remove
-        for s in self.D:  # TODO remove
-            for a in self.D[s]:
-                print('{:>10} {:>10} {:>10}'.format(str(s), a, self.D[s][a]))
+        #print('Displaying distances:')  # TODO remove
+        #for s in self.D:  # TODO remove
+        #    for a in self.D[s]:
+        #        print('{:>10} {:>10} {:>10}'.format(str(s), a, self.D[s][a]))
 
     def update_lipschitz_upper_bounds(self):
         """
@@ -336,8 +336,6 @@ class LRMax(RMax):
         distances_cur = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt current MDP
         distances_mem = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt memory MDP
 
-        # TODO use max([]) for greedy
-
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
             weighted_sum_wrt_cur = 0.
@@ -394,15 +392,12 @@ class LRMax(RMax):
         :return: (dictionary) computed Q-values gap
         """
 
-        # TODO use max([]) for greedy
-        # TODO remove deepcopy?
-        # TODO cache calculation
-
         gap_mem = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
         gap_cur = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
+        cs = self.gamma * self.prior / (1. - self.gamma)
 
         for s, a in s_a_uk:  # Unknown (s, a) in current MDP
-            gap_mem[s][a] = distances_mem[s][a] + self.gamma * self.prior / (1. - self.gamma)
+            gap_mem[s][a] = distances_mem[s][a] + cs
         for i in range(self.vi_n_iter):
             tmp = copy.deepcopy(gap_mem)
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
@@ -412,7 +407,7 @@ class LRMax(RMax):
                 gap_mem[s][a] = distances_mem[s][a] + self.gamma * weighted_next_gap
 
         for s, a in s_a_ku:  # Unknown (s, a) in memory MDP
-            gap_cur[s][a] = distances_cur[s][a] + self.gamma * self.prior / (1. - self.gamma)
+            gap_cur[s][a] = distances_cur[s][a] + cs
         for i in range(self.vi_n_iter):
             tmp = copy.deepcopy(gap_cur)
             for s, a in s_a_kk + s_a_uk:  # Known (s, a) in memory MDP
@@ -424,6 +419,7 @@ class LRMax(RMax):
         gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
         for s in gap_mem:
             for a in gap_mem[s]:
+                # print(s, '{:>6} mem (old): {:>6}   cur (new): {:>6}'.format(a, round(gap_mem[s][a], 2), round(gap_cur[s][a], 2)))  # TODO remove
                 gap[s][a] = min(gap_mem[s][a], gap_cur[s][a])
 
         return gap
