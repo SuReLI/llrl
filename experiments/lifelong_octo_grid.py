@@ -39,5 +39,5 @@ def experiment():
 
 
 if __name__ == '__main__':
-    np.random.seed(199311)
+    np.random.seed(1993)
     experiment()

@@ -142,8 +142,6 @@ def octo_grid_collection(gamma, env_name):
             [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
         ]
     )
-    print(possible_goals)
-    exit()
 
     for i in range(n_goals):
         env = GridWorld(
@@ -151,9 +149,7 @@ def octo_grid_collection(gamma, env_name):
             walls=walls, is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, lava_cost=0.01,
             goal_reward=1, name=env_name
         )
-
         env_dist_dict[env] = sampling_probability
-
     return env_dist_dict
 
 
@@ -298,7 +294,7 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
     sampling_probability = 1. / float(n_env)
     env_dist_dict = {}
 
-    if env_class == 'octo-grid-collection':
+    if env_class == 'octo-grid':
         return MDPDistribution(octo_grid_collection(gamma, env_name), horizon=horizon)
 
     for _ in range(n_env):
