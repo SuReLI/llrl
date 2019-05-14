@@ -16,7 +16,7 @@ GAMMA = .9
 
 def experiment():
     n_env = 5
-    env_distribution = make_env_distribution(env_class='maze', env_name='mazes', n_env=n_env, gamma=GAMMA)
+    env_distribution = make_env_distribution(env_class='maze', env_name='maze', n_env=n_env, gamma=GAMMA)
     actions = env_distribution.get_actions()
     p_min = 1. / float(n_env)
     delta = .1
