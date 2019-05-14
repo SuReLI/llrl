@@ -1,0 +1,15 @@
+(MDP)
+	lifelong-mazes_h-11_w-11
+(Agents)
+	RMax,0
+	RMax-MaxQInit,1
+	LRMax-prior10.0,2
+	LRMax-prior5.0,3
+	LRMax-prior2.0,4
+	LRMax-prior1.0,5
+	LRMax-prior0.5,6
+(Params)
+	samples : 20
+	track_disc_reward : False
+	steps : 1000
+	episodes : 100
