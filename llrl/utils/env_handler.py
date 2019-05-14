@@ -103,7 +103,113 @@ def sample_test_environment(gamma):
     return env
 
 
-def sample_maze(gamma, env_name, verbose=False):
+def octo_grid_collection(gamma, env_name):
+    env_dist_dict = {}
+    w, h = 13, 13
+    n_goals = 12
+    sampling_probability = 1. / float(n_goals)
+    possible_goals = coord_from_binary_list(
+        [
+            [0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0]
+        ]
+    )
+    walls = coord_from_binary_list(
+        [
+            [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+            [1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+        ]
+    )
+    print(possible_goals)
+    exit()
+
+    for i in range(n_goals):
+        env = GridWorld(
+            width=w, height=h, init_loc=(7, 7), rand_init=False, goal_locs=[possible_goals[i]], lava_locs=[()],
+            walls=walls, is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, lava_cost=0.01,
+            goal_reward=1, name=env_name
+        )
+
+        env_dist_dict[env] = sampling_probability
+
+    return env_dist_dict
+
+
+def sample_maze_mono(gamma, env_name, verbose=False):
+    if env_name is None:
+        env_name = "maze"
+
+    w, h = 11, 11
+    goals = coord_from_binary_list(
+        [
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        ]
+    )
+    walls = coord_from_binary_list(
+        [
+            [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],
+            [1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0],
+            [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0],
+            [0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+            [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1],
+            [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0],
+            [0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+        ]
+    )
+
+    index = np.random.randint(0, len(walls))
+    sl = np.random.uniform(0.0, 0.2)
+    wa = walls
+
+    env = GridWorld(
+        width=w, height=h, init_loc=(6, 6), rand_init=False, goal_locs=goals, lava_locs=[()], walls=wa,
+        is_goal_terminal=True, gamma=gamma, slip_prob=sl, step_cost=0.0, lava_cost=0.01,
+        goal_reward=1, name=env_name
+    )
+
+    if verbose:
+        print('Sampled maze - sl:', sl)
+
+    return env
+
+
+def sample_maze_multi(gamma, env_name, verbose=False):
     if env_name is None:
         env_name = "maze"
 
@@ -192,6 +298,9 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
     sampling_probability = 1. / float(n_env)
     env_dist_dict = {}
 
+    if env_class == 'octo-grid-collection':
+        return MDPDistribution(octo_grid_collection(gamma, env_name), horizon=horizon)
+
     for _ in range(n_env):
         if env_class == 'grid-world':
             new_env = sample_grid_world(gamma, env_name, w, h, verbose)
@@ -199,8 +308,10 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
             new_env = sample_corridor(gamma, env_name, w, verbose)
         elif env_class == 'heat-map':
             new_env = sample_heat_map(gamma, env_name, verbose)
-        elif env_class == 'maze':
-            new_env = sample_maze(gamma, env_name, verbose)
+        elif env_class == 'maze-multi-goals':
+            new_env = sample_maze_multi(gamma, env_name, verbose)
+        elif env_class == 'maze-mono-goal':
+            new_env = sample_maze_mono(gamma, env_name, verbose)
         elif env_class == 'test':
             new_env = sample_test_environment(gamma)
         else:
