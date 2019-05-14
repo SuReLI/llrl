@@ -15,10 +15,9 @@ GAMMA = .9
 
 
 def experiment():
-    n_env = 5
-    env_distribution = make_env_distribution(env_class='maze-mono-goal', env_name='maze-mono-goal', n_env=n_env, gamma=GAMMA)
+    env_distribution = make_env_distribution(env_class='octo-grid', env_name='octo-grid', gamma=GAMMA)
     actions = env_distribution.get_actions()
-    p_min = 1. / float(n_env)
+    p_min = 1. / 12.
     delta = .1
 
     m = 100
@@ -34,7 +33,7 @@ def experiment():
     agents_pool = [rmax, lrmax10, lrmax5, lrmax1, lrmax01, lrmax02, rmax_q]
 
     run_agents_lifelong(
-        agents_pool, env_distribution, samples=20, episodes=100, steps=1000, reset_at_terminal=False,
+        agents_pool, env_distribution, samples=30, episodes=100, steps=1000, reset_at_terminal=False,
         open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 

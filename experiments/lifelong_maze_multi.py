@@ -16,12 +16,12 @@ GAMMA = .9
 
 def experiment():
     n_env = 5
-    env_distribution = make_env_distribution(env_class='maze', env_name='maze-multi-goals', n_env=n_env, gamma=GAMMA)
+    env_distribution = make_env_distribution(env_class='maze-multi-goals', env_name='maze-multi-goals', n_env=n_env, gamma=GAMMA)
     actions = env_distribution.get_actions()
     p_min = 1. / float(n_env)
     delta = .1
 
-    m = 100
+    m = 1
     max_mem = 10
     rmax = RMax(actions=actions, gamma=GAMMA, count_threshold=m)
     rmax_q = RMaxMaxQInit(actions=actions, gamma=GAMMA, count_threshold=m, min_sampling_probability=p_min, delta=delta)
@@ -31,7 +31,7 @@ def experiment():
     lrmax1 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=1.)
     lrmax05 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.5)
 
-    agents_pool = [rmax, lrmax10, lrmax2, lrmax05, rmax_q]
+    agents_pool = [rmax, lrmax10, lrmax5, lrmax2, lrmax1, lrmax05, rmax_q]
 
     run_agents_lifelong(
         agents_pool, env_distribution, samples=20, episodes=100, steps=1000, reset_at_terminal=False,
