@@ -30,8 +30,9 @@ class Handler(object):
         :param threshold: threshold for the bi-simulation distance matrix computation
         :return: return the tuple (distance between the MDPs, matching states matrix)
         """
-        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS,
-                                                                                                                m2.nS)
+        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(
+            m1.nS, m2.nS
+        )
         ns = m1.nS
         if d is None:
             d = self.bi_simulation_distance(m1, m2, threshold)
@@ -77,10 +78,19 @@ class Handler(object):
         return distance, matching_matrix
 
     def bi_simulation_distance(self, m1, m2, threshold=0.1):
-        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(m1.nS,
-                                                                                                                m2.nS)
-        assert m1.nA == m2.nA, 'Error: environments have different number of actions: m1.nA={}, m2.nA={}'.format(m1.nA,
-                                                                                                                 m2.nA)
+        """
+        Compute the bi-simulation distance between two MDPs (Dynamic Programming).
+        :param m1: 1st MDP (environment)
+        :param m2: 2nd MDP (environment)
+        :param threshold: threshold for stopping criterion
+        :return:
+        """
+        assert m1.nS == m2.nS, 'Error: environments have different number of states: m1.nS={}, m2.nS={}'.format(
+            m1.nS, m2.nS
+        )
+        assert m1.nA == m2.nA, 'Error: environments have different number of actions: m1.nA={}, m2.nA={}'.format(
+            m1.nA, m2.nA
+        )
         ns, na = m1.nS, m1.nA
         d = np.zeros(shape=(ns, ns))
         tmp_d = np.array(d)

@@ -262,10 +262,9 @@ def sample_maze_multi(gamma, env_name, verbose=False):
     index = np.random.randint(0, len(walls))
     sl = np.random.uniform(0.0, 0.2)
     wa = walls[index]
-    go = goals[index]
 
     env = GridWorld(
-        width=w, height=h, init_loc=(6, 6), rand_init=False, goal_locs=go, lava_locs=[()], walls=wa,
+        width=w, height=h, init_loc=(6, 6), rand_init=False, goal_locs=goals, lava_locs=[()], walls=wa,
         is_goal_terminal=True, gamma=gamma, slip_prob=sl, step_cost=0.0, lava_cost=0.01,
         goal_reward=1, name=env_name
     )
