@@ -28,13 +28,15 @@ def experiment():
     lrmax10 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=10.)
     lrmax5 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=5.)
     lrmax1 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=1.)
+    lrmax05 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.5)
     lrmax02 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.2)
     lrmax01 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.1)
+    lrmax_learn = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=None)
 
-    agents_pool = [rmax, lrmax10, lrmax5, lrmax1, lrmax01, lrmax02, rmax_q]
+    agents_pool = [rmax, lrmax1, lrmax05, lrmax02, lrmax_learn, rmax_q]
 
     run_agents_lifelong(
-        agents_pool, env_distribution, samples=30, episodes=100, steps=1000, reset_at_terminal=False,
+        agents_pool, env_distribution, samples=20, episodes=100, steps=1000, reset_at_terminal=False,
         open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 
