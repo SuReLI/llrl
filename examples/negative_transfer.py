@@ -3,7 +3,11 @@ Negative transfer example using Song et al. [2016] transfer method.
 """
 
 
+from llrl.envs.n_states import NStates
+
+
 def weighted_transfer():
+    env1 = NStates(2)
     print('TODO')
 
 
