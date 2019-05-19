@@ -7,8 +7,9 @@ from llrl.envs.n_states import NStates
 
 
 def weighted_transfer():
-    env1 = NStates(2)
-    print('TODO')
+    ns = 2
+    env1 = NStates(ns)
+    # env2 = NStates(ns)
 
 
 def state_transfer():
