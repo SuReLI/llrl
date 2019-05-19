@@ -54,8 +54,9 @@ def wasserstein_mdp_distance(m1, m2, d=None, threshold=0.1):
     :param threshold: threshold for the bi-simulation distance matrix computation
     :return: return the distance between the MDPs
     """
-    assert m1.nS == m2.nS, "Error: environments have different number of states: m1.nS={}, m2.nS={}".format(m1.nS,
-                                                                                                            m2.nS)
+    assert m1.nS == m2.nS, "Error: environments have different number of states: m1.nS={}, m2.nS={}".format(
+        m1.nS, m2.nS
+    )
     if d is None:
         d = bi_simulation_distance(m1, m2, threshold)
     ns = m1.nS
@@ -65,7 +66,7 @@ def wasserstein_mdp_distance(m1, m2, d=None, threshold=0.1):
     return distance, matching_matrix
 
 
-def bi_simulation_distance(m1, m2, cr, threshold=0.1):
+def bi_simulation_distance(m1, m2, cr=.5, threshold=0.1):
     """
     Compute the bi-simulation distance between two MDPs (Dynamic Programming).
     :param m1: 1st MDP (environment)
@@ -83,10 +84,9 @@ def bi_simulation_distance(m1, m2, cr, threshold=0.1):
     ns, na = m1.nS, m1.nA
     ct = 1. - cr
     d = np.zeros(shape=(ns, ns))
-    tmp_d = np.array(d)
-    gap = threshold + 1.0
-    while gap > threshold:
-        # Iterate
+    tmp = np.array(d)
+    gap = threshold + 1.
+    while gap > threshold:  # Iterate
         for i in range(ns):
             for j in range(ns):
                 d_ija = 0.0
@@ -96,12 +96,12 @@ def bi_simulation_distance(m1, m2, cr, threshold=0.1):
                     delta_t, _ = distribution.wass_primal(di, dj, d)
                     delta_r = abs(m1.expected_reward(i, a) - m2.expected_reward(j, a))
                     d_ija = max(d_ija, cr * delta_r + ct * delta_t)
-                tmp_d[i, j] = d_ija
+                tmp[i, j] = d_ija
         # Measure gap
         gap = 0.0
         for i in range(ns):
             for j in range(ns):
-                gap = max(gap, abs(d[i, j] - tmp_d[i, j]))
+                gap = max(gap, abs(d[i, j] - tmp[i, j]))
         # Update
-        d = np.array(tmp_d)
+        d = np.array(tmp)
     return d

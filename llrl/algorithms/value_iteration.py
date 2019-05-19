@@ -3,7 +3,7 @@ import numpy as np
 from collections import defaultdict
 
 
-def value_iteration(env, gamma=.9, threshold=.01, iter_max=1000, verbose=True):
+def value_iteration(env, gamma=.9, threshold=.01, iter_max=10000, verbose=True):
     """
     Exact Value iteration algorithm.
 
