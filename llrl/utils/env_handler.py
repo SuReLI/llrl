@@ -55,12 +55,10 @@ def sample_corridor(gamma, env_name, w, verbose=False):
     return env
 
 
-def sample_heat_map(gamma, env_name, verbose=False):
+def sample_heat_map(gamma, env_name, w, h, verbose=False):
     if env_name is None:
         env_name = "heat-map"
 
-    w = 50
-    h = 50
     possible_goals = [(w, h - 2), (w, h - 2), (w - 1, h), (w, h - 1), (w, h), (w - 1, h - 1)]
 
     sampled_reward = np.random.uniform(0.9, 1.0)
@@ -68,8 +66,8 @@ def sample_heat_map(gamma, env_name, verbose=False):
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
 
     env = HeatMap(
-        width=w, height=h, init_loc=(25, 25), rand_init=False, goal_locs=[sampled_goal], lava_locs=[()], walls=[],
-        is_goal_terminal=False, gamma=gamma, slip_prob=0.0, step_cost=0.0, lava_cost=0.01,
+        width=w, height=h, init_loc=(int(w / 2), int(h / 2)), rand_init=False, goal_locs=[sampled_goal], lava_locs=[()],
+        walls=[], is_goal_terminal=False, gamma=gamma, slip_prob=0.0, step_cost=0.0, lava_cost=0.01,
         goal_reward=sampled_reward, reward_span=sampled_span, name=env_name
     )
 
@@ -190,7 +188,7 @@ def sample_maze_mono(gamma, env_name, verbose=False):
     )
 
     index = np.random.randint(0, len(walls))
-    sl = np.random.uniform(0.0, 0.2)
+    sl = np.random.uniform(0.0, 0.1)
     wa = walls
 
     env = GridWorld(
@@ -304,7 +302,7 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
         elif env_class == 'corridor':
             new_env = sample_corridor(gamma, env_name, w, verbose)
         elif env_class == 'heat-map':
-            new_env = sample_heat_map(gamma, env_name, verbose)
+            new_env = sample_heat_map(gamma, env_name, w, h, verbose)
         elif env_class == 'maze-multi-walls':
             new_env = sample_maze_multi(gamma, env_name, verbose)
         elif env_class == 'maze-mono-goal':

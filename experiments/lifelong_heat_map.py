@@ -15,8 +15,8 @@ GAMMA = .9
 
 
 def experiment():
-    n_env = 10
-    env_distribution = make_env_distribution(env_class='heat-map', n_env=n_env, gamma=GAMMA, w=50, h=50)
+    n_env = 5
+    env_distribution = make_env_distribution(env_class='heat-map', n_env=n_env, gamma=GAMMA, w=20, h=20)
     actions = env_distribution.get_actions()
     p_min = 1. / float(n_env)
     delta = .1
@@ -36,8 +36,8 @@ def experiment():
     agents_pool = [rmax, lrmax0_2, lrmax0_6, lrmax1_0, lrmax_learn, rmax_q]
 
     run_agents_lifelong(
-        agents_pool, env_distribution, samples=30, episodes=30, steps=100,
-        reset_at_terminal=False, open_plot=True, cumulative_plot=False, is_tracked_value_discounted=False
+        agents_pool, env_distribution, samples=30, episodes=30, steps=100, reset_at_terminal=False,
+        open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 
 
