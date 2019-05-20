@@ -59,16 +59,16 @@ def sample_heat_map(gamma, env_name, verbose=False):
     if env_name is None:
         env_name = "heat-map"
 
-    w = 11
-    h = 11
-    possible_goals = [(w - 1, h), (w, h - 1), (w, h)]
+    w = 50
+    h = 50
+    possible_goals = [(w, h - 2), (w, h - 2), (w - 1, h), (w, h - 1), (w, h), (w - 1, h - 1)]
 
-    sampled_reward = np.random.uniform(0.8, 1.0)
+    sampled_reward = np.random.uniform(0.9, 1.0)
     sampled_span = np.random.uniform(0.5, 1.5)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
 
     env = HeatMap(
-        width=w, height=h, init_loc=(5, 5), rand_init=False, goal_locs=[sampled_goal], lava_locs=[()], walls=[],
+        width=w, height=h, init_loc=(25, 25), rand_init=False, goal_locs=[sampled_goal], lava_locs=[()], walls=[],
         is_goal_terminal=False, gamma=gamma, slip_prob=0.0, step_cost=0.0, lava_cost=0.01,
         goal_reward=sampled_reward, reward_span=sampled_span, name=env_name
     )
