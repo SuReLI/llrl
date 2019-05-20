@@ -69,6 +69,12 @@ class LRMaxCT(LRMax):
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         raise ValueError('Method models_distances not implemented in this class, see _models_distances method.')
 
+    def model_upper_bound(self, i, j, s, a):
+        """
+        See parent class LRMax.
+        """
+        return abs(self.R_memory[i][s][a] - self.R_memory[j][s][a])
+
     def _models_distances(self, r_mem, s_a_kk, s_a_ku, s_a_uk):
         """
         See parent class LRMax.

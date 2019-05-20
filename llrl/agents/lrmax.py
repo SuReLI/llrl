@@ -190,16 +190,16 @@ class LRMax(RMax):
         :param a: action
         :return: Return the distance
         """
-        weighted_sum = 0.
+        dt = 0.
         for s_p in self.T_memory[i][s][a]:
             v_p = max([self.U_memory[i][s_p][a_p] for a_p in self.actions])
-            weighted_sum += v_p * abs(self.T_memory[i][s][a][s_p] - self.T_memory[j][s][a][s_p])
+            dt += v_p * abs(self.T_memory[i][s][a][s_p] - self.T_memory[j][s][a][s_p])
         for s_p in self.T_memory[j][s][a]:
             if s_p not in self.T_memory[i][s][a]:
                 v_p = max([self.U_memory[i][s_p][a_p] for a_p in self.actions])
-                weighted_sum += v_p * self.T_memory[j][s][a][s_p]
+                dt += v_p * self.T_memory[j][s][a][s_p]
         dr = abs(self.R_memory[i][s][a] - self.R_memory[j][s][a])
-        return dr + self.gamma * weighted_sum
+        return dr + self.gamma * dt
 
     def update_max_distances(self):
         """
