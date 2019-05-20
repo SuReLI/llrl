@@ -30,7 +30,10 @@ def experiment():
     lrmax2 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=2.)
     lrmax1 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=1.)
     lrmax05 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.5)
-    lrmax_learn = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=None)
+    lrmax_learn = LRMax(
+        actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=None,
+        min_sampling_probability=p_min, delta=delta
+    )
 
     agents_pool = [rmax, lrmax2, lrmax1, lrmax05, lrmax_learn, rmax_q]
 

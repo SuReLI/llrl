@@ -120,4 +120,4 @@ class LRMaxCT(LRMax):
                     gap_p += max([tmp[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
                 gap[s][a] = distances_dict[s][a] + self.gamma * gap_p
         '''
-        return LRMax.env_local_dist(distances_dict, distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk)
+        return LRMax.env_local_dist(self, distances_dict, distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk)

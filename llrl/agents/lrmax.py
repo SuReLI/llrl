@@ -84,9 +84,6 @@ class LRMax(RMax):
             self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances (high probability)
             self.n_samples_high_confidence = compute_n_samples_high_confidence(min_sampling_probability, delta)
             self.prior = prior_max
-
-            print(self.n_samples_high_confidence)
-            exit()
         else:
             self.estimate_distances_online = False
             self.prior = min(prior, prior_max)
