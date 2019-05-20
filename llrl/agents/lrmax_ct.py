@@ -19,6 +19,8 @@ class LRMaxCT(LRMax):
             epsilon=.1,
             max_memory_size=None,
             prior=1.,
+            min_sampling_probability=0.1,
+            delta=0.05,
             name="LRMax-CT"
     ):
         """
@@ -28,9 +30,11 @@ class LRMaxCT(LRMax):
         :param epsilon: (float) precision of value iteration algorithm
         :param max_memory_size: (int) maximum number of saved models (infinity if None)
         :param prior: (float) prior knowledge of maximum model's distance
+        :param min_sampling_probability: (float) minimum sampling probability of an environment
+        :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
         :param name: (str)
         """
-        name = name + '-prior' + str(prior)
+        name = name if prior is None else name + '-prior' + str(prior)
         LRMax.__init__(
             self,
             actions=actions,
@@ -39,6 +43,8 @@ class LRMaxCT(LRMax):
             epsilon=epsilon,
             max_memory_size=max_memory_size,
             prior=prior,
+            min_sampling_probability=min_sampling_probability,
+            delta=delta,
             name=name
         )
 
@@ -51,9 +57,11 @@ class LRMaxCT(LRMax):
 
         # 2. Compute models distances upper-bounds
         distances_dict = self._models_distances(r_mem, s_a_kk, s_a_ku, s_a_uk)
+        if self.estimate_distances_online:
+            distances_dict = self.integrate_distances_knowledge(distances_dict)
 
         # 3. Compute the Q-values gap with dynamic programming
-        gap = self._q_values_gap(distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk)
+        gap = self._env_local_dist(distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk)
 
         # 4. Deduce upper-bound from u_mem
         return self.lipschitz_upper_bound(u_mem, gap)
@@ -69,7 +77,7 @@ class LRMaxCT(LRMax):
 
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
-            distances_dict[s][a] = abs(self.R[s][a] - r_mem[s][a])
+            distances_dict[s][a] = min(self.prior, abs(self.R[s][a] - r_mem[s][a]))
 
         # Compute model's distances upper-bounds for known-unknown (s, a)
         for s, a in s_a_ku:
@@ -81,28 +89,29 @@ class LRMaxCT(LRMax):
 
         return distances_dict
 
-    def q_values_gap(self, distances_dict, s_a_kk, s_a_ku, s_a_uk):
+    def env_local_dist(self, distances_cur, distances_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         raise ValueError('Method q_values_gap not implemented in this class, see _q_values_gap method.')
 
-    def _q_values_gap(self, distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk):
+    def _env_local_dist(self, distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """
         See parent class LRMax.
         """
+        '''
         gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
 
         for i in range(self.vi_n_iter):
             tmp = copy.deepcopy(gap)
 
             for s, a in s_a_uk:  # Unknown (s, a) in current MDP
-                weighted_next_gap = 0.
+                gap_p = 0.
                 for s_p in t_mem[s][a]:
-                    weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * t_mem[s][a][s_p]
-                gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
+                    gap_p += max([tmp[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
+                gap[s][a] = distances_dict[s][a] + self.gamma * gap_p
 
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
-                weighted_next_gap = 0.
+                gap_p = 0.
                 for s_p in self.T[s][a]:
-                    weighted_next_gap += tmp[s_p][self.greedy_action(s_p, tmp)] * self.T[s][a][s_p]
-                gap[s][a] = distances_dict[s][a] + self.gamma * weighted_next_gap
-
-        return gap
+                    gap_p += max([tmp[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
+                gap[s][a] = distances_dict[s][a] + self.gamma * gap_p
+        '''
+        return LRMax.env_local_dist(distances_dict, distances_dict, t_mem, s_a_kk, s_a_ku, s_a_uk)

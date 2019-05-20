@@ -84,6 +84,9 @@ class LRMax(RMax):
             self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances (high probability)
             self.n_samples_high_confidence = compute_n_samples_high_confidence(min_sampling_probability, delta)
             self.prior = prior_max
+
+            print(self.n_samples_high_confidence)
+            exit()
         else:
             self.estimate_distances_online = False
             self.prior = min(prior, prior_max)
@@ -382,12 +385,12 @@ class LRMax(RMax):
         Compute the environment's local distances based on model's distances between two MDPs.
         :param distances_cur: distances dictionary computed wrt current MDP
         :param distances_mem: distances dictionary computed wrt memory MDP
+        :param t_mem: (dictionary) learned transition function of the previous MDP.
         :param s_a_kk: (list) state-actions pairs known in both MDPs
         :param s_a_ku: (list) state-actions pairs known in the current MDP - unknown in the previous MDP
         :param s_a_uk: (list) state-actions pairs unknown in the current MDP - known in the previous MDP
         :return: (dictionary) computed Q-values gap
         """
-
         gap_mem = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
         gap_cur = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
         cs = self.gamma * self.prior / (1. - self.gamma)
@@ -397,25 +400,24 @@ class LRMax(RMax):
         for i in range(self.vi_n_iter):
             tmp = copy.deepcopy(gap_mem)
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
-                weighted_next_gap = 0.
+                gap_p = 0.
                 for s_p in self.T[s][a]:
-                    weighted_next_gap += max([tmp[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
-                gap_mem[s][a] = distances_mem[s][a] + self.gamma * weighted_next_gap
+                    gap_p += max([tmp[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
+                gap_mem[s][a] = distances_mem[s][a] + self.gamma * gap_p
 
         for s, a in s_a_ku:  # Unknown (s, a) in memory MDP
             gap_cur[s][a] = distances_cur[s][a] + cs
         for i in range(self.vi_n_iter):
             tmp = copy.deepcopy(gap_cur)
             for s, a in s_a_kk + s_a_uk:  # Known (s, a) in memory MDP
-                weighted_next_gap = 0.
+                gap_p = 0.
                 for s_p in t_mem[s][a]:
-                    weighted_next_gap += max([tmp[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
-                gap_cur[s][a] = distances_mem[s][a] + self.gamma * weighted_next_gap
+                    gap_p += max([tmp[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
+                gap_cur[s][a] = distances_mem[s][a] + self.gamma * gap_p
 
         gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
         for s in gap_mem:
             for a in gap_mem[s]:
-                # print(s, '{:>6} mem (old): {:>6}   cur (new): {:>6}'.format(a, round(gap_mem[s][a], 2), round(gap_cur[s][a], 2)))  # TODO remove
                 gap[s][a] = min(gap_mem[s][a], gap_cur[s][a])
 
         return gap
