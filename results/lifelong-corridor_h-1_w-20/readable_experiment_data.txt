@@ -8,7 +8,7 @@
 	LRMax,4
 	RMax-MaxQInit,5
 (Params)
-	steps : 10
-	track_disc_reward : False
 	episodes : 50
+	track_disc_reward : False
+	steps : 10
 	samples : 50
