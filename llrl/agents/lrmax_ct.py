@@ -21,7 +21,7 @@ class LRMaxCT(LRMax):
             prior=1.,
             min_sampling_probability=0.1,
             delta=0.05,
-            name="LRMax-CT"
+            name="LRMax"
     ):
         """
         :param actions: action space of the environment
@@ -34,7 +34,7 @@ class LRMaxCT(LRMax):
         :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
         :param name: (str)
         """
-        name = name if prior is None else name + '-prior' + str(prior)
+        # name = name if prior is None else name + '-prior' + str(prior)
         LRMax.__init__(
             self,
             actions=actions,
