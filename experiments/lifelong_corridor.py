@@ -33,11 +33,11 @@ def experiment():
         min_sampling_probability=p_min, delta=delta
     )
 
-    agents_pool = [rmax, lrmax0_2, lrmax0_6, lrmax1_0, lrmax_learn, rmax_q]
+    agents_pool = [rmax, lrmax1_0, lrmax0_6, lrmax0_2, lrmax_learn, rmax_q]
 
     run_agents_lifelong(
         agents_pool, env_distribution, samples=50, episodes=50, steps=10, reset_at_terminal=False,
-        open_plot=True, cumulative_plot=False, is_tracked_value_discounted=False, plot_only=True, plot_title=False
+        open_plot=True, cumulative_plot=False, is_tracked_value_discounted=False, plot_only=False, plot_title=False
     )
 
 

@@ -51,7 +51,8 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.legend(loc='best')
+    # plt.legend(loc='best')  # TODO put back
+    plt.legend(loc='lower right')
     plt.grid(True)  # , linestyle='--')
     exp_dir_split_list = path.split("/")
     if 'results' in exp_dir_split_list:
