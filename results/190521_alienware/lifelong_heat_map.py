@@ -4,6 +4,13 @@ Lifelong RL experiment in constant transition function setting
 
 import numpy as np
 
+import sys
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+sys.path
+sys.path.append('/home/sureli/Documents/erwan/git/llrl')
+sys.path.append('/home/sureli/Documents/erwan/git/llrl/venv/lib/python3.5/site-packages')
+
 from llrl.agents.rmax import RMax
 from llrl.agents.lrmax_ct import LRMaxCT
 from llrl.agents.rmax_maxqinit import RMaxMaxQInit
@@ -37,7 +44,7 @@ def experiment():
 
     run_agents_lifelong(
         agents_pool, env_distribution, samples=30, episodes=30, steps=10, reset_at_terminal=False,
-        open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=True
+        open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False
     )
 
 
