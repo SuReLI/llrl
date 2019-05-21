@@ -10,6 +10,7 @@
 
 experiments/results/
 examples/results/
+results/backup/
 tmp/
 outdated/
 
