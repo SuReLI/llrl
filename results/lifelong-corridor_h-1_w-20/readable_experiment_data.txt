@@ -2,13 +2,13 @@
 	lifelong-corridor_h-1_w-20
 (Agents)
 	RMax,0
-	LRMax-CT-prior1.0-prior1.0,1
-	LRMax-CT-prior0.6-prior0.6,2
-	LRMax-CT-prior0.2-prior0.2,3
-	LRMax-CT,4
+	LRMax-prior1.0,1
+	LRMax-prior0.6,2
+	LRMax-prior0.2,3
+	LRMax,4
 	RMax-MaxQInit,5
 (Params)
-	samples : 50
-	episodes : 50
-	track_disc_reward : False
 	steps : 10
+	track_disc_reward : False
+	episodes : 50
+	samples : 50
