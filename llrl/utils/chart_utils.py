@@ -13,7 +13,7 @@ color_ls = [
 ]
 
 
-def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True):
+def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True, plot_title=True):
     """
     Tweaked version of simple_rl.utils.chart_utils.plot
     Method made less specific, no specification of the type of data.
@@ -28,6 +28,7 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
     :param y_label: (str)
     :param title_prefix: (str)
     :param open_plot: (Bool)
+    :param plot_title: (Bool)
     :return: None
     """
     # LaTeX rendering
@@ -57,8 +58,9 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
         exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
     else:
         exp_name = exp_dir_split_list[0]
-    plt_title = _format_title(title_prefix + exp_name)
-    plt.title(plt_title)
+    if plot_title:
+        plt_title = _format_title(title_prefix + exp_name)
+        plt.title(plt_title)
 
     # Save
     plot_file_name = os.path.join(path, pdf_name + '.pdf')

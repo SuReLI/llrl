@@ -46,7 +46,8 @@ def plot_return_per_episode(
         path,
         agents,
         is_tracked_value_discounted,
-        open_plot=True
+        open_plot=True,
+        plot_title=True
 ):
     # Set names
     labels = [
@@ -74,7 +75,7 @@ def plot_return_per_episode(
         returns_up.append(df[labels[3]][0:n_episodes])
     plot(
         path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot
+        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot, plot_title=plot_title
     )
 
 
@@ -112,7 +113,8 @@ def plot_return_per_task(
         path,
         agents,
         is_tracked_value_discounted,
-        open_plot=True
+        open_plot=True,
+        plot_title=True
 ):
     # Set names
     labels = [
@@ -140,7 +142,7 @@ def plot_return_per_task(
         returns_up.append(df[labels[3]][0:n_tasks])
     plot(
         path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot
+        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot, plot_title=plot_title
     )
 
 
@@ -159,6 +161,7 @@ def run_agents_lifelong(
         cumulative_plot=True,
         is_tracked_value_discounted=False,
         plot_only=False,
+        plot_title=True,
         dir_for_plot='results'
 ):
     """
@@ -184,6 +187,7 @@ def run_agents_lifelong(
     :param resample_at_terminal: (bool) (not implemented in this tweaked version of run_agents_lifelong)
     :param cumulative_plot: (bool)
     :param plot_only: (bool)
+    :param plot_title: (bool)
     :param is_tracked_value_discounted: (bool)
     :param dir_for_plot: (str)
     :return:
@@ -287,8 +291,10 @@ def run_agents_lifelong(
 
     # Plot
     plot_return_per_task(
-        experiment.exp_directory, agents, is_tracked_value_discounted=is_tracked_value_discounted, open_plot=open_plot
+        experiment.exp_directory, agents, is_tracked_value_discounted=is_tracked_value_discounted,
+        open_plot=open_plot, plot_title=plot_title
     )
     plot_return_per_episode(
-        experiment.exp_directory, agents, is_tracked_value_discounted=is_tracked_value_discounted, open_plot=open_plot
+        experiment.exp_directory, agents, is_tracked_value_discounted=is_tracked_value_discounted,
+        open_plot=open_plot, plot_title=plot_title
     )
