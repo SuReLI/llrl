@@ -152,7 +152,6 @@ class RMax(Agent):
 
                         weighted_next_upper_bound = 0.
                         for s_p in self.T[s][a]:
-                            # TODO use max
-                            weighted_next_upper_bound += self.U[s_p][self.greedy_action(s_p, self.U)] * self.T[s][a][s_p]
+                            weighted_next_upper_bound += max(self.U[s_p][a_p] for a_p in self.actions) * self.T[s][a][s_p]
 
                         self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
