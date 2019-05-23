@@ -24,7 +24,6 @@ N_STEPS = 1000
 
 PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
 PRIOR_MAX = 0.
-# PRIORS = [round(p, 1) for p in np.linspace(start=PRIOR_MIN, stop=PRIOR_MAX, num=5)]
 PRIORS = [19.0, 17.0, 15.0, 10.0, 0.0]
 
 
