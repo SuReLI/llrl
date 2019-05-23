@@ -10,3 +10,22 @@ In order to use this virtual environment, you need to run the following command 
     source venv/bin/activate
     
 From there, you can run the script using the embedded python version.
+
+## Experiments
+
+To run the experiments of the Lipschitz Lifelong Reinforcement Learning paper, go to the experiments repository and run the following scripts:
+
+Experiment 1:
+
+	python bounds_comparison.py
+
+Experiment 2:
+
+	python prior use.py
+	
+Experiment 3:
+
+	python lifelong_corridor.py
+	python lifelong_maze_mono.py
+	pythonlifelong_maze_multi.py
+
