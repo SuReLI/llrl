@@ -27,5 +27,5 @@ Experiment 3:
 
 	python lifelong_corridor.py
 	python lifelong_maze_mono.py
-	pythonlifelong_maze_multi.py
+	python lifelong_maze_multi.py
 
