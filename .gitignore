@@ -1,12 +1,4 @@
-.idea/inspectionProfiles
-.idea/libraries
-
-.idea/modules.xml
-.idea/riderModule.iml
-.idea/encoding.xml
-.idea/llrl.iml
-.idea/misc.xml
-.idea/workspace.xml
+.idea
 
 experiments/results/
 examples/results/
