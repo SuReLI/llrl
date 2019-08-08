@@ -4,6 +4,6 @@
 	RMax,0
 (Params)
 	samples : 10
+	episodes : 500
 	steps : 1000
 	track_disc_reward : False
-	episodes : 500
