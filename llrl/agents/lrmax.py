@@ -35,7 +35,8 @@ def compute_n_samples_high_confidence(p_min, delta):
 
 class LRMax(RMax):
     """
-    Lipschitz R-Max agent
+    Lipschitz R-Max agent.
+    Leverage the pseudo-Lipschitz continuity of the optimal Q-value function in the MDP space to perform value transfer.
     """
 
     def __init__(
@@ -43,22 +44,24 @@ class LRMax(RMax):
             actions,
             gamma=0.9,
             count_threshold=1,
-            epsilon=0.1,
             max_memory_size=None,
+            epsilon=0.1,
+            delta=0.05,
+            v_max=None,
             prior=None,
             min_sampling_probability=0.1,
-            delta=0.05,
             name="LRMax"
     ):
         """
         :param actions: action space of the environment
         :param gamma: (float) discount factor
         :param count_threshold: (int) count after which a state-action pair is considered known
-        :param epsilon: (float) precision of value iteration algorithm
         :param max_memory_size: (int) maximum number of saved models (infinity if None)
+        :param epsilon: (float) precision of value iteration algorithm
+        :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
+        :param v_max: (float) known upper-bound on the value function
         :param prior: (float) prior knowledge of maximum model's distance
         :param min_sampling_probability: (float) minimum sampling probability of an environment
-        :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
         :param name: (str)
         """
         name = name if prior is None else name + '-prior' + str(prior)
@@ -77,6 +80,10 @@ class LRMax(RMax):
         self.R_memory = []
         self.T_memory = []
         self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
+
+        if v_max is None:
+            self.v_max = 1. / (1. - gamma)
+        self.b = epsilon * (1. + gamma * self.v_max)
 
         prior_max = (1. + gamma) / (1. - gamma)
         if prior is None:
@@ -99,7 +106,7 @@ class LRMax(RMax):
         """
         # Save previously learned model
         if len(self.counter) > 0 and (self.max_memory_size is None or len(self.U_lip) < self.max_memory_size):
-                self.update_memory()
+            self.update_memory()
 
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
         self.prev_s = None
@@ -136,7 +143,7 @@ class LRMax(RMax):
         Consequently, the saved state-action pairs only refer to known pairs.
         :return: None
         """
-        new_u = defaultdict(lambda: defaultdict(lambda: self.r_max / (1. - self.gamma)))
+        new_u = defaultdict(lambda: defaultdict(lambda: self.v_max))
         new_r = defaultdict(lambda: defaultdict(float))
         new_t = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
 
@@ -238,12 +245,12 @@ class LRMax(RMax):
         Called at initialization and when a new state-action pair is known.
         :return: None
         """
-        U = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
+        u = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
         for u_lip in self.U_lip:
             for s in u_lip:
                 for a in u_lip[s]:
-                    if u_lip[s][a] < U[s][a]:
-                        U[s][a] = u_lip[s][a]
+                    if u_lip[s][a] < u[s][a]:
+                        u[s][a] = u_lip[s][a]
 
         for i in range(self.vi_n_iter):
             for s in self.R:
@@ -251,10 +258,10 @@ class LRMax(RMax):
                     if self.is_known(s, a):
                         weighted_next_upper_bound = 0.
                         for s_p in self.T[s][a]:
-                            weighted_next_upper_bound += U[s_p][self.greedy_action(s_p, U)] * self.T[s][a][s_p]
-                        U[s][a] = self.R[s][a] + self.gamma * weighted_next_upper_bound
+                            weighted_next_upper_bound += u[s_p][self.greedy_action(s_p, u)] * self.T[s][a][s_p]
+                        u[s][a] = self.R[s][a] + self.gamma * weighted_next_upper_bound
 
-        self.U = U
+        self.U = u
 
     def integrate_distances_knowledge(self, distances):
         for s in distances:
@@ -298,10 +305,11 @@ class LRMax(RMax):
         :param r_mem: Reward memory of the previous MDP
         :return: the 3 lists as a tuple
         """
-        # Different state-action pairs container:
+        # Define different state-action pairs container:
         s_a_kk = []  # Known in both MDPs
         s_a_ku = []  # Known in current MDP - Unknown in previous MDP
         s_a_uk = []  # Unknown in current MDP - Known in previous MDP
+        # TODO maybe use dictionaries instead of lists?
 
         # Fill containers
         for s in self.R:
@@ -320,7 +328,7 @@ class LRMax(RMax):
 
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """
-        Compute the model's local distances between the current MDP and the input memory unit.
+        Compute the model's local pseudo-distances between the current MDP and the input memory unit.
         :param u_mem: (dictionary) upper-bound on the Q-value function of the previous MDP.
         :param r_mem: (dictionary) learned expected reward function of the previous MDP.
         :param t_mem: (dictionary) learned transition function of the previous MDP.
@@ -346,10 +354,10 @@ class LRMax(RMax):
                     weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
 
             dr = abs(self.R[s][a] - r_mem[s][a])
-            distances_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur, self.prior)
-            distances_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem, self.prior)
+            distances_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + 2. * self.b, self.prior)
+            distances_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + 2. * self.b, self.prior)
 
-        ma = self.gamma * self.r_max / (1. - self.gamma)
+        ma = self.gamma * self.v_max + self.b
 
         # Compute model's distances upper-bounds for known-unknown (s, a)
         for s, a in s_a_ku:
