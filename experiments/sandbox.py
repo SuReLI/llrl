@@ -2,7 +2,7 @@ import numpy as np
 
 from llrl.agents.rmax import RMax
 from llrl.agents.lrmax import LRMax
-from llrl.agents.rmax_maxqinit import MaxQInit
+from llrl.agents.maxqinit import MaxQInit
 from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments_maker import run_agents_lifelong
 
