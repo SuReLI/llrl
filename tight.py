@@ -19,7 +19,7 @@ def experiment():
     actions = env_distribution.get_actions()
     p_min = 1. / 7.  # There are seven possible MDPs
     epsilon_q = .1
-    epsilon_m = .1
+    epsilon_m = 1
     delta = .05
     n_states = 9 * 9
 
@@ -32,7 +32,7 @@ def experiment():
     agents_pool = [rmax]  # , lrmax]
 
     run_agents_lifelong(
-        agents_pool, env_distribution, samples=1, episodes=10000, steps=10000, reset_at_terminal=False,
+        agents_pool, env_distribution, samples=10, episodes=500, steps=1000, reset_at_terminal=False,
         open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False, plot_title=False
     )
 
