@@ -1,0 +1,9 @@
+(MDP)
+	lifelong-tight_h-9_w-9
+(Agents)
+	RMax,0
+(Params)
+	steps : 10000
+	episodes : 10000
+	samples : 1
+	track_disc_reward : False

@@ -9,9 +9,12 @@ Changes compared to Dave's original RMax:
 2) Only use learned transition model when state-action pair is known;
 
 3) Directly store transition probabilities and averaged reward signal instead of counters and list of sampled rewards
-   resulting in faster computation and easier interpretability.
+   resulting in faster computation and easier interpretability;
 
-4) Single visit counter (lower memory requirements).
+4) Single visit counter (lower memory requirements);
+
+5) count_threshold can be replaced by (epsilon, delta) for epsilon accurate models in L1 norm
+   with probability at least 1 - delta.
 """
 
 import random
@@ -21,24 +24,64 @@ from collections import defaultdict
 from simple_rl.agents.AgentClass import Agent
 
 
+def compute_n_model_samples_high_confidence(epsilon, delta, n_states):
+    """
+    Compute the number of model samples required for epsilon accurate model in L1-norm
+    with probability at least 1 - delta.
+    :param epsilon: (float)
+    :param delta: (float)
+    :param n_states: (int)
+    :return: (int)
+    """
+    m_r_min = np.log(2. / delta) / (2. * epsilon ** 2.)
+    m_t_min = 2. * (np.log(2. ** float(n_states) - 2.) - np.log(delta)) / (epsilon ** 2.)
+    return int(max(m_r_min, m_t_min)) + 1
+
+
 class RMax(Agent):
     """
     Implementation of an R-Max agent [Brafman and Tennenholtz 2003]
     Use Value Iteration to compute the R-Max upper-bound following [Strehl et al 2009].
     """
 
-    def __init__(self, actions, gamma=0.9, count_threshold=1, epsilon=0.1, name="RMax"):
+    def __init__(
+            self,
+            actions,
+            gamma=0.9,
+            count_threshold=None,
+            epsilon_q=0.1,
+            epsilon_m=None,
+            delta=None,
+            n_states=None,
+            name="RMax"
+    ):
         """
         :param actions: action space of the environment
         :param gamma: (float) discount factor
         :param count_threshold: (int) count after which a state-action pair is considered known
-        :param epsilon: (float) precision of value iteration algorithm
+        (only set count_threshold if delta and epsilon are not defined)
+        :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
+        :param epsilon_m: (float) precision of the learned models in L1 norm
+        :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
+        :param n_states: (int) number of states
         :param name: (str)
         """
+        if count_threshold is None:
+            if delta is None or epsilon_m is None or n_states is None:
+                raise ValueError('Please set either `count_threshold` or `delta`, `epsilon_m` and `n_states`.')
+        else:
+            if delta is not None or epsilon_m is not None or n_states is not None:
+                raise ValueError('Please set either `count_threshold` or `delta`, `epsilon_m` and `n_states`.')
+
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.r_max = 1.0
-        self.count_threshold = count_threshold
-        self.vi_n_iter = int(np.log(1. / (epsilon * (1. - self.gamma))) / (1. - self.gamma))  # Nb of value iterations
+
+        if count_threshold is None:
+            self.count_threshold = compute_n_model_samples_high_confidence(epsilon_m, delta, n_states)
+        else:
+            self.count_threshold = count_threshold
+
+        self.vi_n_iter = int(np.log(1. / (epsilon_q * (1. - self.gamma))) / (1. - self.gamma))  # Nb of value iterations
 
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
         self.prev_s = None
