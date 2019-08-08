@@ -10,7 +10,7 @@ from collections import defaultdict
 from simple_rl.agents.AgentClass import Agent
 
 
-class RMaxMaxQInit(Agent):
+class MaxQInit(Agent):
     def __init__(
             self,
             actions,
@@ -19,7 +19,7 @@ class RMaxMaxQInit(Agent):
             epsilon=0.1,
             min_sampling_probability=0.1,
             delta=0.05,
-            name="RMax-MaxQInit"
+            name="MaxQInit"
     ):
         """
         :param actions: action space of the environment

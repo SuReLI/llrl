@@ -6,7 +6,7 @@ import numpy as np
 
 from llrl.agents.rmax import RMax
 from llrl.agents.lrmax import LRMax
-from llrl.agents.rmax_maxqinit import RMaxMaxQInit
+from llrl.agents.rmax_maxqinit import MaxQInit
 from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments_maker import run_agents_lifelong
 
@@ -24,7 +24,7 @@ def experiment():
     m = 1
     max_mem = 10
     rmax = RMax(actions=actions, gamma=GAMMA, count_threshold=m)
-    rmax_q = RMaxMaxQInit(actions=actions, gamma=GAMMA, count_threshold=m, min_sampling_probability=p_min, delta=delta)
+    rmax_q = MaxQInit(actions=actions, gamma=GAMMA, count_threshold=m, min_sampling_probability=p_min, delta=delta)
     lrmax2 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=2.)
     lrmax1 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=1.)
     lrmax05 = LRMax(actions=actions, gamma=GAMMA, count_threshold=m, max_memory_size=max_mem, prior=0.5)
