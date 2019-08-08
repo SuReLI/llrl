@@ -83,6 +83,7 @@ class LRMax(RMax):
 
         if v_max is None:
             self.v_max = 1. / (1. - gamma)
+        self.epsilon = epsilon
         self.b = epsilon * (1. + gamma * self.v_max)
 
         prior_max = (1. + gamma) / (1. - gamma)
@@ -396,36 +397,37 @@ class LRMax(RMax):
         :param s_a_uk: (list) state-actions pairs unknown in the current MDP - known in the previous MDP
         :return: (dictionary) computed Q-values gap
         """
-        gap_mem = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
-        gap_cur = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
-        cs = self.gamma * self.prior / (1. - self.gamma)
+        d_max = self.prior / (1. - self.gamma)
+        gamma_d_max = self.gamma * d_max
+        d_mem = defaultdict(lambda: defaultdict(lambda: d_max))
+        d_cur = defaultdict(lambda: defaultdict(lambda: d_max))
 
         for s, a in s_a_uk:  # Unknown (s, a) in current MDP
-            gap_mem[s][a] = distances_mem[s][a] + cs
+            d_mem[s][a] = distances_mem[s][a] + gamma_d_max
         for i in range(self.vi_n_iter):
-            tmp = copy.deepcopy(gap_mem)
+            tmp = copy.deepcopy(d_mem)
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
-                gap_p = 0.
+                d_p = 0.
                 for s_p in self.T[s][a]:
-                    gap_p += max([tmp[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
-                gap_mem[s][a] = distances_mem[s][a] + self.gamma * gap_p
+                    d_p += max([tmp[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
+                d_mem[s][a] = distances_mem[s][a] + self.gamma * d_p + self.epsilon * gamma_d_max
 
         for s, a in s_a_ku:  # Unknown (s, a) in memory MDP
-            gap_cur[s][a] = distances_cur[s][a] + cs
+            d_cur[s][a] = distances_cur[s][a] + gamma_d_max
         for i in range(self.vi_n_iter):
-            tmp = copy.deepcopy(gap_cur)
+            tmp = copy.deepcopy(d_cur)
             for s, a in s_a_kk + s_a_uk:  # Known (s, a) in memory MDP
-                gap_p = 0.
+                d_p = 0.
                 for s_p in t_mem[s][a]:
-                    gap_p += max([tmp[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
-                gap_cur[s][a] = distances_mem[s][a] + self.gamma * gap_p
+                    d_p += max([tmp[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
+                d_cur[s][a] = distances_mem[s][a] + self.gamma * d_p + self.epsilon * gamma_d_max
 
-        gap = defaultdict(lambda: defaultdict(lambda: self.prior / (1. - self.gamma)))
-        for s in gap_mem:
-            for a in gap_mem[s]:
-                gap[s][a] = min(gap_mem[s][a], gap_cur[s][a])
+        d = defaultdict(lambda: defaultdict(lambda: d_max))
+        for s in d_mem:
+            for a in d_mem[s]:
+                d[s][a] = min(d_mem[s][a], d_cur[s][a])
 
-        return gap
+        return d
 
     def lipschitz_upper_bound(self, u_mem, gap):
         """
