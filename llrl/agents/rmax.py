@@ -75,6 +75,7 @@ class RMax(Agent):
 
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.r_max = 1.0
+        self.v_max = self.r_max / (1. - gamma)
 
         if count_threshold is None:
             self.count_threshold = compute_n_model_samples_high_confidence(epsilon_m, delta, n_states)
@@ -113,7 +114,7 @@ class RMax(Agent):
         counter[s][a] (int): number of times the state action pair has been sampled
         :return: U, R, T, counter
         """
-        return defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma))), \
+        return defaultdict(lambda: defaultdict(lambda: self.v_max)), \
                defaultdict(lambda: defaultdict(float)), \
                defaultdict(lambda: defaultdict(lambda: defaultdict(float))), \
                defaultdict(lambda: defaultdict(int))

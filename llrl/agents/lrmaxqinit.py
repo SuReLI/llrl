@@ -1,4 +1,6 @@
 from llrl.agents.lrmax import LRMax
+import llrl.agents.maxqinit as mqi
+from collections import defaultdict
 
 
 class LRMaxQInit(LRMax):
@@ -44,20 +46,22 @@ class LRMaxQInit(LRMax):
                        max_memory_size=max_memory_size, prior=prior, min_sampling_probability=min_sampling_probability,
                        name=name)
 
-    def reset(self):
+        self.n_required_tasks = mqi.number_of_tasks_for_high_confidence_upper_bound(delta, min_sampling_probability)
+
+    def initialize_upper_bound(self):
         """
-        Reset the attributes to initial state (called between instances).
-        Save the previous model.
+        Initialization of the total upper-bound on the Q-value function.
+        Called before applying the value iteration algorithm.
         :return: None
         """
-        # Save previously learned model
-        if len(self.counter) > 0 and (self.max_memory_size is None or len(self.U_lip) < self.max_memory_size):
-            self.update_memory()
+        self.U = defaultdict(lambda: defaultdict(lambda: self.v_max))
 
-        RMax.reset(self)
+        if len(self.U_memory) > self.n_required_tasks:
+            for s in self.SA_memory:
+                for a in self.SA_memory[s]:
+                    self.U[s][a] = max([u[s][a] for u in self.U_memory])
 
-        self.update_lipschitz_upper_bounds()
-        self.update_upper_bound()
-
-        if self.estimate_distances_online:
-            self.update_max_distances()
+        for u_lip in self.U_lip:
+            for s in u_lip:
+                for a in u_lip[s]:
+                    self.U[s][a] = min(self.U[s][a], u_lip[s][a])

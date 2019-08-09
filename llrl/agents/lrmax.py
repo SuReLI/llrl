@@ -1,3 +1,4 @@
+from copy import deepcopy
 from collections import defaultdict
 from itertools import permutations
 
@@ -118,11 +119,11 @@ class LRMax(RMax):
 
         RMax.reset(self)
 
-        self.update_lipschitz_upper_bounds()
-        self.update_upper_bound()
-
         if self.estimate_distances_online:
             self.update_max_distances()
+
+        self.update_lipschitz_upper_bounds()
+        self.update_upper_bound()
 
     def act(self, s, r):
         """
@@ -149,22 +150,14 @@ class LRMax(RMax):
         Consequently, the saved state-action pairs only refer to known pairs.
         :return: None
         """
-        new_u = defaultdict(lambda: defaultdict(lambda: self.v_max))
-        new_r = defaultdict(lambda: defaultdict(float))
-        new_t = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
-
         for s in self.R:
             for a in self.R[s]:
                 if self.is_known(s, a):
-                    new_u[s][a] = self.U[s][a]
-                    new_r[s][a] = self.R[s][a]
-                    for s_p in self.T[s][a]:
-                        new_t[s][a][s_p] = self.T[s][a][s_p]
                     self.SA_memory[s][a] = True
 
-        self.U_memory.append(new_u)
-        self.R_memory.append(new_r)
-        self.T_memory.append(new_t)
+        self.U_memory.append(deepcopy(self.U))
+        self.R_memory.append(deepcopy(self.R))
+        self.T_memory.append(deepcopy(self.T))
 
     def update(self, s, a, r, s_p):
         """
@@ -245,28 +238,34 @@ class LRMax(RMax):
                     self.compute_lipschitz_upper_bound(self.U_memory[i], self.R_memory[i], self.T_memory[i])
                 )
 
+    def initialize_upper_bound(self):
+        """
+        Initialization of the total upper-bound on the Q-value function.
+        Called before applying the value iteration algorithm.
+        :return: None
+        """
+        self.U = defaultdict(lambda: defaultdict(lambda: self.v_max))
+        for u_lip in self.U_lip:
+            for s in u_lip:
+                for a in u_lip[s]:
+                    self.U[s][a] = min(self.U[s][a], u_lip[s][a])
+
     def update_upper_bound(self):
         """
         Update the total upper bound on the Q-value function.
         Called at initialization and when a new state-action pair is known.
         :return: None
         """
-        u = defaultdict(lambda: defaultdict(lambda: self.v_max))
-        for u_lip in self.U_lip:
-            for s in u_lip:
-                for a in u_lip[s]:
-                    u[s][a] = min(u[s][a], u_lip[s][a])
+        self.initialize_upper_bound()
 
-        for i in range(self.vi_n_iter):
+        for _ in range(self.vi_n_iter):
             for s in self.R:
                 for a in self.R[s]:
                     if self.is_known(s, a):
                         u_p = 0.
                         for s_p in self.T[s][a]:
-                            u_p += max([u[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
-                        u[s][a] = self.R[s][a] + self.gamma * u_p
-
-        self.U = u
+                            u_p += max([self.U[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
+                        self.U[s][a] = self.R[s][a] + self.gamma * u_p
 
     def integrate_distances_knowledge(self, distances):
         for s in distances:
