@@ -1,4 +1,3 @@
-import random
 from collections import defaultdict
 from itertools import permutations
 
