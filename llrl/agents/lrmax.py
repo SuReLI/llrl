@@ -219,12 +219,12 @@ class LRMax(RMax):
         Called after each interaction with an environment.
         :return: None
         """
-        n_prev_mdps = len(self.U_memory)
-        if n_prev_mdps >= self.n_samples_high_confidence:
+        n_prev_tasks = len(self.U_memory)
+        if n_prev_tasks >= self.n_samples_high_confidence:
             for s in self.SA_memory:
                 for a in self.SA_memory[s]:
                     indices = []
-                    for i in range(n_prev_mdps):
+                    for i in range(n_prev_tasks):
                         if s in self.R_memory[i] and a in self.R_memory[i][s]:  # s, a is known in ith
                             indices.append(i)
                     if len(indices) >= self.n_samples_high_confidence:
@@ -239,10 +239,10 @@ class LRMax(RMax):
         Called at initialization and when a new state-action pair is known.
         :return: None
         """
-        n_prev_mdps = len(self.U_memory)
-        if n_prev_mdps > 0:
+        n_prev_tasks = len(self.U_memory)
+        if n_prev_tasks > 0:
             self.U_lip = []
-            for i in range(n_prev_mdps):
+            for i in range(n_prev_tasks):
                 self.U_lip.append(
                     self.compute_lipschitz_upper_bound(self.U_memory[i], self.R_memory[i], self.T_memory[i])
                 )
@@ -253,12 +253,11 @@ class LRMax(RMax):
         Called at initialization and when a new state-action pair is known.
         :return: None
         """
-        u = defaultdict(lambda: defaultdict(lambda: self.r_max / (1.0 - self.gamma)))
+        u = defaultdict(lambda: defaultdict(lambda: self.v_max))
         for u_lip in self.U_lip:
             for s in u_lip:
                 for a in u_lip[s]:
-                    if u_lip[s][a] < u[s][a]:
-                        u[s][a] = u_lip[s][a]
+                    u[s][a] = min(u[s][a], u_lip[s][a])
 
         for i in range(self.vi_n_iter):
             for s in self.R:
@@ -266,7 +265,7 @@ class LRMax(RMax):
                     if self.is_known(s, a):
                         u_p = 0.
                         for s_p in self.T[s][a]:
-                            u_p += u[s_p][self.greedy_action(s_p, u)] * self.T[s][a][s_p]
+                            u_p += max([u[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
                         u[s][a] = self.R[s][a] + self.gamma * u_p
 
         self.U = u

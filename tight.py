@@ -28,9 +28,11 @@ def experiment():
     rmax = RMax(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states)
     lrmax = LRMax(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                   n_states=n_states, max_memory_size=max_mem, prior=19.)
+    maxqinit = MaxQInit(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
+                        n_states=n_states, min_sampling_probability=p_min)
     lrmaxqinit = LRMaxQInit(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                             n_states=n_states, max_memory_size=max_mem, prior=19.)
-    agents_pool = [lrmaxqinit]
+    agents_pool = [rmax, maxqinit]
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, samples=2, episodes=5, steps=100, reset_at_terminal=False,

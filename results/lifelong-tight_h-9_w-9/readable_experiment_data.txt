@@ -1,7 +1,8 @@
 (MDP)
 	lifelong-tight_h-9_w-9
 (Agents)
-	LRMax-prior19.0-prior19.0,0
+	RMax,0
+	MaxQInit,1
 (Params)
 	samples : 2
 	episodes : 5
