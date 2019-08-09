@@ -3,7 +3,7 @@
 (Agents)
 	RMax,0
 (Params)
-	samples : 10
+	samples : 1
 	episodes : 500
 	steps : 1000
 	track_disc_reward : False

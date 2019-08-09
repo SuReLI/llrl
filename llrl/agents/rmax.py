@@ -187,14 +187,12 @@ class RMax(Agent):
         Called when a new state-action pair is known.
         :return: None
         """
-        for i in range(self.vi_n_iter):
+        for _ in range(self.vi_n_iter):
             for s in self.R:
                 for a in self.R[s]:
                     if self.is_known(s, a):
-                        r_s_a = self.R[s][a]
-
-                        weighted_next_upper_bound = 0.
+                        u_p = 0.
                         for s_p in self.T[s][a]:
-                            weighted_next_upper_bound += max(self.U[s_p][a_p] for a_p in self.actions) * self.T[s][a][s_p]
+                            u_p += max(self.U[s_p][a_p] for a_p in self.actions) * self.T[s][a][s_p]
 
-                        self.U[s][a] = r_s_a + self.gamma * weighted_next_upper_bound
+                        self.U[s][a] = self.R[s][a] + self.gamma * u_p
