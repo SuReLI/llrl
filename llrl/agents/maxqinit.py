@@ -35,7 +35,7 @@ class MaxQInit(RMax):
         RMax.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon_q=epsilon_q,
                       epsilon_m=epsilon_m, delta=delta, n_states=n_states, name=name)
 
-        self.SA_memory = []
+        self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
         self.U_memory = []  # Upper-bounds on the Q-values of previous MDPs
         self.n_required_tasks = np.log(delta) / np.log(1. - min_sampling_probability)
 
@@ -47,7 +47,7 @@ class MaxQInit(RMax):
         for s in self.R:
             for a in self.R[s]:
                 if self.is_known(s, a):
-                    self.SA_memory.append((s, a))
+                    self.SA_memory[s][a] = True
         self.U_memory.append(copy.deepcopy(self.U))
 
         RMax.reset(self)
@@ -60,5 +60,6 @@ class MaxQInit(RMax):
         Update the bound on the Q-value with the MaxQInit method.
         :return: None
         """
-        for s, a in self.SA_memory:
-            self.U[s][a] = max([u[s][a] for u in self.U_memory])
+        for s in self.SA_memory:
+            for a in self.SA_memory[s]:
+                self.U[s][a] = max([u[s][a] for u in self.U_memory])

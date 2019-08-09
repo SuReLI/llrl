@@ -39,18 +39,25 @@ class LRMaxQInit(LRMax):
         :param name: (str)
         """
         name = name if prior is None else name + '-prior' + str(prior)
-        LRMax.__init__(
-            self,
-            actions=actions,
-            gamma=gamma,
-            count_threshold=count_threshold,
-            epsilon_q=epsilon_q,
-            epsilon_m=epsilon_m,
-            delta=delta,
-            n_states=n_states,
-            v_max=v_max,
-            max_memory_size=max_memory_size,
-            prior=prior,
-            min_sampling_probability=min_sampling_probability,
-            name=name
-        )
+        LRMax.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon_q=epsilon_q,
+                       epsilon_m=epsilon_m, delta=delta, n_states=n_states, v_max=v_max,
+                       max_memory_size=max_memory_size, prior=prior, min_sampling_probability=min_sampling_probability,
+                       name=name)
+
+    def reset(self):
+        """
+        Reset the attributes to initial state (called between instances).
+        Save the previous model.
+        :return: None
+        """
+        # Save previously learned model
+        if len(self.counter) > 0 and (self.max_memory_size is None or len(self.U_lip) < self.max_memory_size):
+            self.update_memory()
+
+        RMax.reset(self)
+
+        self.update_lipschitz_upper_bounds()
+        self.update_upper_bound()
+
+        if self.estimate_distances_online:
+            self.update_max_distances()

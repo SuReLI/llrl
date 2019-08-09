@@ -116,9 +116,7 @@ class LRMax(RMax):
         if len(self.counter) > 0 and (self.max_memory_size is None or len(self.U_lip) < self.max_memory_size):
             self.update_memory()
 
-        self.U, self.R, self.T, self.counter = self.empty_memory_structure()
-        self.prev_s = None
-        self.prev_a = None
+        RMax.reset(self)
 
         self.update_lipschitz_upper_bounds()
         self.update_upper_bound()
