@@ -1,9 +1,9 @@
 (MDP)
 	lifelong-tight_h-9_w-9
 (Agents)
-	RMax,0
+	LRMax-prior19.000000000000004,0
 (Params)
-	samples : 1
-	episodes : 500
+	samples : 10
+	episodes : 10
 	steps : 1000
 	track_disc_reward : False

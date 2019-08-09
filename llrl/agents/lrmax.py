@@ -1,4 +1,4 @@
-import copy
+import random
 from collections import defaultdict
 from itertools import permutations
 
@@ -43,11 +43,13 @@ class LRMax(RMax):
             self,
             actions,
             gamma=0.9,
-            count_threshold=1,
-            max_memory_size=None,
-            epsilon=0.1,
-            delta=0.05,
+            count_threshold=None,
+            epsilon_q=0.1,
+            epsilon_m=None,
+            delta=None,
+            n_states=None,
             v_max=None,
+            max_memory_size=None,
             prior=None,
             min_sampling_probability=0.1,
             name="LRMax"
@@ -56,10 +58,13 @@ class LRMax(RMax):
         :param actions: action space of the environment
         :param gamma: (float) discount factor
         :param count_threshold: (int) count after which a state-action pair is considered known
-        :param max_memory_size: (int) maximum number of saved models (infinity if None)
-        :param epsilon: (float) precision of value iteration algorithm
-        :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
+        (only set count_threshold if delta and epsilon are not defined)
+        :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
+        :param epsilon_m: (float) precision of the learned models in L1 norm
+        :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
+        :param n_states: (int) number of states
         :param v_max: (float) known upper-bound on the value function
+        :param max_memory_size: (int) maximum number of saved models (infinity if None)
         :param prior: (float) prior knowledge of maximum model's distance
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
@@ -70,7 +75,10 @@ class LRMax(RMax):
             actions=actions,
             gamma=gamma,
             count_threshold=count_threshold,
-            epsilon=epsilon,
+            epsilon_q=epsilon_q,
+            epsilon_m=epsilon_m,
+            delta=delta,
+            n_states=n_states,
             name=name
         )
 
@@ -82,9 +90,9 @@ class LRMax(RMax):
         self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
 
         if v_max is None:
-            self.v_max = 1. / (1. - gamma)
-        self.epsilon = epsilon
-        self.b = epsilon * (1. + gamma * self.v_max)
+            self.v_max = self.r_max / (1. - gamma)
+        self.epsilon_m = epsilon_m
+        self.b = epsilon_m * (1. + gamma * self.v_max)
 
         prior_max = (1. + gamma) / (1. - gamma)
         if prior is None:
@@ -128,12 +136,12 @@ class LRMax(RMax):
         """
         self.update(self.prev_s, self.prev_a, r, s)
 
-        a = self.greedy_action(s, self.U)
+        a_star = self.greedy_action(s, self.U)
 
-        self.prev_a = a
+        self.prev_a = a_star
         self.prev_s = s
 
-        return a
+        return a_star
 
     def update_memory(self):
         """
@@ -257,10 +265,10 @@ class LRMax(RMax):
             for s in self.R:
                 for a in self.R[s]:
                     if self.is_known(s, a):
-                        weighted_next_upper_bound = 0.
+                        u_p = 0.
                         for s_p in self.T[s][a]:
-                            weighted_next_upper_bound += u[s_p][self.greedy_action(s_p, u)] * self.T[s][a][s_p]
-                        u[s][a] = self.R[s][a] + self.gamma * weighted_next_upper_bound
+                            u_p += u[s_p][self.greedy_action(s_p, u)] * self.T[s][a][s_p]
+                        u[s][a] = self.R[s][a] + self.gamma * u_p
 
         self.U = u
 
@@ -404,22 +412,20 @@ class LRMax(RMax):
         for s, a in s_a_uk:  # Unknown (s, a) in current MDP
             d_mem[s][a] = distances_mem[s][a] + gamma_d_max
         for i in range(self.vi_n_iter):
-            tmp = copy.deepcopy(d_mem)
             for s, a in s_a_kk + s_a_ku:  # Known (s, a) in current MDP
                 d_p = 0.
                 for s_p in self.T[s][a]:
-                    d_p += max([tmp[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
-                d_mem[s][a] = distances_mem[s][a] + self.gamma * d_p + self.epsilon * gamma_d_max
+                    d_p += max([d_mem[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
+                d_mem[s][a] = distances_mem[s][a] + self.gamma * d_p + self.epsilon_m * gamma_d_max
 
         for s, a in s_a_ku:  # Unknown (s, a) in memory MDP
             d_cur[s][a] = distances_cur[s][a] + gamma_d_max
         for i in range(self.vi_n_iter):
-            tmp = copy.deepcopy(d_cur)
             for s, a in s_a_kk + s_a_uk:  # Known (s, a) in memory MDP
                 d_p = 0.
                 for s_p in t_mem[s][a]:
-                    d_p += max([tmp[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
-                d_cur[s][a] = distances_mem[s][a] + self.gamma * d_p + self.epsilon * gamma_d_max
+                    d_p += max([d_cur[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
+                d_cur[s][a] = distances_mem[s][a] + self.gamma * d_p + self.epsilon_m * gamma_d_max
 
         d = defaultdict(lambda: defaultdict(lambda: d_max))
         for s in d_mem:

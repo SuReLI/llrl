@@ -98,7 +98,7 @@ class GridWorld(GridWorldMDP):
         if (s_p.x, s_p.y) in self.goal_locs:
             r = self.goal_reward - self.step_cost
         elif (s_p.x, s_p.y) in self.lava_locs:
-            r = - self.lava_cost
+            r = 0. - self.lava_cost
         else:
             r = 0. - self.step_cost
 
@@ -112,15 +112,14 @@ class GridWorld(GridWorldMDP):
 
     def states(self):
         """
-        Compute a list of the states of the environment.
+        Return a list of the states of the environment.
         :return: list of states
         """
         states = []
         for i in range(1, self.width + 1):
             for j in range(1, self.height + 1):
                 s = GridWorldState(i, j)
-                if (i, j) in self.goal_locs and self.is_goal_terminal:
+                if self.is_goal_terminal and (i, j) in self.goal_locs:
                     s.set_terminal(True)
                 states.append(s)
         return states
-
