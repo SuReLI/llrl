@@ -101,7 +101,8 @@ class LRMax(RMax):
         Re-initialization for multiple instances.
         :return: None
         """
-        print('Warning: re_init not yet implemented on', self.name)  # TODO
+        print('Warning: re_init not yet implemented on', self.name,
+              ', you should stop your script if you are running multiple instances')  # TODO
 
     def reset(self):
         """

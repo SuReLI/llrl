@@ -4,7 +4,7 @@ from llrl.agents.rmax import RMax
 from llrl.agents.lrmax import LRMax
 from llrl.agents.maxqinit import MaxQInit
 from llrl.utils.env_handler import make_env_distribution
-from llrl.experiments_maker import run_agents_lifelong
+from llrl.experiments import run_agents_lifelong
 
 
 GAMMA = .9

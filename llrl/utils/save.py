@@ -2,6 +2,51 @@ import csv
 import pandas as pd
 
 
+def lifelong_save(path, agent, data, n_instance, is_first_save):
+    """
+    Save according to a specific data structure designed for lifelong RL experiments.
+    :param path: (str)
+    :param agent: agent object
+    :param data: (dictionary)
+    :return: None
+    """
+    full_path = path + '/results-' + agent.get_name() + '.csv'
+    if is_first_save:
+        names = ['instance', 'task', 'episode', 'return', 'discounted_return']
+        csv_write(names, full_path, 'w')
+    # TODO here
+
+
+def save_return_per_episode(
+        path,
+        agents,
+        avg_return_per_episode_per_agent,
+        is_tracked_value_discounted
+):
+    # Set names
+    labels = [
+        'episode_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
+    ] if is_tracked_value_discounted else [
+        'episode_number', 'average_return', 'average_return_lo', 'average_return_up'
+    ]
+    file_name = 'average_discounted_return_per_episode' if is_tracked_value_discounted else 'average_return_per_episode'
+
+    # Save
+    n_episodes = len(avg_return_per_episode_per_agent[0])
+    x = range(n_episodes)
+    data = []
+    for agent in range(len(agents)):
+        data.append([])
+        for episode in range(n_episodes):
+            data[-1].append([
+                x[episode],
+                avg_return_per_episode_per_agent[agent][episode][0],
+                avg_return_per_episode_per_agent[agent][episode][1],
+                avg_return_per_episode_per_agent[agent][episode][2]
+            ])
+    save_agents(path, csv_name=file_name, agents=agents, data=data, labels=labels)
+
+
 def get_csv_path(path, csv_name, agent):
     return path + '/' + csv_name + '-' + agent.get_name() + '.csv'
 

@@ -7,39 +7,9 @@ import time
 from collections import defaultdict
 
 from llrl.utils.utils import mean_confidence_interval
-from llrl.utils.save import save_agents, open_agents
+from llrl.utils.save import lifelong_save, save_agents, open_agents
 from llrl.utils.chart_utils import plot
 from simple_rl.experiments import Experiment
-
-
-def save_return_per_episode(
-        path,
-        agents,
-        avg_return_per_episode_per_agent,
-        is_tracked_value_discounted
-):
-    # Set names
-    labels = [
-        'episode_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
-    ] if is_tracked_value_discounted else [
-        'episode_number', 'average_return', 'average_return_lo', 'average_return_up'
-    ]
-    file_name = 'average_discounted_return_per_episode' if is_tracked_value_discounted else 'average_return_per_episode'
-
-    # Save
-    n_episodes = len(avg_return_per_episode_per_agent[0])
-    x = range(n_episodes)
-    data = []
-    for agent in range(len(agents)):
-        data.append([])
-        for episode in range(n_episodes):
-            data[-1].append([
-                x[episode],
-                avg_return_per_episode_per_agent[agent][episode][0],
-                avg_return_per_episode_per_agent[agent][episode][1],
-                avg_return_per_episode_per_agent[agent][episode][2]
-            ])
-    save_agents(path, csv_name=file_name, agents=agents, data=data, labels=labels)
 
 
 def plot_return_per_episode(
@@ -196,7 +166,6 @@ def run_agents_lifelong(
 
     if not plot_only:
         print("Running experiment:\n" + str(experiment))
-        times = defaultdict(float)
         avg_return_per_task_per_agent = []
         avg_return_per_episode_per_agent = []
 
@@ -207,12 +176,6 @@ def run_agents_lifelong(
 
         for agent in agents:
             run_single_agent_lifelong(agent)
-
-        # Time stuff
-        print("\n--- TIMES ---")
-        for agent in times.keys():
-            print(str(agent) + " agent took " + str(round(times[agent], 2)) + " seconds.")
-        print("-------------\n")
 
         # Save
         save_return_per_task(experiment.exp_directory, agents, avg_return_per_task_per_agent,
@@ -232,28 +195,35 @@ def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episode
                               reset_at_terminal, verbose):
     """"""
     print(str(agent) + " is learning.")
+    for instance in range(1, n_instances + 1):
+        agent.re_init()  # re-initialize before each instance
+        data = {'returns_per_tasks': [], 'discounted_returns_per_tasks': []}
 
-    for instance in range(n_instances):
-        print("  Instance " + str(instance + 1) + " / " + str(n_instances))
-        agent.__init__()
+        print("  Instance " + str(instance) + " / " + n_instances)
         start = time.clock()
-        instance_returns = []
-        for i in range(n_tasks):
-            print("    Experience task " + str(i + 1) + " / " + str(n_tasks))
+        for i in range(1, n_tasks + 1):
+            print("    Experience task " + str(i) + " / " + n_tasks)
             task = tasks[i]  # task selection
 
-            # Run
-            _, _, task_returns = run_single_agent_on_mdp(
+            # Run on task
+            _, _, returns, discounted_returns = run_single_agent_on_mdp(
                 agent, task, n_episodes, n_steps, experiment, verbose=verbose, track_disc_reward=track_disc_reward,
                 reset_at_terminal=reset_at_terminal, resample_at_terminal=False
             )
 
-            instance_returns.append(task_returns)
+            # Store
+            data['returns_per_tasks'].append(returns)
+            data['discounted_returns_per_tasks'].append(discounted_returns)
 
             # Reset the agent
             agent.reset()
+        print("    Total time elapsed: " + str(round(time.clock() - start, 3)))
 
-        # Store results
+        # Save
+        lifelong_save(experiment.exp_directory, agent, data, instance, True if instance == 1 else False)
+
+        # TODO remove
+        '''
         avg_return_per_task = [(0., 0., 0.)] * n_tasks  # Mean, lower, upper
         avg_return_per_episode = [(0., 0., 0.)] * n_episodes  # Mean, lower, upper
         for i in range(n_tasks):
@@ -261,13 +231,10 @@ def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episode
         for j in range(n_episodes):
             return_per_task = [returns[i][j] for i in range(n_tasks)]
             avg_return_per_episode[j] = mean_confidence_interval(return_per_task, confidence=confidence)
-
+            
         avg_return_per_task_per_agent.append(avg_return_per_task)
         avg_return_per_episode_per_agent.append(avg_return_per_episode)
-
-        # Track how much time this agent took
-        end = time.clock()
-        times[agent] = round(end - start, 3)
+        '''
 
 
 def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_disc_reward=False,
@@ -301,8 +268,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
 
         # Compute initial state/reward.
         state = mdp.get_init_state()
-        reward = 0
-        episode_start_time = time.clock()
+        reward = 0.
 
         for step in range(1, steps + 1):
 
@@ -348,7 +314,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
             state = next_state
 
         # A final update.
-        action = agent.act(state, reward)
+        _ = agent.act(state, reward)
 
         # Process experiment info at end of episode.
         if experiment is not None:
