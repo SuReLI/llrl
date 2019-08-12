@@ -84,4 +84,4 @@ class MaxQInit(RMax):
         """
         for s in self.SA_memory:
             for a in self.SA_memory[s]:
-                self.U[s][a] = max([u[s][a] for u in self.U_memory])
+                self.U[s][a] = min(self.U[s][a], max([u[s][a] for u in self.U_memory]))

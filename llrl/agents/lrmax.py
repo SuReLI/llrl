@@ -110,8 +110,6 @@ class LRMax(RMax):
 
         if self.estimate_distances_online:
             self.update_max_distances()
-
-        self.update_lipschitz_upper_bounds()
         self.update_upper_bound()
 
     def act(self, s, r):
@@ -170,62 +168,7 @@ class LRMax(RMax):
                         self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
 
                 if self.counter[s][a] == self.count_threshold:
-                    self.update_lipschitz_upper_bounds()
                     self.update_upper_bound()
-
-    def model_upper_bound(self, i, j, s, a):
-        """
-        Compute the distance between memory models at (s, a)
-        :param i: (int) index of the first model, whose Q-value upper-bound is used
-        :param j: (int) index of the second model
-        :param s: state
-        :param a: action
-        :return: Return the distance
-        """
-        dt = 0.
-        for s_p in self.T_memory[i][s][a]:
-            v_p = max([self.U_memory[i][s_p][a_p] for a_p in self.actions])
-            dt += v_p * abs(self.T_memory[i][s][a][s_p] - self.T_memory[j][s][a][s_p])
-        for s_p in self.T_memory[j][s][a]:
-            if s_p not in self.T_memory[i][s][a]:
-                v_p = max([self.U_memory[i][s_p][a_p] for a_p in self.actions])
-                dt += v_p * self.T_memory[j][s][a][s_p]
-        dr = abs(self.R_memory[i][s][a] - self.R_memory[j][s][a])
-        return dr + self.gamma * dt
-
-    def update_max_distances(self):
-        """
-        Update the maximum model's distance for each state-action pair.
-        Called after each interaction with an environment.
-        :return: None
-        """
-        n_prev_tasks = len(self.U_memory)
-        if n_prev_tasks >= self.n_samples_high_confidence:
-            for s in self.SA_memory:
-                for a in self.SA_memory[s]:
-                    indices = []
-                    for i in range(n_prev_tasks):
-                        if s in self.R_memory[i] and a in self.R_memory[i][s]:  # s, a is known in ith
-                            indices.append(i)
-                    if len(indices) >= self.n_samples_high_confidence:
-                        distances = []
-                        for p in permutations(indices, 2):
-                            distances.append(self.model_upper_bound(p[0], p[1], s, a))
-                        self.D[s][a] = max(distances)
-
-    def update_lipschitz_upper_bounds(self):
-        """
-        Update the Lipschitz upper-bound for each instance of the memory.
-        Called at initialization and when a new state-action pair is known.
-        :return: None
-        """
-        n_prev_tasks = len(self.U_memory)
-        if n_prev_tasks > 0:
-            self.U_lip = []
-            for i in range(n_prev_tasks):
-                self.U_lip.append(
-                    self.compute_lipschitz_upper_bound(self.U_memory[i], self.R_memory[i], self.T_memory[i])
-                )
 
     def initialize_upper_bound(self):
         """
@@ -245,18 +188,68 @@ class LRMax(RMax):
         Called at initialization and when a new state-action pair is known.
         :return: None
         """
+        self.update_lipschitz_upper_bounds()
         self.initialize_upper_bound()
+        RMax.update_upper_bound(self)
 
-        for _ in range(self.vi_n_iter):
-            for s in self.R:
-                for a in self.R[s]:
-                    if self.is_known(s, a):
-                        u_p = 0.
-                        for s_p in self.T[s][a]:
-                            u_p += max([self.U[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
-                        self.U[s][a] = self.R[s][a] + self.gamma * u_p
+    def update_lipschitz_upper_bounds(self):
+        """
+        Update the Lipschitz upper-bound for each instance of the memory.
+        Called at initialization and when a new state-action pair is known.
+        :return: None
+        """
+        n_prev_tasks = len(self.U_memory)
+        if n_prev_tasks > 0:
+            self.U_lip = []
+            for i in range(n_prev_tasks):
+                self.U_lip.append(self.compute_lipschitz_upper_bound(self.U_memory[i], self.R_memory[i],
+                                                                     self.T_memory[i]))
+
+    def model_upper_bound(self, i, j, s, a):
+        """
+        Compute the distance between memory models at (s, a)
+        :param i: (int) index of the first model, whose Q-value upper-bound is used
+        :param j: (int) index of the second model
+        :param s: state
+        :param a: action
+        :return: Return the distance
+        """
+        dt = 0.
+        for s_p in self.T_memory[i][s][a]:
+            v_p = max([self.U_memory[i][s_p][a_p] for a_p in self.actions])
+            dt += v_p * abs(self.T_memory[i][s][a][s_p] - self.T_memory[j][s][a][s_p])
+        for s_p in self.T_memory[j][s][a]:
+            if s_p not in self.T_memory[i][s][a]:
+                v_p = max([self.U_memory[i][s_p][a_p] for a_p in self.actions])
+                dt += v_p * self.T_memory[j][s][a][s_p]
+        return abs(self.R_memory[i][s][a] - self.R_memory[j][s][a]) + self.gamma * dt
+
+    def update_max_distances(self):
+        """
+        Update the maximum model's distance for each state-action pair.
+        Called after each interaction with an environment.
+        :return: None
+        """
+        n_prev_tasks = len(self.U_memory)
+        if n_prev_tasks >= self.n_samples_high_confidence:
+            for s in self.SA_memory:
+                for a in self.SA_memory[s]:
+                    indices = []  # indices of the tasks where (s, a) is known
+                    for i in range(n_prev_tasks):
+                        if s in self.R_memory[i] and a in self.R_memory[i][s]:  # s, a is known in ith
+                            indices.append(i)
+                    if len(indices) >= self.n_samples_high_confidence:
+                        distances = []
+                        for p in permutations(indices, 2):
+                            distances.append(self.model_upper_bound(p[0], p[1], s, a))
+                        self.D[s][a] = max(distances)
 
     def integrate_distances_knowledge(self, distances):
+        """
+        Integrate the knowledge on the learned distances to the distance estimates.
+        :param distances: (dictionary) distance estimates
+        :return: (dictionary) distance estimates with integrated knowledge
+        """
         for s in distances:
             for a in distances[s]:
                 distances[s][a] = min(distances[s][a], self.D[s][a])

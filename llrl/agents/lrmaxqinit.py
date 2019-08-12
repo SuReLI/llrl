@@ -58,7 +58,7 @@ class LRMaxQInit(LRMax):
         if len(self.U_memory) > self.n_required_tasks:
             for s in self.SA_memory:
                 for a in self.SA_memory[s]:
-                    self.U[s][a] = max([u[s][a] for u in self.U_memory])
+                    self.U[s][a] = min(self.U[s][a], max([u[s][a] for u in self.U_memory]))
 
         for u_lip in self.U_lip:
             for s in u_lip:

@@ -117,9 +117,9 @@ class RMax(Agent):
         counter[s][a] (int): number of times the state action pair has been sampled
         :return: U, R, T, counter
         """
-        return defaultdict(lambda: defaultdict(lambda: self.v_max)), \
-               defaultdict(lambda: defaultdict(float)), \
-               defaultdict(lambda: defaultdict(lambda: defaultdict(float))), \
+        return defaultdict(lambda: defaultdict(lambda: self.v_max)),\
+               defaultdict(lambda: defaultdict(float)),\
+               defaultdict(lambda: defaultdict(lambda: defaultdict(float))),\
                defaultdict(lambda: defaultdict(int))
 
     def is_known(self, s, a):
@@ -167,7 +167,7 @@ class RMax(Agent):
                         self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
 
                 if self.counter[s][a] == self.count_threshold:
-                    self.update_rmax_upper_bound()
+                    self.update_upper_bound()
 
     def greedy_action(self, s, f):
         """
@@ -185,7 +185,7 @@ class RMax(Agent):
                 a_star = a
         return a_star
 
-    def update_rmax_upper_bound(self):
+    def update_upper_bound(self):
         """
         Update the upper bound on the Q-value function.
         Called when a new state-action pair is known.
@@ -197,6 +197,5 @@ class RMax(Agent):
                     if self.is_known(s, a):
                         u_p = 0.
                         for s_p in self.T[s][a]:
-                            u_p += max(self.U[s_p][a_p] for a_p in self.actions) * self.T[s][a][s_p]
-
+                            u_p += max([self.U[s_p][a_p] for a_p in self.actions]) * self.T[s][a][s_p]
                         self.U[s][a] = self.R[s][a] + self.gamma * u_p
