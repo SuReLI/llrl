@@ -96,6 +96,13 @@ class LRMax(RMax):
         self.U_lip = []
         self.update_upper_bound()
 
+    def re_init(self):
+        """
+        Re-initialization for multiple instances.
+        :return: None
+        """
+        print('Warning: re_init not yet implemented on', self.name)  # TODO
+
     def reset(self):
         """
         Reset the attributes to initial state (called between instances).

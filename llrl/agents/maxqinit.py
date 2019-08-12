@@ -53,6 +53,13 @@ class MaxQInit(RMax):
         self.U_memory = []  # Upper-bounds on the Q-values of previous MDPs
         self.n_required_tasks = number_of_tasks_for_high_confidence_upper_bound(delta, min_sampling_probability)
 
+    def re_init(self):
+        """
+        Re-initialization for multiple instances.
+        :return: None
+        """
+        print('Warning: re_init not yet implemented on', self.name)  # TODO
+
     def reset(self):
         """
         Reset the attributes to initial state (called between instances).

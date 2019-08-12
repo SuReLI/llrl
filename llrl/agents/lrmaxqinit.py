@@ -47,6 +47,13 @@ class LRMaxQInit(LRMax):
                        max_memory_size=max_memory_size, prior=prior, min_sampling_probability=min_sampling_probability,
                        name=name)
 
+    def re_init(self):
+        """
+        Re-initialization for multiple instances.
+        :return: None
+        """
+        print('Warning: re_init not yet implemented on', self.name)  # TODO
+
     def initialize_upper_bound(self):
         """
         Initialization of the total upper-bound on the Q-value function.

@@ -79,7 +79,10 @@ class RMax(Agent):
         self.r_max = 1.0
         self.v_max = self.r_max / (1. - gamma) if v_max is None else v_max
 
+        self.epsilon_q = epsilon_q
         self.epsilon_m = epsilon_m
+        self.delta = delta
+        self.n_states = n_states
         if count_threshold is None:
             self.count_threshold = compute_n_model_samples_high_confidence(epsilon_m, delta, n_states)
         else:
@@ -90,6 +93,20 @@ class RMax(Agent):
         self.U, self.R, self.T, self.counter = self.empty_memory_structure()
         self.prev_s = None
         self.prev_a = None
+
+    def re_init(self):
+        """
+        Re-initialization for multiple instances.
+        :return: None
+        """
+        if self.epsilon_m is None:
+            self.__init__(actions=self.actions, gamma=self.gamma, count_threshold=self.count_threshold,
+                          epsilon_q=self.epsilon_q, epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
+                          v_max=self.v_max, name=self.name)
+        else:
+            self.__init__(actions=self.actions, gamma=self.gamma, count_threshold=None,
+                          epsilon_q=self.epsilon_q, epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
+                          v_max=self.v_max, name=self.name)
 
     def reset(self):
         """

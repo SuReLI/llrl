@@ -228,11 +228,14 @@ def run_agents_lifelong(
                             open_plot=open_plot, plot_title=plot_title)
 
 
-def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, verbose):
+def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
+                              reset_at_terminal, verbose):
+    """"""
     print(str(agent) + " is learning.")
 
     for instance in range(n_instances):
         print("  Instance " + str(instance + 1) + " / " + str(n_instances))
+        agent.__init__()
         start = time.clock()
         instance_returns = []
         for i in range(n_tasks):
