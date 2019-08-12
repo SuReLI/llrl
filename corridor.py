@@ -26,6 +26,7 @@ def experiment():
     max_mem = 2
 
     # Agents
+    rmaxtest = RMax(actions=actions, gamma=gamma, epsilon_q=epsilon_q, count_threshold=5)
     rmax = RMax(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states)
     lrmax = LRMax(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                   n_states=n_states, max_memory_size=max_mem, prior=19.)
@@ -33,10 +34,10 @@ def experiment():
                         n_states=n_states, min_sampling_probability=p_min)
     lrmaxqinit = LRMaxQInit(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                             n_states=n_states, max_memory_size=max_mem, prior=19.)
-    agents_pool = [rmax]
+    agents_pool = [rmaxtest]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, samples=1000, episodes=1000, steps=2, reset_at_terminal=False,
+    run_agents_lifelong(agents_pool, env_distribution, n_tasks=50, n_episodes=50, steps=2, reset_at_terminal=False,
                         open_plot=True, cumulative_plot=False, is_tracked_value_discounted=False, plot_only=False,
                         plot_title=False)
 

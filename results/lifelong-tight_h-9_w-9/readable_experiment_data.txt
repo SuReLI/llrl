@@ -2,9 +2,8 @@
 	lifelong-tight_h-9_w-9
 (Agents)
 	RMax,0
-	MaxQInit,1
 (Params)
-	samples : 2
+	samples : 5
 	episodes : 5
 	steps : 100
 	track_disc_reward : False
