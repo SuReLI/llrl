@@ -10,17 +10,18 @@ def probability_of_success(n_samples, p_min):
     Compute a lower bound on the probability of successful distance estimation.
     :param n_samples: (int) number of samples
     :param p_min: (float) minimum sampling probability of an environment
-    :return: Return the probability of successful estimation
+    :return: (float) the probability of successful estimation in [0, 1]
     """
     return 1. - 2. * (1. - p_min) ** float(n_samples) + (1. - 2. * p_min) ** float(n_samples)
 
 
 def compute_n_samples_high_confidence(p_min, delta):
     """
-    Compute the number of samples required for an accurate estimate with high probability.
+    Compute the number of samples required for an accurate estimate
+    of the model pseudo-distance with high probability.
     :param p_min: (float) minimum sampling probability
     :param delta: (float) uncertainty degree on the maximum model's distance of a state-action pair
-    :return: Return the number of samples
+    :return: (int) the number of samples
     """
     hc = 1. - delta
     n_max = int(1e6)
@@ -70,17 +71,8 @@ class LRMax(RMax):
         :param name: (str)
         """
         name = name if prior is None else name + '-prior' + str(prior)
-        RMax.__init__(
-            self,
-            actions=actions,
-            gamma=gamma,
-            count_threshold=count_threshold,
-            epsilon_q=epsilon_q,
-            epsilon_m=epsilon_m,
-            delta=delta,
-            n_states=n_states,
-            name=name
-        )
+        RMax.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon_q=epsilon_q,
+                      epsilon_m=epsilon_m, delta=delta, n_states=n_states, v_max=v_max, name=name)
 
         # Lifelong Learning memories
         self.max_memory_size = max_memory_size
@@ -89,9 +81,6 @@ class LRMax(RMax):
         self.T_memory = []
         self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
 
-        if v_max is None:
-            self.v_max = self.r_max / (1. - gamma)
-        self.epsilon_m = epsilon_m
         self.b = epsilon_m * (1. + gamma * self.v_max)
 
         prior_max = (1. + gamma) / (1. - gamma)

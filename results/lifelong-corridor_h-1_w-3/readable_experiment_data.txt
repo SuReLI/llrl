@@ -1,0 +1,9 @@
+(MDP)
+	lifelong-corridor_h-1_w-3
+(Agents)
+	RMax,0
+(Params)
+	samples : 1000
+	episodes : 1000
+	steps : 2
+	track_disc_reward : False

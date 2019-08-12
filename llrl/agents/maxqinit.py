@@ -30,6 +30,7 @@ class MaxQInit(RMax):
             epsilon_m=None,
             delta=None,
             n_states=None,
+            v_max=None,
             min_sampling_probability=0.1,
             name="MaxQInit"
     ):
@@ -41,11 +42,12 @@ class MaxQInit(RMax):
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) uncertainty degree
         :param n_states: (int) number of states
+        :param v_max: (float) known upper-bound on the value function
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
         """
         RMax.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon_q=epsilon_q,
-                      epsilon_m=epsilon_m, delta=delta, n_states=n_states, name=name)
+                      epsilon_m=epsilon_m, delta=delta, n_states=n_states, v_max=v_max, name=name)
 
         self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
         self.U_memory = []  # Upper-bounds on the Q-values of previous MDPs

@@ -19,9 +19,9 @@ def experiment():
     actions = env_distribution.get_actions()
     p_min = 1. / 7.  # There are seven possible MDPs
     epsilon_q = .1
-    epsilon_m = 1.
+    epsilon_m = .01
     delta = .1
-    n_states = 3
+    n_states = 4
     max_mem = 10
 
     # Agents

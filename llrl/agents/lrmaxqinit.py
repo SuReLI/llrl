@@ -41,12 +41,11 @@ class LRMaxQInit(LRMax):
         :param name: (str)
         """
         name = name if prior is None else name + '-prior' + str(prior)
+        self.n_required_tasks = mqi.number_of_tasks_for_high_confidence_upper_bound(delta, min_sampling_probability)
         LRMax.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon_q=epsilon_q,
                        epsilon_m=epsilon_m, delta=delta, n_states=n_states, v_max=v_max,
                        max_memory_size=max_memory_size, prior=prior, min_sampling_probability=min_sampling_probability,
                        name=name)
-
-        self.n_required_tasks = mqi.number_of_tasks_for_high_confidence_upper_bound(delta, min_sampling_probability)
 
     def initialize_upper_bound(self):
         """

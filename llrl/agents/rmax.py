@@ -53,6 +53,7 @@ class RMax(Agent):
             epsilon_m=None,
             delta=None,
             n_states=None,
+            v_max=None,
             name="RMax"
     ):
         """
@@ -64,6 +65,7 @@ class RMax(Agent):
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
         :param n_states: (int) number of states
+        :param v_max: (float) known upper-bound on the value function
         :param name: (str)
         """
         if count_threshold is None:
@@ -75,8 +77,9 @@ class RMax(Agent):
 
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
         self.r_max = 1.0
-        self.v_max = self.r_max / (1. - gamma)
+        self.v_max = self.r_max / (1. - gamma) if v_max is None else v_max
 
+        self.epsilon_m = epsilon_m
         if count_threshold is None:
             self.count_threshold = compute_n_model_samples_high_confidence(epsilon_m, delta, n_states)
         else:
