@@ -2,19 +2,29 @@ import csv
 import pandas as pd
 
 
-def lifelong_save(path, agent, data, n_instance, is_first_save):
+def lifelong_save(path, agent, data, instance_number, is_first_save):
     """
     Save according to a specific data structure designed for lifelong RL experiments.
     :param path: (str)
     :param agent: agent object
     :param data: (dictionary)
+    :param instance_number: (int)
+    :param is_first_save: (bool)
     :return: None
     """
     full_path = path + '/results-' + agent.get_name() + '.csv'
+    n_tasks = len(data['returns_per_tasks'])
+    n_episodes = len(data['returns_per_tasks'][0])
+
     if is_first_save:
         names = ['instance', 'task', 'episode', 'return', 'discounted_return']
         csv_write(names, full_path, 'w')
-    # TODO here
+
+    for i in range(n_tasks):
+        for j in range(n_episodes):
+            row = [str(instance_number), str(i + 1), str(j + 1), data['returns_per_tasks'][i][j],
+                   data['discounted_returns_per_tasks'][i][j]]
+            csv_write(row, full_path, 'a')
 
 
 def save_return_per_episode(
