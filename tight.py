@@ -35,9 +35,8 @@ def experiment():
     agents_pool = [rmax]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, n_tasks=5, n_episodes=5, steps=100, reset_at_terminal=False,
-                        open_plot=True, cumulative_plot=False, is_tracked_value_discounted=True, plot_only=False,
-                        plot_title=False)
+    run_agents_lifelong(agents_pool, env_distribution, n_instances=1, n_tasks=50, n_episodes=50, n_steps=2,
+                        reset_at_terminal=False)
 
 
 if __name__ == '__main__':

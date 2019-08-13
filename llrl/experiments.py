@@ -124,14 +124,9 @@ def run_agents_lifelong(
         n_episodes=1,
         n_steps=100,
         clear_old_results=True,
-        open_plot=True,
         track_disc_reward=False,
         reset_at_terminal=False,
         cumulative_plot=True,
-        is_tracked_value_discounted=False,
-        confidence=.9,
-        plot_only=False,
-        plot_title=True,
         dir_for_plot='results',
         verbose=False
 ):
@@ -151,9 +146,7 @@ def run_agents_lifelong(
     So, if each episode is 100 steps, then episode 2 will start discounting as though it's step 101.
     :param reset_at_terminal: (bool)
     :param cumulative_plot: (bool)
-    :param plot_only: (bool)
     :param plot_title: (bool)
-    :param is_tracked_value_discounted: (bool)
     :param confidence: (float)
     :param dir_for_plot: (str)
     :param verbose: (bool)
@@ -164,46 +157,44 @@ def run_agents_lifelong(
                             is_lifelong=True, clear_old_results=clear_old_results, track_disc_reward=track_disc_reward,
                             cumulative_plot=cumulative_plot, dir_for_plot=dir_for_plot)
 
-    if not plot_only:
-        print("Running experiment:\n" + str(experiment))
-        avg_return_per_task_per_agent = []
-        avg_return_per_episode_per_agent = []
+    print("Running experiment:\n" + str(experiment))
 
-        # Sample tasks at first so that agents experience the same sequence of tasks
-        tasks = []
-        for _ in range(n_tasks):
-            tasks.append(mdp_distribution.sample())
+    # Sample tasks at first so that agents experience the same sequence of tasks
+    tasks = []
+    for _ in range(n_tasks):
+        tasks.append(mdp_distribution.sample())
 
-        for agent in agents:
-            run_single_agent_lifelong(agent)
-
-        # Save
-        save_return_per_task(experiment.exp_directory, agents, avg_return_per_task_per_agent,
-                             is_tracked_value_discounted=is_tracked_value_discounted)
-        save_return_per_episode(experiment.exp_directory, agents, avg_return_per_episode_per_agent,
-                                is_tracked_value_discounted=is_tracked_value_discounted)
-        # experiment.make_plots(open_plot=open_plot)
-
-    # Plot
-    plot_return_per_task(experiment.exp_directory, agents, is_tracked_value_discounted=is_tracked_value_discounted,
-                         open_plot=open_plot, plot_title=plot_title)
-    plot_return_per_episode(experiment.exp_directory, agents, is_tracked_value_discounted=is_tracked_value_discounted,
-                            open_plot=open_plot, plot_title=plot_title)
+    for agent in agents:
+        run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
+                                  track_disc_reward, reset_at_terminal, verbose)
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
                               reset_at_terminal, verbose):
-    """"""
+    """
+    TODO
+    :param agent:
+    :param experiment:
+    :param n_instances:
+    :param n_tasks:
+    :param n_episodes:
+    :param n_steps:
+    :param tasks:
+    :param track_disc_reward:
+    :param reset_at_terminal:
+    :param verbose:
+    :return:
+    """
     print(str(agent) + " is learning.")
     for instance in range(1, n_instances + 1):
         agent.re_init()  # re-initialize before each instance
         data = {'returns_per_tasks': [], 'discounted_returns_per_tasks': []}
 
-        print("  Instance " + str(instance) + " / " + n_instances)
+        print("  Instance " + str(instance) + " / " + str(n_instances))
         start = time.clock()
         for i in range(1, n_tasks + 1):
-            print("    Experience task " + str(i) + " / " + n_tasks)
-            task = tasks[i]  # task selection
+            print("    Experience task " + str(i) + " / " + str(n_tasks))
+            task = tasks[i - 1]  # task selection
 
             # Run on task
             _, _, returns, discounted_returns = run_single_agent_on_mdp(
@@ -264,7 +255,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
         cumulative_episodic_reward = 0.
 
         if verbose:
-            print("      Episode", episode, "/", episodes)
+            print("      Episode", str(episode), "/", str(episodes))
 
         # Compute initial state/reward.
         state = mdp.get_init_state()
