@@ -25,7 +25,7 @@ class MaxQInit(RMax):
             self,
             actions,
             gamma=0.9,
-            count_threshold=None,
+            n_known=None,
             epsilon_q=0.1,
             epsilon_m=None,
             delta=None,
@@ -37,7 +37,7 @@ class MaxQInit(RMax):
         """
         :param actions: action space of the environment
         :param gamma: (float) discount factor
-        :param count_threshold: (int) count after which a state-action pair is considered known
+        :param n_known: (int) count after which a state-action pair is considered known
         :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) uncertainty degree
@@ -46,7 +46,7 @@ class MaxQInit(RMax):
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
         """
-        RMax.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon_q=epsilon_q,
+        RMax.__init__(self, actions=actions, gamma=gamma, n_known=n_known, epsilon_q=epsilon_q,
                       epsilon_m=epsilon_m, delta=delta, n_states=n_states, v_max=v_max, name=name)
 
         self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))

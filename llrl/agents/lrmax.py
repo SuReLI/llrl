@@ -43,36 +43,44 @@ class LRMax(RMax):
     def __init__(
             self,
             actions,
-            gamma=0.9,
-            count_threshold=None,
+            gamma=.9,
+            r_max=1.,
+            v_max=None,
+            deduce_v_max=True,
+            n_known=None,
             epsilon_q=0.1,
             epsilon_m=None,
             delta=None,
             n_states=None,
-            v_max=None,
+            deduce_n_known=True,  #
             max_memory_size=None,
             prior=None,
-            min_sampling_probability=0.1,
+            min_sampling_probability=.1,
             name="LRMax"
     ):
         """
         :param actions: action space of the environment
         :param gamma: (float) discount factor
-        :param count_threshold: (int) count after which a state-action pair is considered known
-        (only set count_threshold if delta and epsilon are not defined)
+        :param r_max: (float) known upper-bound on the reward function
+        :param v_max: (float) known upper-bound on the value function
+        :param deduce_v_max: (bool) set to True to deduce v_max from r_max
+        :param n_known: (int) count after which a state-action pair is considered known
+        (only set n_known if delta and epsilon are not defined)
         :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
         :param n_states: (int) number of states
-        :param v_max: (float) known upper-bound on the value function
+        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
+
         :param max_memory_size: (int) maximum number of saved models (infinity if None)
         :param prior: (float) prior knowledge of maximum model's distance
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
         """
         name = name if prior is None else name + '-prior' + str(prior)
-        RMax.__init__(self, actions=actions, gamma=gamma, count_threshold=count_threshold, epsilon_q=epsilon_q,
-                      epsilon_m=epsilon_m, delta=delta, n_states=n_states, v_max=v_max, name=name)
+        RMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
+                      n_known=n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
+                      deduce_n_known=deduce_n_known, name=name)
 
         # Lifelong Learning memories
         self.max_memory_size = max_memory_size
@@ -81,17 +89,19 @@ class LRMax(RMax):
         self.T_memory = []
         self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
 
-        self.b = epsilon_m * (1. + gamma * self.v_max)
+        self.b = self.epsilon_m * (1. + self.gamma * self.v_max)
 
         prior_max = (1. + gamma) / (1. - gamma)
+        self.prior = prior_max if prior is None else min(prior, prior_max)
+
+        # TODO here : see how to handle cases of estimate_distances_online
         if prior is None:
             self.estimate_distances_online = True
             self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances (high probability)
             self.n_samples_high_confidence = compute_n_samples_high_confidence(min_sampling_probability, delta)
-            self.prior = prior_max
         else:
             self.estimate_distances_online = False
-            self.prior = min(prior, prior_max)
+
 
         self.U_lip = []
         self.update_upper_bound()
@@ -165,7 +175,7 @@ class LRMax(RMax):
         :return: None
         """
         if s is not None and a is not None:
-            if self.counter[s][a] < self.count_threshold:
+            if self.counter[s][a] < self.n_known:
                 self.counter[s][a] += 1
                 normalizer = 1. / float(self.counter[s][a])
 
@@ -175,7 +185,7 @@ class LRMax(RMax):
                     if _s_p not in [s_p]:
                         self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
 
-                if self.counter[s][a] == self.count_threshold:
+                if self.counter[s][a] == self.n_known:
                     self.update_upper_bound()
 
     def initialize_upper_bound(self):

@@ -13,7 +13,7 @@ Changes compared to Dave's original RMax:
 
 4) Single visit counter (lower memory requirements);
 
-5) count_threshold can be replaced by (epsilon, delta) for epsilon accurate models in L1 norm
+5) n_known can be replaced by (epsilon, delta) for epsilon accurate models in L1 norm
    with probability at least 1 - delta.
 """
 
@@ -47,46 +47,48 @@ class RMax(Agent):
     def __init__(
             self,
             actions,
-            gamma=0.9,
-            count_threshold=None,
+            gamma=.9,
+            r_max=1.,
+            v_max=None,
+            deduce_v_max=True,
+            n_known=None,
             epsilon_q=0.1,
             epsilon_m=None,
             delta=None,
             n_states=None,
-            v_max=None,
+            deduce_n_known=True,
             name="RMax"
     ):
         """
         :param actions: action space of the environment
         :param gamma: (float) discount factor
-        :param count_threshold: (int) count after which a state-action pair is considered known
-        (only set count_threshold if delta and epsilon are not defined)
+        :param r_max: (float) known upper-bound on the reward function
+        :param v_max: (float) known upper-bound on the value function
+        :param deduce_v_max: (bool) set to True to deduce v_max from r_max
+        :param n_known: (int) count after which a state-action pair is considered known
+        (only set n_known if delta and epsilon are not defined)
         :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
         :param n_states: (int) number of states
-        :param v_max: (float) known upper-bound on the value function
+        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
         :param name: (str)
         """
-        if count_threshold is None:
-            if delta is None or epsilon_m is None or n_states is None:
-                raise ValueError('Please set either `count_threshold` or `delta`, `epsilon_m` and `n_states`.')
-        else:
-            if delta is not None or epsilon_m is not None or n_states is not None:
-                raise ValueError('Please set either `count_threshold` or `delta`, `epsilon_m` and `n_states`.')
-
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)
-        self.r_max = 1.0
-        self.v_max = self.r_max / (1. - gamma) if v_max is None else v_max
+        self.r_max = r_max
+        self.v_max = v_max
+        self.deduce_v_max = deduce_v_max
+        if deduce_v_max:
+            self.v_max = self.r_max / (1. - gamma) if v_max is None else v_max
 
         self.epsilon_q = epsilon_q
         self.epsilon_m = epsilon_m
         self.delta = delta
         self.n_states = n_states
-        if count_threshold is None:
-            self.count_threshold = compute_n_model_samples_high_confidence(epsilon_m, delta, n_states)
-        else:
-            self.count_threshold = count_threshold
+        self.n_known = n_known
+        self.deduce_n_known = deduce_n_known
+        if deduce_n_known:
+            self.n_known = compute_n_model_samples_high_confidence(epsilon_m, delta, n_states)
 
         self.vi_n_iter = int(np.log(1. / (epsilon_q * (1. - self.gamma))) / (1. - self.gamma))  # Nb of value iterations
 
@@ -99,14 +101,10 @@ class RMax(Agent):
         Re-initialization for multiple instances.
         :return: None
         """
-        if self.epsilon_m is None:
-            self.__init__(actions=self.actions, gamma=self.gamma, count_threshold=self.count_threshold,
-                          epsilon_q=self.epsilon_q, epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
-                          v_max=self.v_max, name=self.name)
-        else:
-            self.__init__(actions=self.actions, gamma=self.gamma, count_threshold=None,
-                          epsilon_q=self.epsilon_q, epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
-                          v_max=self.v_max, name=self.name)
+        self.__init__(actions=self.actions, gamma=self.gamma, r_max=self.r_max, v_max=self.v_max,
+                      deduce_v_max=self.deduce_v_max, n_known=self.n_known, epsilon_q=self.epsilon_q,
+                      epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
+                      deduce_n_known=self.deduce_n_known, name=self.name)
 
     def reset(self):
         """
@@ -140,7 +138,7 @@ class RMax(Agent):
                defaultdict(lambda: defaultdict(int))
 
     def is_known(self, s, a):
-        return self.counter[s][a] >= self.count_threshold
+        return self.counter[s][a] >= self.n_known
 
     def get_nb_known_sa(self):
         return sum([self.is_known(s, a) for s, a in self.counter.keys()])
@@ -173,7 +171,7 @@ class RMax(Agent):
         :return: None
         """
         if s is not None and a is not None:
-            if self.counter[s][a] < self.count_threshold:
+            if self.counter[s][a] < self.n_known:
                 self.counter[s][a] += 1
                 normalizer = 1. / float(self.counter[s][a])
 
@@ -183,7 +181,7 @@ class RMax(Agent):
                     if _s_p not in [s_p]:
                         self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
 
-                if self.counter[s][a] == self.count_threshold:
+                if self.counter[s][a] == self.n_known:
                     self.update_upper_bound()
 
     def greedy_action(self, s, f):
