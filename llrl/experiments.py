@@ -5,6 +5,7 @@ Useful functions for making experiments (e.g. Lifelong RL)
 import sys
 import time
 from collections import defaultdict
+from multiprocessing import Pool
 
 from llrl.utils.utils import mean_confidence_interval
 from llrl.utils.save import lifelong_save, save_agents, open_agents
@@ -124,6 +125,7 @@ def run_agents_lifelong(
         n_tasks=5,
         n_episodes=1,
         n_steps=100,
+        parallel_run=True,
         clear_old_results=True,
         track_disc_reward=False,
         reset_at_terminal=False,
@@ -142,6 +144,7 @@ def run_agents_lifelong(
     :param n_tasks: (int)
     :param n_episodes: (int)
     :param n_steps: (int)
+    :param parallel_run: (bool)
     :param clear_old_results: (bool)
     :param open_plot: (bool)
     :param track_disc_reward: (bool) If true records and plots discounted reward, discounted over episodes.
@@ -162,14 +165,26 @@ def run_agents_lifelong(
 
     print("Running experiment:\n" + str(experiment))
 
-    # Sample tasks at first so that agents experience the same sequence of tasks
+    # Sample tasks
     tasks = []
     for _ in range(n_tasks):
         tasks.append(mdp_distribution.sample())
 
-    for agent in agents:
-        run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
-                                  track_disc_reward, reset_at_terminal, verbose)
+    # Run
+    if parallel_run:
+        pool = Pool(processes=len(agents))
+        results_pool = []
+        for agent in agents:
+            results_pool.append(pool.apply_async(run_single_agent_lifelong, [agent, experiment, n_instances, n_tasks,
+                                                                             n_episodes, n_steps, tasks,
+                                                                             track_disc_reward, reset_at_terminal,
+                                                                             verbose]))
+        for result in results_pool:
+            result.get()
+    else:
+        for agent in agents:
+            run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
+                                      track_disc_reward, reset_at_terminal, verbose)
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
