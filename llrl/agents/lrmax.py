@@ -55,6 +55,7 @@ class LRMax(RMax):
             deduce_n_known=True,  #
             max_memory_size=None,
             prior=None,
+            estimate_distances_online=True,
             min_sampling_probability=.1,
             name="LRMax"
     ):
@@ -74,6 +75,8 @@ class LRMax(RMax):
 
         :param max_memory_size: (int) maximum number of saved models (infinity if None)
         :param prior: (float) prior knowledge of maximum model's distance
+        :param estimate_distances_online: (bool) set to True for online estimation of a tighter upper-bound for the
+        model pseudo-distances. The estimation is valid with high probability.
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
         """
@@ -89,21 +92,19 @@ class LRMax(RMax):
         self.T_memory = []
         self.SA_memory = defaultdict(lambda: defaultdict(lambda: False))
 
+        self.U_lip = []
         self.b = self.epsilon_m * (1. + self.gamma * self.v_max)
 
+        # Prior knowledge on maximum model distance
         prior_max = (1. + gamma) / (1. - gamma)
         self.prior = prior_max if prior is None else min(prior, prior_max)
 
-        # TODO here : see how to handle cases of estimate_distances_online
-        if prior is None:
-            self.estimate_distances_online = True
-            self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances (high probability)
-            self.n_samples_high_confidence = compute_n_samples_high_confidence(min_sampling_probability, delta)
-        else:
-            self.estimate_distances_online = False
+        # Online distances estimation
+        self.estimate_distances_online = estimate_distances_online
+        self.min_sampling_probability = min_sampling_probability
+        self.D = defaultdict(lambda: defaultdict(lambda: prior_max))  # Dictionary of distances (high probability)
+        self.n_samples_high_confidence = compute_n_samples_high_confidence(min_sampling_probability, delta)
 
-
-        self.U_lip = []
         self.update_upper_bound()
 
     def re_init(self):
@@ -111,8 +112,12 @@ class LRMax(RMax):
         Re-initialization for multiple instances.
         :return: None
         """
-        print('Warning: re_init not yet implemented on', self.name,
-              ', you should stop your script if you are running multiple instances')  # TODO
+        self.__init__(actions=self.actions, gamma=self.gamma, r_max=self.r_max, v_max=self.v_max,
+                      deduce_v_max=self.deduce_v_max, n_known=self.n_known, epsilon_q=self.epsilon_q,
+                      epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
+                      deduce_n_known=self.deduce_n_known, max_memory_size=self.max_memory_size, prior=self.prior,
+                      estimate_distances_online=self.estimate_distances_online,
+                      min_sampling_probability=self.min_sampling_probability, name=self.name)
 
     def reset(self):
         """
