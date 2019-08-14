@@ -35,6 +35,10 @@ def experiment():
                   deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                   max_memory_size=max_mem, prior=None, estimate_distances_online=True,
                   min_sampling_probability=p_min, name='LRMax')
+    lrmaxprior = LRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
+                       deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
+                       max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
+                       min_sampling_probability=p_min, name='LRMax(Dmax=0.2)')
     maxqinit = MaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                         deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                         min_sampling_probability=p_min, name='MaxQInit')
@@ -42,7 +46,7 @@ def experiment():
                             deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                             n_states=n_states, max_memory_size=max_mem, prior=None, estimate_distances_online=True,
                             min_sampling_probability=p_min, name='LRMaxQInit')
-    agents_pool = [rmax, lrmax, maxqinit, lrmaxqinit]
+    agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit]
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=5, n_tasks=100, n_episodes=100,

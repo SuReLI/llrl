@@ -15,10 +15,11 @@ from llrl.experiments import run_agents_lifelong
 def experiment():
     # Parameters
     gamma = .9
-    env_distribution = make_env_distribution(env_class='stochastic-tight', env_name='stochastic-tight', gamma=gamma)
+    env_distribution = make_env_distribution(env_class='deterministic-spread', env_name='deterministic-spread',
+                                             gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
-    p_min = 1. / 7.  # There are seven possible MDPs
+    p_min = 1. / 3.  # There are seven possible MDPs
     epsilon_q = .1
     epsilon_m = .01
     delta = .1
@@ -36,8 +37,8 @@ def experiment():
                   min_sampling_probability=p_min, name='LRMax')
     lrmaxprior = LRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                        deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
-                       max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
-                       min_sampling_probability=p_min, name='LRMax(Dmax=0.2)')
+                       max_memory_size=max_mem, prior=0.1, estimate_distances_online=True,
+                       min_sampling_probability=p_min, name='LRMax(Dmax=0.1)')
     maxqinit = MaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                         deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                         min_sampling_probability=p_min, name='MaxQInit')
