@@ -30,22 +30,22 @@ def experiment():
 
     # Agents
     rmax = RMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
-                deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m)
+                deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, name='RMax')
     lrmax = LRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                   deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                   max_memory_size=max_mem, prior=None, estimate_distances_online=True,
-                  min_sampling_probability=p_min)
+                  min_sampling_probability=p_min, name='LRMax')
     maxqinit = MaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                         deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
-                        min_sampling_probability=p_min)
+                        min_sampling_probability=p_min, name='MaxQInit')
     lrmaxqinit = LRMaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                             deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                             n_states=n_states, max_memory_size=max_mem, prior=None, estimate_distances_online=True,
-                            min_sampling_probability=p_min)
+                            min_sampling_probability=p_min, name='LRMaxQInit')
     agents_pool = [rmax, lrmax, maxqinit, lrmaxqinit]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=1, n_tasks=50, n_episodes=50,
+    run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=10, n_tasks=50, n_episodes=50,
                         n_steps=2, reset_at_terminal=False)
 
 

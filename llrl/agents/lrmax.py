@@ -80,7 +80,7 @@ class LRMax(RMax):
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
         """
-        name = name if prior is None else name + '(Dmax =' + str(prior) + ')'
+        self.name = name
         RMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
                       n_known=n_known, deduce_n_known=deduce_n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
                       delta=delta, n_states=n_states, name=name)

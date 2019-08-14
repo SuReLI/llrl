@@ -50,7 +50,7 @@ class LRMaxQInit(LRMax):
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
         """
-        name = name if prior is None else name + '(Dmax =' + str(prior) + ')'
+        self.name = name
         self.n_required_tasks = mqi.number_of_tasks_for_high_confidence_upper_bound(delta, min_sampling_probability)
 
         LRMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,

@@ -175,7 +175,6 @@ def run_agents_lifelong(
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
                               reset_at_terminal, verbose):
     """
-    TODO
     :param agent:
     :param experiment:
     :param n_instances:
@@ -216,25 +215,10 @@ def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episode
         # Save
         lifelong_save(experiment.exp_directory, agent, data, instance, True if instance == 1 else False)
 
-        # TODO remove
-        '''
-        avg_return_per_task = [(0., 0., 0.)] * n_tasks  # Mean, lower, upper
-        avg_return_per_episode = [(0., 0., 0.)] * n_episodes  # Mean, lower, upper
-        for i in range(n_tasks):
-            avg_return_per_task[i] = mean_confidence_interval(returns[i], confidence=confidence)
-        for j in range(n_episodes):
-            return_per_task = [returns[i][j] for i in range(n_tasks)]
-            avg_return_per_episode[j] = mean_confidence_interval(return_per_task, confidence=confidence)
-            
-        avg_return_per_task_per_agent.append(avg_return_per_task)
-        avg_return_per_episode_per_agent.append(avg_return_per_episode)
-        '''
-
 
 def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_disc_reward=False,
                             reset_at_terminal=False, resample_at_terminal=False, verbose=False):
     """
-    TODO
     :param agent:
     :param mdp:
     :param episodes:
