@@ -52,7 +52,7 @@ class LRMax(RMax):
             epsilon_m=None,
             delta=None,
             n_states=None,
-            deduce_n_known=True,  #
+            deduce_n_known=True,
             max_memory_size=None,
             prior=None,
             estimate_distances_online=True,
@@ -80,7 +80,7 @@ class LRMax(RMax):
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
         """
-        name = name if prior is None else name + '-prior' + str(prior)
+        name = name if prior is None else name + '(Dmax =' + str(prior) + ')'
         RMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
                       n_known=n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                       deduce_n_known=deduce_n_known, name=name)
