@@ -119,6 +119,7 @@ def plot_return_per_task(
 def run_agents_lifelong(
         agents,
         mdp_distribution,
+        name_identifier,
         n_instances=1,
         n_tasks=5,
         n_episodes=1,
@@ -136,6 +137,7 @@ def run_agents_lifelong(
 
     :param agents: (list)
     :param mdp_distribution: (MDPDistribution)
+    :param name_identifier: (str)
     :param n_instances: (int)
     :param n_tasks: (int)
     :param n_episodes: (int)
@@ -153,9 +155,10 @@ def run_agents_lifelong(
     :return:
     """
     exp_params = {"samples": n_tasks, "episodes": n_episodes, "steps": n_steps}
-    experiment = Experiment(agents=agents, mdp=mdp_distribution, params=exp_params, is_episodic=n_episodes > 1,
-                            is_lifelong=True, clear_old_results=clear_old_results, track_disc_reward=track_disc_reward,
-                            cumulative_plot=cumulative_plot, dir_for_plot=dir_for_plot)
+    experiment = Experiment(agents=agents, mdp=mdp_distribution, name_identifier=name_identifier, params=exp_params,
+                            is_episodic=n_episodes > 1, is_lifelong=True, clear_old_results=clear_old_results,
+                            track_disc_reward=track_disc_reward, cumulative_plot=cumulative_plot,
+                            dir_for_plot=dir_for_plot)
 
     print("Running experiment:\n" + str(experiment))
 

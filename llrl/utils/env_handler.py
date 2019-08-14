@@ -41,6 +41,7 @@ def sample_corridor(gamma, env_name, w, verbose=False):
     init_loc = (int(w / 2.), 1)
 
     sampled_reward = np.random.uniform(r_min, r_max)
+    sampled_reward = 1.
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
         width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal],
