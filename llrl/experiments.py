@@ -172,6 +172,7 @@ def run_agents_lifelong(
         tasks.append(mdp_distribution.sample())
 
     # Run
+    '''
     if parallel_run:
         n_agents = len(agents)
         pool = ProcessPool(nodes=n_agents)
@@ -183,21 +184,11 @@ def run_agents_lifelong(
         pool.close()
         pool.join()
         pool.clear()
-        '''
-        results_pool = []
-        for i in range(n_agents):
-            results_pool.append(pool.apply_async(
-                run_single_agent_lifelong,
-                [agents[i], experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
-                 reset_at_terminal, verbose]
-            ))
-        for result in results_pool:
-            result.get()
-        '''
     else:
-        for agent in agents:
-            run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
-                                      track_disc_reward, reset_at_terminal, verbose)
+    '''
+    for agent in agents:
+        run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
+                                  track_disc_reward, reset_at_terminal, verbose)
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
