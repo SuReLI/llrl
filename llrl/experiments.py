@@ -174,11 +174,12 @@ def run_agents_lifelong(
     if parallel_run:
         pool = Pool(processes=len(agents))
         results_pool = []
-        for agent in agents:
-            results_pool.append(pool.apply_async(run_single_agent_lifelong, [agent, experiment, n_instances, n_tasks,
-                                                                             n_episodes, n_steps, tasks,
-                                                                             track_disc_reward, reset_at_terminal,
-                                                                             verbose]))
+        for i in range(len(agents)):
+            results_pool.append(pool.apply_async(
+                run_single_agent_lifelong,
+                [agents[i], experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
+                 reset_at_terminal, verbose]
+            ))
         for result in results_pool:
             result.get()
     else:
