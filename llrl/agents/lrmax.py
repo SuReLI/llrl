@@ -96,8 +96,9 @@ class LRMax(RMax):
         self.b = self.epsilon_m * (1. + self.gamma * self.v_max)
 
         # Prior knowledge on maximum model distance
-        prior_max = (1. + gamma) / (1. - gamma)
+        prior_max = self.r_max + self.gamma * 2. * self.v_max
         self.prior = prior_max if prior is None else min(prior, prior_max)
+        self.prior = round(self.prior, 2)
 
         # Online distances estimation
         self.estimate_distances_online = estimate_distances_online
