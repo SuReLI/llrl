@@ -2,7 +2,7 @@
 
 #SBATCH --nodes=4
 #SBATCH --ntasks-per-node=24
-#SBATCH --time=24:00:00
+#SBATCH --time=48:00:00
 #SBATCH --begin=now
 #SBATCH --mail-user=erwan.lecarpentier@isae-supaero.fr
 #SBATCH --mail-type=FAIL,END

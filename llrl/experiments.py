@@ -6,6 +6,7 @@ import sys
 import time
 from collections import defaultdict
 from multiprocessing import Pool
+from pathos.multiprocessing import ProcessPool
 
 from llrl.utils.utils import mean_confidence_interval
 from llrl.utils.save import lifelong_save, save_agents, open_agents
@@ -125,7 +126,7 @@ def run_agents_lifelong(
         n_tasks=5,
         n_episodes=1,
         n_steps=100,
-        parallel_run=True,
+        parallel_run=False,
         clear_old_results=True,
         track_disc_reward=False,
         reset_at_terminal=False,
@@ -172,9 +173,19 @@ def run_agents_lifelong(
 
     # Run
     if parallel_run:
-        pool = Pool(processes=len(agents))
+        n_agents = len(agents)
+        pool = ProcessPool(nodes=n_agents)
+        # for i in range(n_agents):
+        pool.map(
+            run_single_agent_lifelong,
+            agents[0], experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward, reset_at_terminal, verbose
+        )
+        pool.close()
+        pool.join()
+        pool.clear()
+        '''
         results_pool = []
-        for i in range(len(agents)):
+        for i in range(n_agents):
             results_pool.append(pool.apply_async(
                 run_single_agent_lifelong,
                 [agents[i], experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
@@ -182,6 +193,7 @@ def run_agents_lifelong(
             ))
         for result in results_pool:
             result.get()
+        '''
     else:
         for agent in agents:
             run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
