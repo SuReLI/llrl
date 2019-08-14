@@ -13,47 +13,51 @@ class LRMaxQInit(LRMax):
     def __init__(
             self,
             actions,
-            gamma=0.9,
+            gamma=.9,
+            r_max=1.,
+            v_max=None,
+            deduce_v_max=True,
             n_known=None,
             epsilon_q=0.1,
             epsilon_m=None,
             delta=None,
             n_states=None,
-            v_max=None,
+            deduce_n_known=True,
             max_memory_size=None,
             prior=None,
-            min_sampling_probability=0.1,
+            estimate_distances_online=True,
+            min_sampling_probability=.1,
             name="LRMaxQInit"
     ):
         """
         :param actions: action space of the environment
         :param gamma: (float) discount factor
+        :param r_max: (float) known upper-bound on the reward function
+        :param v_max: (float) known upper-bound on the value function
+        :param deduce_v_max: (bool) set to True to deduce v_max from r_max
         :param n_known: (int) count after which a state-action pair is considered known
         (only set n_known if delta and epsilon are not defined)
         :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
         :param n_states: (int) number of states
-        :param v_max: (float) known upper-bound on the value function
+        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
+
         :param max_memory_size: (int) maximum number of saved models (infinity if None)
         :param prior: (float) prior knowledge of maximum model's distance
+        :param estimate_distances_online: (bool) set to True for online estimation of a tighter upper-bound for the
+        model pseudo-distances. The estimation is valid with high probability.
         :param min_sampling_probability: (float) minimum sampling probability of an environment
         :param name: (str)
         """
-        name = name if prior is None else name + '-prior' + str(prior)
+        name = name if prior is None else name + '(Dmax =' + str(prior) + ')'
         self.n_required_tasks = mqi.number_of_tasks_for_high_confidence_upper_bound(delta, min_sampling_probability)
-        LRMax.__init__(self, actions=actions, gamma=gamma, n_known=n_known, epsilon_q=epsilon_q,
-                       epsilon_m=epsilon_m, delta=delta, n_states=n_states, v_max=v_max,
-                       max_memory_size=max_memory_size, prior=prior, min_sampling_probability=min_sampling_probability,
-                       name=name)
 
-    def re_init(self):
-        """
-        Re-initialization for multiple instances.
-        :return: None
-        """
-        print('Warning: re_init not yet implemented on', self.name,
-              ', you should stop your script if you are running multiple instances')  # TODO
+        LRMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
+                       n_known=n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
+                       deduce_n_known=deduce_n_known, max_memory_size=max_memory_size, prior=prior,
+                       estimate_distances_online=estimate_distances_online,
+                       min_sampling_probability=min_sampling_probability, name=name)
 
     def initialize_upper_bound(self):
         """
