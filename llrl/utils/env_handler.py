@@ -156,7 +156,7 @@ def tight_collection(gamma, env_name):
     return env_dist_dict
 
 
-def deterministic_spread(gamma, env_name):
+def deterministic_spread_collection(gamma, env_name):
     env_dist_dict = {}
     goals_map = [
         [1, 0, 0, 0, 0, 0, 0, 0, 1],
