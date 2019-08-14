@@ -52,11 +52,11 @@ class RMax(Agent):
             v_max=None,
             deduce_v_max=True,
             n_known=None,
+            deduce_n_known=True,
             epsilon_q=0.1,
             epsilon_m=None,
             delta=None,
             n_states=None,
-            deduce_n_known=True,
             name="RMax"
     ):
         """
@@ -67,11 +67,11 @@ class RMax(Agent):
         :param deduce_v_max: (bool) set to True to deduce v_max from r_max
         :param n_known: (int) count after which a state-action pair is considered known
         (only set n_known if delta and epsilon are not defined)
+        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
         :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
         :param n_states: (int) number of states
-        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
         :param name: (str)
         """
         Agent.__init__(self, name=name, actions=actions, gamma=gamma)

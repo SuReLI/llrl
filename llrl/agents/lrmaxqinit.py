@@ -18,11 +18,11 @@ class LRMaxQInit(LRMax):
             v_max=None,
             deduce_v_max=True,
             n_known=None,
+            deduce_n_known=True,
             epsilon_q=0.1,
             epsilon_m=None,
             delta=None,
             n_states=None,
-            deduce_n_known=True,
             max_memory_size=None,
             prior=None,
             estimate_distances_online=True,
@@ -37,11 +37,11 @@ class LRMaxQInit(LRMax):
         :param deduce_v_max: (bool) set to True to deduce v_max from r_max
         :param n_known: (int) count after which a state-action pair is considered known
         (only set n_known if delta and epsilon are not defined)
+        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
         :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
         :param n_states: (int) number of states
-        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
 
         :param max_memory_size: (int) maximum number of saved models (infinity if None)
         :param prior: (float) prior knowledge of maximum model's distance
@@ -54,8 +54,8 @@ class LRMaxQInit(LRMax):
         self.n_required_tasks = mqi.number_of_tasks_for_high_confidence_upper_bound(delta, min_sampling_probability)
 
         LRMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
-                       n_known=n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
-                       deduce_n_known=deduce_n_known, max_memory_size=max_memory_size, prior=prior,
+                       n_known=n_known, deduce_n_known=deduce_n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
+                       delta=delta, n_states=n_states, max_memory_size=max_memory_size, prior=prior,
                        estimate_distances_online=estimate_distances_online,
                        min_sampling_probability=min_sampling_probability, name=name)
 

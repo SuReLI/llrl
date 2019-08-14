@@ -28,10 +28,29 @@ def experiment():
     max_mem = 2
 
     # Agents
-    rmax = RMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, epsilon_q=epsilon_q,
-                n_known=5, deduce_n_known=False)
+    rmax = RMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=5,
+                epsilon_q=epsilon_q, deduce_n_known=False)
     lrmax = LRMax(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                   n_states=n_states, max_memory_size=max_mem, prior=19.)
+
+    '''
+    actions,
+            gamma=.9,
+            r_max=1.,
+            v_max=None,
+            deduce_v_max=True,
+            n_known=None,
+            epsilon_q=0.1,
+            epsilon_m=None,
+            delta=None,
+            n_states=None,
+            deduce_n_known=True,
+            max_memory_size=None,
+            prior=None,
+            estimate_distances_online=True,
+            min_sampling_probability=.1,
+            name="LRMax"
+            '''
     maxqinit = MaxQInit(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                         n_states=n_states, min_sampling_probability=p_min)
     lrmaxqinit = LRMaxQInit(actions=actions, gamma=gamma, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,

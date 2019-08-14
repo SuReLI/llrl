@@ -48,11 +48,11 @@ class LRMax(RMax):
             v_max=None,
             deduce_v_max=True,
             n_known=None,
+            deduce_n_known=True,
             epsilon_q=0.1,
             epsilon_m=None,
             delta=None,
             n_states=None,
-            deduce_n_known=True,
             max_memory_size=None,
             prior=None,
             estimate_distances_online=True,
@@ -66,12 +66,12 @@ class LRMax(RMax):
         :param v_max: (float) known upper-bound on the value function
         :param deduce_v_max: (bool) set to True to deduce v_max from r_max
         :param n_known: (int) count after which a state-action pair is considered known
+        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
         (only set n_known if delta and epsilon are not defined)
         :param epsilon_q: (float) precision of value iteration algorithm for Q-value computation
         :param epsilon_m: (float) precision of the learned models in L1 norm
         :param delta: (float) models are learned epsilon_m-closely with probability at least 1 - delta
         :param n_states: (int) number of states
-        :param deduce_n_known: (bool) set to True to deduce n_known from (delta, n_states, epsilon_m)
 
         :param max_memory_size: (int) maximum number of saved models (infinity if None)
         :param prior: (float) prior knowledge of maximum model's distance
@@ -82,8 +82,8 @@ class LRMax(RMax):
         """
         name = name if prior is None else name + '(Dmax =' + str(prior) + ')'
         RMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
-                      n_known=n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
-                      deduce_n_known=deduce_n_known, name=name)
+                      n_known=n_known, deduce_n_known=deduce_n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
+                      delta=delta, n_states=n_states, name=name)
 
         # Lifelong Learning memories
         self.max_memory_size = max_memory_size
@@ -113,9 +113,9 @@ class LRMax(RMax):
         :return: None
         """
         self.__init__(actions=self.actions, gamma=self.gamma, r_max=self.r_max, v_max=self.v_max,
-                      deduce_v_max=self.deduce_v_max, n_known=self.n_known, epsilon_q=self.epsilon_q,
-                      epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
-                      deduce_n_known=self.deduce_n_known, max_memory_size=self.max_memory_size, prior=self.prior,
+                      deduce_v_max=self.deduce_v_max, n_known=self.n_known, deduce_n_known=self.deduce_n_known,
+                      epsilon_q=self.epsilon_q, epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
+                      max_memory_size=self.max_memory_size, prior=self.prior,
                       estimate_distances_online=self.estimate_distances_online,
                       min_sampling_probability=self.min_sampling_probability, name=self.name)
 
