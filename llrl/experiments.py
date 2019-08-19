@@ -15,7 +15,7 @@ from simple_rl.experiments import Experiment
 def run_agents_lifelong(
         agents,
         mdp_distribution,
-        name_identifier,
+        name_identifier=None,
         n_instances=1,
         n_tasks=5,
         n_episodes=1,
@@ -27,7 +27,10 @@ def run_agents_lifelong(
         cumulative_plot=True,
         dir_for_plot='results',
         verbose=False,
-        plot_only=True
+        plot_only=True,
+        confidence=.9,
+        open_plot=False,
+        plot_title=True
 ):
     """
     Runs each agent on the MDP distribution according to the given parameters.
@@ -49,6 +52,9 @@ def run_agents_lifelong(
     :param dir_for_plot: (str)
     :param verbose: (bool)
     :param plot_only: (bool)
+    :param confidence: (float)
+    :param open_plot: (bool)
+    :param plot_title: (bool)
     :return:
     """
     exp_params = {"samples": n_tasks, "episodes": n_episodes, "steps": n_steps}
@@ -85,7 +91,7 @@ def run_agents_lifelong(
             run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
                                       track_disc_reward, reset_at_terminal, path, verbose)
 
-    lifelong_plot(agents, path)
+    lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title)
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,

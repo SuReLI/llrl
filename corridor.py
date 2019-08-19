@@ -50,7 +50,7 @@ def experiment():
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=5, n_tasks=100, n_episodes=100,
-                        n_steps=11, reset_at_terminal=False)
+                        n_steps=11, reset_at_terminal=False, plot_only=True, open_plot=True, plot_title=True)
 
 
 if __name__ == '__main__':
