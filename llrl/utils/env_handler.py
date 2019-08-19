@@ -149,7 +149,7 @@ def tight_collection(gamma, env_name):
 
     for g in possible_goals:
         env = GridWorld(
-            width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=[g],
+            width=w, height=h, init_loc=(5, 5), rand_init=False, goal_locs=[g],
             is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, goal_reward=0.1, name=env_name
         )
         env_dist_dict[env] = sampling_probability
