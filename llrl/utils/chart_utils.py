@@ -85,6 +85,7 @@ def lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot
          open_plot=open_plot, plot_title=plot_title)
 
 
+
 def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True, plot_title=True):
     """
     Tweaked version of simple_rl.utils.chart_utils.plot

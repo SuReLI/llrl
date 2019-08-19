@@ -1,6 +1,8 @@
+from collections import defaultdict
+from copy import deepcopy
+
 from llrl.agents.lrmax import LRMax
 import llrl.agents.maxqinit as mqi
-from collections import defaultdict
 
 
 class LRMaxQInit(LRMax):
@@ -52,12 +54,30 @@ class LRMaxQInit(LRMax):
         """
         self.name = name
         self.n_required_tasks = mqi.number_of_tasks_for_high_confidence_upper_bound(delta, min_sampling_probability)
+        self.maxQ_memory = []  # Upper-bounds on the Q-values of previous MDPs
 
         LRMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
                        n_known=n_known, deduce_n_known=deduce_n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
                        delta=delta, n_states=n_states, max_memory_size=max_memory_size, prior=prior,
                        estimate_distances_online=estimate_distances_online,
                        min_sampling_probability=min_sampling_probability, name=name)
+
+    def reset(self):
+        """
+        Reset the attributes to initial state (called between instances).
+        Save the previous model.
+        :return: None
+        """
+        self.update_sa_memory()
+        LRMax.reset(self)
+
+    def update_sa_memory(self):
+        for s in self.R:
+            for a in self.R[s]:
+                if self.is_known(s, a):
+                    self.SA_memory[s][a] = True
+
+        self.maxQ_memory.append(deepcopy(self.U))
 
     def initialize_upper_bound(self):
         """
@@ -67,10 +87,10 @@ class LRMaxQInit(LRMax):
         """
         self.U = defaultdict(lambda: defaultdict(lambda: self.v_max))
 
-        if len(self.U_memory) > self.n_required_tasks:
+        if len(self.maxQ_memory) > self.n_required_tasks:
             for s in self.SA_memory:
                 for a in self.SA_memory[s]:
-                    self.U[s][a] = min(self.U[s][a], max([u[s][a] for u in self.U_memory]))
+                    self.U[s][a] = min(self.U[s][a], max([u[s][a] for u in self.maxQ_memory]))
 
         for u_lip in self.U_lip:
             for s in u_lip:

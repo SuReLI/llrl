@@ -35,7 +35,7 @@ def sample_corridor(gamma, env_name, w, verbose=False):
     if env_name is None:
         env_name = "corridor"
 
-    r_min = 0.8
+    r_min = 0.9
     r_max = 1.0
     possible_goals = [(w, 1)]
     init_loc = (int(w / 2.), 1)
