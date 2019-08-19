@@ -5,12 +5,51 @@ from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib.ticker import MaxNLocator
 
+from llrl.utils.utils import mean_confidence_interval
+from llrl.utils.save import csv_path_from_name
+
 COLOR_SHIFT = 0
 
 color_ls = [
     [118, 167, 125], [102, 120, 173], [198, 113, 113], [94, 94, 94], [169, 193, 213],
     [230, 169, 132], [192, 197, 182], [210, 180, 226], [167, 167, 125], [125, 167, 125]
 ]
+
+
+def lifelong_plot():
+    print('TODO')
+    # csv_path_from_name()
+
+    '''
+    # Set names
+    labels = [
+        'episode_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
+    ] if is_tracked_value_discounted else [
+        'episode_number', 'average_return', 'average_return_lo', 'average_return_up'
+    ]
+    file_name = 'average_discounted_return_per_episode' if is_tracked_value_discounted else 'average_return_per_episode'
+    x_label = r'Episode Number'
+    y_label = r'Average Discounted Return' if is_tracked_value_discounted else r'Average Return'
+    title_prefix = r'Average Discounted Return: ' if is_tracked_value_discounted else r'Average Return: '
+
+    # Open data
+    data_frames = open_agents(path, csv_name=file_name, agents=agents)
+
+    # Plot
+    n_episodes = len(data_frames[0][labels[0]])
+    x = range(n_episodes)
+    returns = []
+    returns_lo = []
+    returns_up = []
+    for df in data_frames:
+        returns.append(df[labels[1]][0:n_episodes])
+        returns_lo.append(df[labels[2]][0:n_episodes])
+        returns_up.append(df[labels[3]][0:n_episodes])
+    plot(
+        path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
+        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot, plot_title=plot_title
+    )
+    '''
 
 
 def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True, plot_title=True):

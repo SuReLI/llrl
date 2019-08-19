@@ -1,5 +1,8 @@
 import csv
-import pandas as pd
+
+
+def csv_path_from_name(root_path, agent_name):
+    return root_path + '/results-' + agent_name + '.csv'
 
 
 def lifelong_save(path, agent, data, instance_number, is_first_save):
@@ -12,7 +15,7 @@ def lifelong_save(path, agent, data, instance_number, is_first_save):
     :param is_first_save: (bool)
     :return: None
     """
-    full_path = path + '/results-' + agent.get_name() + '.csv'
+    full_path = csv_path_from_name(path, agent.get_name())
     n_tasks = len(data['returns_per_tasks'])
     n_episodes = len(data['returns_per_tasks'][0])
 
@@ -27,6 +30,8 @@ def lifelong_save(path, agent, data, instance_number, is_first_save):
             csv_write(row, full_path, 'a')
 
 
+# TODO remove
+'''
 def save_return_per_episode(
         path,
         agents,
@@ -96,6 +101,7 @@ def open_agents(path, csv_name, agents):
         csv_path = get_csv_path(path, csv_name, agents[agent])
         data_frames.append(pd.read_csv(csv_path))
     return data_frames
+'''
 
 
 def csv_write(row, path, mode):

@@ -1,121 +1,15 @@
 """
-Useful functions for making experiments (e.g. Lifelong RL)
+Useful functions for experiments (e.g. Lifelong RL)
 """
 
-import sys
 import time
 from collections import defaultdict
 from multiprocessing import Pool
 from pathos.multiprocessing import ProcessPool
 
-from llrl.utils.utils import mean_confidence_interval
-from llrl.utils.save import lifelong_save, save_agents, open_agents
-from llrl.utils.chart_utils import plot
+from llrl.utils.save import lifelong_save
+from llrl.utils.chart_utils import lifelong_plot
 from simple_rl.experiments import Experiment
-
-
-def plot_return_per_episode(
-        path,
-        agents,
-        is_tracked_value_discounted,
-        open_plot=True,
-        plot_title=True
-):
-    # Set names
-    labels = [
-        'episode_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
-    ] if is_tracked_value_discounted else [
-        'episode_number', 'average_return', 'average_return_lo', 'average_return_up'
-    ]
-    file_name = 'average_discounted_return_per_episode' if is_tracked_value_discounted else 'average_return_per_episode'
-    x_label = r'Episode Number'
-    y_label = r'Average Discounted Return' if is_tracked_value_discounted else r'Average Return'
-    title_prefix = r'Average Discounted Return: ' if is_tracked_value_discounted else r'Average Return: '
-
-    # Open data
-    data_frames = open_agents(path, csv_name=file_name, agents=agents)
-
-    # Plot
-    n_episodes = len(data_frames[0][labels[0]])
-    x = range(n_episodes)
-    returns = []
-    returns_lo = []
-    returns_up = []
-    for df in data_frames:
-        returns.append(df[labels[1]][0:n_episodes])
-        returns_lo.append(df[labels[2]][0:n_episodes])
-        returns_up.append(df[labels[3]][0:n_episodes])
-    plot(
-        path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot, plot_title=plot_title
-    )
-
-
-def save_return_per_task(
-        path,
-        agents,
-        avg_return_per_task_per_agent,
-        is_tracked_value_discounted
-):
-    # Set names
-    labels = [
-        'task_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
-    ] if is_tracked_value_discounted else [
-        'task_number', 'average_return', 'average_return_lo', 'average_return_up'
-    ]
-    file_name = 'average_discounted_return_per_task' if is_tracked_value_discounted else 'average_return_per_task'
-
-    # Save
-    n_tasks = len(avg_return_per_task_per_agent[0])
-    x = range(n_tasks)
-    data = []
-    for agent in range(len(agents)):
-        data.append([])
-        for task in range(n_tasks):
-            data[-1].append([
-                x[task],
-                avg_return_per_task_per_agent[agent][task][0],
-                avg_return_per_task_per_agent[agent][task][1],
-                avg_return_per_task_per_agent[agent][task][2]
-            ])
-    save_agents(path, csv_name=file_name, agents=agents, data=data, labels=labels)
-
-
-def plot_return_per_task(
-        path,
-        agents,
-        is_tracked_value_discounted,
-        open_plot=True,
-        plot_title=True
-):
-    # Set names
-    labels = [
-        'task_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
-    ] if is_tracked_value_discounted else [
-        'task_number', 'average_return', 'average_return_lo', 'average_return_up'
-    ]
-    file_name = 'average_discounted_return_per_task' if is_tracked_value_discounted else 'average_return_per_task'
-    x_label = r'Task Number'
-    y_label = r'Average Discounted Return' if is_tracked_value_discounted else r'Average Return'
-    title_prefix = r'Average Discounted Return: ' if is_tracked_value_discounted else r'Average Return: '
-
-    # Open data
-    data_frames = open_agents(path, csv_name=file_name, agents=agents)
-
-    # Plot
-    n_tasks = len(data_frames[0][labels[0]])
-    x = range(n_tasks)
-    returns = []
-    returns_lo = []
-    returns_up = []
-    for df in data_frames:
-        returns.append(df[labels[1]][0:n_tasks])
-        returns_lo.append(df[labels[2]][0:n_tasks])
-        returns_up.append(df[labels[3]][0:n_tasks])
-    plot(
-        path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot, plot_title=plot_title
-    )
 
 
 def run_agents_lifelong(
@@ -132,7 +26,8 @@ def run_agents_lifelong(
         reset_at_terminal=False,
         cumulative_plot=True,
         dir_for_plot='results',
-        verbose=False
+        verbose=False,
+        plot_only=True
 ):
     """
     Runs each agent on the MDP distribution according to the given parameters.
@@ -147,15 +42,13 @@ def run_agents_lifelong(
     :param n_steps: (int)
     :param parallel_run: (bool)
     :param clear_old_results: (bool)
-    :param open_plot: (bool)
     :param track_disc_reward: (bool) If true records and plots discounted reward, discounted over episodes.
     So, if each episode is 100 steps, then episode 2 will start discounting as though it's step 101.
     :param reset_at_terminal: (bool)
     :param cumulative_plot: (bool)
-    :param plot_title: (bool)
-    :param confidence: (float)
     :param dir_for_plot: (str)
     :param verbose: (bool)
+    :param plot_only: (bool)
     :return:
     """
     exp_params = {"samples": n_tasks, "episodes": n_episodes, "steps": n_steps}
@@ -172,23 +65,26 @@ def run_agents_lifelong(
         tasks.append(mdp_distribution.sample())
 
     # Run
-    '''
-    if parallel_run:
-        n_agents = len(agents)
-        pool = ProcessPool(nodes=n_agents)
-        # for i in range(n_agents):
-        pool.map(
-            run_single_agent_lifelong,
-            agents[0], experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward, reset_at_terminal, verbose
-        )
-        pool.close()
-        pool.join()
-        pool.clear()
-    else:
-    '''
-    for agent in agents:
-        run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
-                                  track_disc_reward, reset_at_terminal, verbose)
+    if not plot_only:
+        '''
+        if parallel_run:
+            n_agents = len(agents)
+            pool = ProcessPool(nodes=n_agents)
+            # for i in range(n_agents):
+            pool.map(
+                run_single_agent_lifelong,
+                agents[0], experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward, reset_at_terminal, verbose
+            )
+            pool.close()
+            pool.join()
+            pool.clear()
+        else:
+        '''
+        for agent in agents:
+            run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
+                                      track_disc_reward, reset_at_terminal, verbose)
+
+    lifelong_plot()
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
