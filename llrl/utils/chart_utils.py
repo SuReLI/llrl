@@ -1,6 +1,7 @@
 import sys
 import os
 import pandas
+import numpy as np
 from cycler import cycler
 from matplotlib import pyplot as plt
 from matplotlib import rc
@@ -17,44 +18,71 @@ color_ls = [
 ]
 
 
-def lifelong_plot(agents, path):
+def lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title):
     dfs = []
     for agent in agents:
         agent_path = csv_path_from_agent(path, agent)
         dfs.append(pandas.read_csv(agent_path))
 
-    print(dfs[0])
+    tre, tre_lo, tre_up = [], [], []
+    dre, dre_lo, dre_up = [], [], []
+    trt, trt_lo, trt_up = [], [], []
+    drt, drt_lo, drt_up = [], [], []
+    for i in range(len(agents)):
+        tre_i, tre_lo_i, tre_up_i = [], [], []
+        dre_i, dre_lo_i, dre_up_i = [], [], []
+        for j in range(1, n_episodes + 1):
+            df = dfs[i].loc[dfs[i]['episode'] == j]
+            tre_mci_j = mean_confidence_interval(df['return'], confidence)
+            tre_i.append(tre_mci_j[0])
+            tre_lo_i.append(tre_mci_j[1])
+            tre_up_i.append(tre_mci_j[2])
+            dre_mci_j = mean_confidence_interval(df['discounted_return'], confidence)
+            dre_i.append(dre_mci_j[0])
+            dre_lo_i.append(dre_mci_j[1])
+            dre_up_i.append(dre_mci_j[2])
+        tre.append(tre_i)
+        tre_lo.append(tre_lo_i)
+        tre_up.append(tre_up_i)
+        dre.append(dre_i)
+        dre_lo.append(dre_lo_i)
+        dre_up.append(dre_up_i)
 
-    '''
-    # Set names
-    labels = [
-        'episode_number', 'average_discounted_return', 'average_discounted_return_lo', 'average_discounted_return_up'
-    ] if is_tracked_value_discounted else [
-        'episode_number', 'average_return', 'average_return_lo', 'average_return_up'
-    ]
-    file_name = 'average_discounted_return_per_episode' if is_tracked_value_discounted else 'average_return_per_episode'
-    x_label = r'Episode Number'
-    y_label = r'Average Discounted Return' if is_tracked_value_discounted else r'Average Return'
-    title_prefix = r'Average Discounted Return: ' if is_tracked_value_discounted else r'Average Return: '
+        trt_i, trt_lo_i, trt_up_i = [], [], []
+        drt_i, drt_lo_i, drt_up_i = [], [], []
+        for j in range(1, n_tasks + 1):
+            df = dfs[i].loc[dfs[i]['task'] == j]
+            trt_mci_j = mean_confidence_interval(df['return'], confidence)
+            trt_i.append(trt_mci_j[0])
+            trt_lo_i.append(trt_mci_j[1])
+            trt_up_i.append(trt_mci_j[2])
+            drt_mci_j = mean_confidence_interval(df['discounted_return'], confidence)
+            drt_i.append(drt_mci_j[0])
+            drt_lo_i.append(drt_mci_j[1])
+            drt_up_i.append(drt_mci_j[2])
+        trt.append(trt_i)
+        trt_lo.append(trt_lo_i)
+        trt_up.append(trt_up_i)
+        drt.append(drt_i)
+        drt_lo.append(drt_lo_i)
+        drt_up.append(drt_up_i)
 
-    # Open data
-    data_frames = open_agents(path, csv_name=file_name, agents=agents)
-
-    # Plot
-    n_episodes = len(data_frames[0][labels[0]])
-    x = range(n_episodes)
-    returns = []
-    returns_lo = []
-    returns_up = []
-    for df in data_frames:
-        returns.append(df[labels[1]][0:n_episodes])
-        returns_lo.append(df[labels[2]][0:n_episodes])
-        returns_up.append(df[labels[3]][0:n_episodes])
-    plot(
-        path, pdf_name=file_name, agents=agents, x=x, y=returns, y_lo=returns_lo, y_up=returns_up,
-        x_label=x_label, y_label=y_label, title_prefix=title_prefix, open_plot=open_plot, plot_title=plot_title
-    )
-    '''
+    x_e = range(1, n_episodes + 1)
+    x_t = range(1, n_tasks + 1)
+    x_label_e = r'Episode number'
+    x_label_t = r'Task number'
+    plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
+         x_label=x_label_e, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
+         plot_title=plot_title)
+    plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
+         x_label=x_label_e, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
+         open_plot=open_plot, plot_title=plot_title)
+    plot(path, pdf_name='return_vs_task', agents=agents, x=x_t, y=trt, y_lo=trt_lo, y_up=trt_up,
+         x_label=x_label_t, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
+         plot_title=plot_title)
+    plot(path, pdf_name='discounted_return_vs_task', agents=agents, x=x_t, y=drt, y_lo=drt_lo, y_up=drt_up,
+         x_label=x_label_t, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
+         open_plot=open_plot, plot_title=plot_title)
 
 
 def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True, plot_title=True):
