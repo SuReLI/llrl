@@ -1,8 +1,14 @@
 import csv
 
 
-def csv_path_from_name(root_path, agent_name):
-    return root_path + '/results-' + agent_name + '.csv'
+def csv_path_from_agent(root_path, agent):
+    """
+    Get the saving path from agent object and root path.
+    :param root_path: (str)
+    :param agent: (object)
+    :return: (str)
+    """
+    return root_path + '/results-' + agent.get_name() + '.csv'
 
 
 def lifelong_save(path, agent, data, instance_number, is_first_save):
@@ -15,7 +21,7 @@ def lifelong_save(path, agent, data, instance_number, is_first_save):
     :param is_first_save: (bool)
     :return: None
     """
-    full_path = csv_path_from_name(path, agent.get_name())
+    full_path = csv_path_from_agent(path, agent)
     n_tasks = len(data['returns_per_tasks'])
     n_episodes = len(data['returns_per_tasks'][0])
 

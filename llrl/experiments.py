@@ -56,6 +56,7 @@ def run_agents_lifelong(
                             is_episodic=n_episodes > 1, is_lifelong=True, clear_old_results=clear_old_results,
                             track_disc_reward=track_disc_reward, cumulative_plot=cumulative_plot,
                             dir_for_plot=dir_for_plot)
+    path = experiment.exp_directory
 
     print("Running experiment:\n" + str(experiment))
 
@@ -82,13 +83,13 @@ def run_agents_lifelong(
         '''
         for agent in agents:
             run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
-                                      track_disc_reward, reset_at_terminal, verbose)
+                                      track_disc_reward, reset_at_terminal, path, verbose)
 
-    lifelong_plot()
+    lifelong_plot(agents, path)
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
-                              reset_at_terminal, verbose):
+                              reset_at_terminal, path, verbose):
     """
     :param agent:
     :param experiment:
@@ -99,6 +100,7 @@ def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episode
     :param tasks:
     :param track_disc_reward:
     :param reset_at_terminal:
+    :param path:
     :param verbose:
     :return:
     """
@@ -128,7 +130,7 @@ def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episode
         print("    Total time elapsed: " + str(round(time.clock() - start, 3)))
 
         # Save
-        lifelong_save(experiment.exp_directory, agent, data, instance, True if instance == 1 else False)
+        lifelong_save(path, agent, data, instance, True if instance == 1 else False)
 
 
 def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_disc_reward=False,

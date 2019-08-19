@@ -1,12 +1,13 @@
 import sys
 import os
+import pandas
 from cycler import cycler
 from matplotlib import pyplot as plt
 from matplotlib import rc
 from matplotlib.ticker import MaxNLocator
 
 from llrl.utils.utils import mean_confidence_interval
-from llrl.utils.save import csv_path_from_name
+from llrl.utils.save import csv_path_from_agent
 
 COLOR_SHIFT = 0
 
@@ -16,9 +17,13 @@ color_ls = [
 ]
 
 
-def lifelong_plot():
-    print('TODO')
-    # csv_path_from_name()
+def lifelong_plot(agents, path):
+    dfs = []
+    for agent in agents:
+        agent_path = csv_path_from_agent(path, agent)
+        dfs.append(pandas.read_csv(agent_path))
+
+    print(dfs[0])
 
     '''
     # Set names
