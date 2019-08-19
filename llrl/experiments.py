@@ -3,9 +3,6 @@ Useful functions for experiments (e.g. Lifelong RL)
 """
 
 import time
-from collections import defaultdict
-from multiprocessing import Pool
-from pathos.multiprocessing import ProcessPool
 
 from llrl.utils.save import lifelong_save
 from llrl.utils.chart_utils import lifelong_plot
