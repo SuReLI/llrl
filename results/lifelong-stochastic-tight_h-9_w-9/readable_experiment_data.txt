@@ -5,7 +5,6 @@
 	LRMax,1
 	LRMax(Dmax=0.2),2
 	MaxQInit,3
-	LRMaxQInit,4
 (Params)
 	samples : 50
 	episodes : 50

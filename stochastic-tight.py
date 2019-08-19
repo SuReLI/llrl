@@ -45,7 +45,7 @@ def experiment():
                             deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                             n_states=n_states, max_memory_size=max_mem, prior=None, estimate_distances_online=True,
                             min_sampling_probability=p_min, name='LRMaxQInit')
-    agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit]
+    agents_pool = [rmax, lrmax, lrmaxprior, maxqinit]  # , lrmaxqinit]
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=5, n_tasks=50, n_episodes=50, n_steps=100,
