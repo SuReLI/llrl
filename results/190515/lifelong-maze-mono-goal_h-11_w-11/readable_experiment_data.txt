@@ -1,0 +1,14 @@
+(MDP)
+	lifelong-maze-mono-goal_h-11_w-11
+(Agents)
+	RMax,0
+	LRMax-prior1.0,1
+	LRMax-prior0.5,2
+	LRMax-prior0.2,3
+	LRMax,4
+	RMax-MaxQInit,5
+(Params)
+	steps : 1000
+	episodes : 100
+	samples : 20
+	track_disc_reward : False
