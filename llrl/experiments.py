@@ -37,7 +37,8 @@ def run_agents_lifelong(
         cumulative_plot=True,
         dir_for_plot='results',
         verbose=False,
-        plot_only=True,
+        do_run=True,
+        do_plot=False,
         confidence=.9,
         open_plot=False,
         plot_title=True
@@ -61,7 +62,8 @@ def run_agents_lifelong(
     :param cumulative_plot: (bool)
     :param dir_for_plot: (str)
     :param verbose: (bool)
-    :param plot_only: (bool)
+    :param do_run: (bool)
+    :param do_plot: (bool)
     :param confidence: (float)
     :param open_plot: (bool)
     :param plot_title: (bool)
@@ -82,7 +84,7 @@ def run_agents_lifelong(
         tasks.append(mdp_distribution.sample())
 
     # Run
-    if not plot_only:
+    if do_run:
         if parallel_run:
             n_agents = len(agents)
             n_processes = n_agents if n_processes is None else n_processes
@@ -103,7 +105,8 @@ def run_agents_lifelong(
                 run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
                                           track_disc_reward, reset_at_terminal, path, verbose)
 
-    lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title)
+    if do_plot:
+        lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title)
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
