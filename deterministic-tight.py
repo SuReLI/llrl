@@ -19,14 +19,14 @@ def experiment():
                                              gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
-    p_min = 1. / 7.  # There are seven possible MDPs
+    p_min = 1. / 6.
     epsilon_q = .1
     epsilon_m = .01
     delta = .1
     r_max = 1.
     v_max = 1.
     n_states = 4
-    max_mem = 4
+    max_mem = 5
 
     # Agents
     rmax = RMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
@@ -53,8 +53,9 @@ def experiment():
     agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit, lrmaxqinitprior]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, n_instances=4, n_tasks=60, n_episodes=60, n_steps=100,
-                        reset_at_terminal=False, plot_only=False, open_plot=True, plot_title=True)
+    run_agents_lifelong(agents_pool, env_distribution, n_instances=10, n_tasks=100, n_episodes=100, n_steps=100,
+                        reset_at_terminal=False, open_plot=True, plot_title=True,
+                        parallel_run=True, n_processes=None)
 
 
 if __name__ == '__main__':
