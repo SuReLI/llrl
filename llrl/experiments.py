@@ -97,7 +97,7 @@ def run_agents_lifelong(
                 jobs.append(job)
 
             for job in jobs:
-                print(job.get())
+                job.get()
         else:
             for agent in agents:
                 run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
