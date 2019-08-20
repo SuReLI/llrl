@@ -3,10 +3,22 @@ Useful functions for experiments (e.g. Lifelong RL)
 """
 
 import time
+import dill
+from multiprocessing import Pool
 
 from llrl.utils.save import lifelong_save
 from llrl.utils.chart_utils import lifelong_plot
 from simple_rl.experiments import Experiment
+
+
+def run_dill_encoded(payload):
+    fun, args = dill.loads(payload)
+    return fun(*args)
+
+
+def apply_async(pool, fun, args):
+    payload = dill.dumps((fun, args))
+    return pool.apply_async(run_dill_encoded, (payload,))
 
 
 def run_agents_lifelong(
@@ -18,6 +30,7 @@ def run_agents_lifelong(
         n_episodes=1,
         n_steps=100,
         parallel_run=False,
+        n_processes=None,
         clear_old_results=True,
         track_disc_reward=False,
         reset_at_terminal=False,
@@ -70,23 +83,25 @@ def run_agents_lifelong(
 
     # Run
     if not plot_only:
-        '''
         if parallel_run:
             n_agents = len(agents)
-            pool = ProcessPool(nodes=n_agents)
-            # for i in range(n_agents):
-            pool.map(
-                run_single_agent_lifelong,
-                agents[0], experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward, reset_at_terminal, verbose
-            )
-            pool.close()
-            pool.join()
-            pool.clear()
+            n_processes = n_agents if n_processes is None else n_processes
+            pool = Pool(processes=n_processes)
+
+            # Asynchronous execution
+            jobs = []
+            for i in range(n_agents):
+                job = apply_async(pool, run_single_agent_lifelong, (agents[i], experiment, n_instances, n_tasks,
+                                                                    n_episodes, n_steps, tasks, track_disc_reward,
+                                                                    reset_at_terminal, path, verbose))
+                jobs.append(job)
+
+            for job in jobs:
+                print(job.get())
         else:
-        '''
-        for agent in agents:
-            run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
-                                      track_disc_reward, reset_at_terminal, path, verbose)
+            for agent in agents:
+                run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
+                                          track_disc_reward, reset_at_terminal, path, verbose)
 
     lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title)
 
