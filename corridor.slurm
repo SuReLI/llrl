@@ -20,10 +20,12 @@ sort $SLURM_NODEFILE | uniq -c | xargs printf "(%d)    %s\n"
 
 echo nbtask = $SLURM_NTASKS
 
+source deactivate
+source activate myenv
+sleep 1
 which python
-source /softs/Utils/anaconda3/bin/activate myenv
-which python
-/home/disc/e.lecarpentier/.conda/envs/myenv/bin/python corridor.py
-deactivate
+python corridor.py
+source deactivate
+
 
 rm $SLURM_NODEFILE

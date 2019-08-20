@@ -1,7 +1,6 @@
-(24)    node057
+(24)    node067
 nbtask = 24
-/softs/Utils/anaconda3/bin/python
-/softs/Utils/anaconda3/bin/python
+/home/disc/e.lecarpentier/.conda/envs/myenv/bin/python
 Warning: Tensorflow not installed.
 Warning: OpenAI gym not installed.
 Creating environments of class corridor
@@ -48,7 +47,7 @@ MaxQInit is learning.
     Experience task 18 / 20
     Experience task 19 / 20
     Experience task 20 / 20
-    Total time elapsed: 2.47
+    Total time elapsed: 2.44
 LRMaxQInit(Dmax0.2) is learning.
   Instance 1 / 1
     Experience task 1 / 20
@@ -71,7 +70,7 @@ LRMaxQInit(Dmax0.2) is learning.
     Experience task 18 / 20
     Experience task 19 / 20
     Experience task 20 / 20
-    Total time elapsed: 7.3
+    Total time elapsed: 7.28
 RMax is learning.
   Instance 1 / 1
     Experience task 1 / 20
@@ -94,7 +93,7 @@ RMax is learning.
     Experience task 18 / 20
     Experience task 19 / 20
     Experience task 20 / 20
-    Total time elapsed: 3.99
+    Total time elapsed: 3.96
 LRMaxQInit is learning.
   Instance 1 / 1
     Experience task 1 / 20
@@ -117,4 +116,4 @@ LRMaxQInit is learning.
     Experience task 18 / 20
     Experience task 19 / 20
     Experience task 20 / 20
-    Total time elapsed: 9.73
+    Total time elapsed: 9.56
