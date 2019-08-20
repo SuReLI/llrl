@@ -21,7 +21,7 @@ def experiment():
     n_known = 10
     p_min = 1. / 6.
     epsilon_q = .1
-    epsilon_m = .01
+    epsilon_m = .0001
     delta = .1
     r_max = 1.
     v_max = 1.

@@ -101,7 +101,7 @@ def sample_test_environment(gamma):
     return env
 
 
-def stochastic_tight_collection(gamma, env_name):
+def tight_collection(gamma, env_name, sto=False):
     env_dist_dict = {}
     goals_map = [
         [0, 0, 0, 0, 0, 0, 1, 1, 1],
@@ -120,43 +120,16 @@ def stochastic_tight_collection(gamma, env_name):
     sampling_probability = 1. / float(n_goals)
 
     for g in possible_goals:
-        sampled_slip = np.random.uniform(0.0, 1.0)
+        sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
-            width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=[g],
+            width=w, height=h, init_loc=(5, 5), rand_init=False, goal_locs=[g],
             is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
 
 
-def tight_collection(gamma, env_name):
-    env_dist_dict = {}
-    goals_map = [
-        [0, 0, 0, 0, 0, 0, 1, 1, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0, 1],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    ]
-    possible_goals = coord_from_binary_list(goals_map)
-    w, h = len(goals_map[0]), len(goals_map)
-    n_goals = int(sum([sum(p) for p in goals_map]))
-    sampling_probability = 1. / float(n_goals)
-
-    for g in possible_goals:
-        env = GridWorld(
-            width=w, height=h, init_loc=(5, 5), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, goal_reward=0.1, name=env_name
-        )
-        env_dist_dict[env] = sampling_probability
-    return env_dist_dict
-
-
-def tight_collection_big(gamma, env_name):
+def tight_collection_big(gamma, env_name, sto=False):
     env_dist_dict = {}
     goals_map = [
         [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
@@ -177,15 +150,16 @@ def tight_collection_big(gamma, env_name):
     sampling_probability = 1. / float(n_goals)
 
     for g in possible_goals:
+        sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
             width=w, height=h, init_loc=(6, 6), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
 
 
-def tight_collection_small(gamma, env_name):
+def tight_collection_small(gamma, env_name, sto=False):
     env_dist_dict = {}
     goals_map = [
         [0, 0, 0, 0, 1, 1, 1],
@@ -202,9 +176,10 @@ def tight_collection_small(gamma, env_name):
     sampling_probability = 1. / float(n_goals)
 
     for g in possible_goals:
+        sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
             width=w, height=h, init_loc=(4, 4), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
@@ -438,7 +413,11 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
     elif env_class == 'deterministic-tight-small':
         return MDPDistribution(tight_collection_small(gamma, env_name), horizon=horizon)
     elif env_class == 'stochastic-tight':
-        return MDPDistribution(stochastic_tight_collection(gamma, env_name), horizon=horizon)
+        return MDPDistribution(tight_collection(gamma, env_name, sto=True), horizon=horizon)
+    elif env_class == 'stochastic-tight-big':
+        return MDPDistribution(tight_collection_big(gamma, env_name, sto=True), horizon=horizon)
+    elif env_class == 'stochastic-tight-small':
+        return MDPDistribution(tight_collection_small(gamma, env_name, sto=True), horizon=horizon)
     elif env_class == 'deterministic-spread':
         return MDPDistribution(deterministic_spread_collection(gamma, env_name), horizon=horizon)
 
