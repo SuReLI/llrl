@@ -1,15 +1,14 @@
 #!/bin/bash
 
-#SBATCH --nodes=4
+#SBATCH --nodes=1
 #SBATCH --ntasks-per-node=24
+#SBATCH --partition=short
 #SBATCH --time=24:00:00
-#SBATCH --begin=now
 #SBATCH --mail-user=erwan.lecarpentier@isae-supaero.fr
 #SBATCH --mail-type=FAIL,END
 #SBATCH --job-name=exp-corridor
 #SBATCH --output=slurm.%j.out
 #SBATCH --error=slurm.%j.err
-#SBATCH --partition=short
 
 module purge
 module load python/3.7
