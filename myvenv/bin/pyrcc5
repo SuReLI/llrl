@@ -1,2 +1,0 @@
-#!/bin/sh
-exec /home/e.lecarpentier/Documents/git/llrl/llrl-code/myvenv/bin/python -m PyQt5.pyrcc_main ${1+"$@"}
