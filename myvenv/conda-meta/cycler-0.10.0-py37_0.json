@@ -1,0 +1,39 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "py37_0",
+  "build_number": 0,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [
+    "python >=3.7,<3.8.0a0",
+    "six"
+  ],
+  "files": [
+    "lib/python3.7/site-packages/__pycache__/cycler.cpython-37.pyc",
+    "lib/python3.7/site-packages/cycler-0.10.0-py3.7.egg-info/PKG-INFO",
+    "lib/python3.7/site-packages/cycler-0.10.0-py3.7.egg-info/SOURCES.txt",
+    "lib/python3.7/site-packages/cycler-0.10.0-py3.7.egg-info/dependency_links.txt",
+    "lib/python3.7/site-packages/cycler-0.10.0-py3.7.egg-info/requires.txt",
+    "lib/python3.7/site-packages/cycler-0.10.0-py3.7.egg-info/top_level.txt",
+    "lib/python3.7/site-packages/cycler.py"
+  ],
+  "fn": "cycler-0.10.0-py37_0.tar.bz2",
+  "license": "BSD 3-Clause",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/cycler-0.10.0-py37_0",
+    "type": 1
+  },
+  "md5": "0c9d4b221c5e6bd4cd851218a89fc909",
+  "name": "cycler",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 13694,
+  "subdir": "linux-64",
+  "timestamp": 1530793355515,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/cycler-0.10.0-py37_0.tar.bz2",
+  "version": "0.10.0",
+  "with_features_depends": {}
+}

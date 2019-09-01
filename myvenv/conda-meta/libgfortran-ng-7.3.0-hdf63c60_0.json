@@ -1,0 +1,36 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "hdf63c60_0",
+  "build_number": 0,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [],
+  "files": [
+    "lib/libgfortran.so",
+    "lib/libgfortran.so.4",
+    "lib/libgfortran.so.4.0.0",
+    "share/licenses/libgfortran/RUNTIME.LIBRARY.EXCEPTION",
+    "x86_64-conda_cos6-linux-gnu/sysroot/lib/libgfortran.so",
+    "x86_64-conda_cos6-linux-gnu/sysroot/lib/libgfortran.so.4",
+    "x86_64-conda_cos6-linux-gnu/sysroot/lib/libgfortran.so.4.0.0"
+  ],
+  "fn": "libgfortran-ng-7.3.0-hdf63c60_0.tar.bz2",
+  "license": "GPL",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/libgfortran-ng-7.3.0-hdf63c60_0",
+    "type": 1
+  },
+  "md5": "6003e09e8cef9aca91b954abfdd0f39c",
+  "name": "libgfortran-ng",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 1336385,
+  "subdir": "linux-64",
+  "timestamp": 1534628456385,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/libgfortran-ng-7.3.0-hdf63c60_0.tar.bz2",
+  "version": "7.3.0",
+  "with_features_depends": {}
+}

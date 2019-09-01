@@ -1,0 +1,40 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "py37he6710b0_0",
+  "build_number": 0,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [
+    "libgcc-ng >=7.3.0",
+    "libstdcxx-ng >=7.3.0",
+    "python >=3.7,<3.8.0a0"
+  ],
+  "files": [
+    "lib/python3.7/site-packages/kiwisolver-1.1.0.dist-info/INSTALLER",
+    "lib/python3.7/site-packages/kiwisolver-1.1.0.dist-info/METADATA",
+    "lib/python3.7/site-packages/kiwisolver-1.1.0.dist-info/RECORD",
+    "lib/python3.7/site-packages/kiwisolver-1.1.0.dist-info/WHEEL",
+    "lib/python3.7/site-packages/kiwisolver-1.1.0.dist-info/top_level.txt",
+    "lib/python3.7/site-packages/kiwisolver.cpython-37m-x86_64-linux-gnu.so"
+  ],
+  "fn": "kiwisolver-1.1.0-py37he6710b0_0.tar.bz2",
+  "license": "BSD 3-Clause",
+  "license_family": "BSD",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/kiwisolver-1.1.0-py37he6710b0_0",
+    "type": 1
+  },
+  "md5": "b4692f437bd50cb18ec43fdbb5ad9bdb",
+  "name": "kiwisolver",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 91739,
+  "subdir": "linux-64",
+  "timestamp": 1556560851628,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/kiwisolver-1.1.0-py37he6710b0_0.tar.bz2",
+  "version": "1.1.0",
+  "with_features_depends": {}
+}

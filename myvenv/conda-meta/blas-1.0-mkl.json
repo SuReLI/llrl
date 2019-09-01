@@ -1,0 +1,27 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "mkl",
+  "build_number": 1,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [],
+  "files": [],
+  "fn": "blas-1.0-mkl.tar.bz2",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/blas-1.0-mkl",
+    "type": 1
+  },
+  "md5": "751c2c5b239a728db05f91374aaac3a1",
+  "name": "blas",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 5838,
+  "subdir": "linux-64",
+  "timestamp": 1528122042945,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/blas-1.0-mkl.tar.bz2",
+  "version": "1.0",
+  "with_features_depends": {}
+}

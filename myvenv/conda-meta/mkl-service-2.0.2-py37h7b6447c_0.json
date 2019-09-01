@@ -1,0 +1,49 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "py37h7b6447c_0",
+  "build_number": 0,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [
+    "libgcc-ng >=7.3.0",
+    "mkl >=2019.3,<2020.0a0",
+    "numpy >=1.11.3,<2.0a0",
+    "python >=3.7,<3.8.0a0",
+    "six"
+  ],
+  "files": [
+    "lib/python3.7/site-packages/mkl/__init__.py",
+    "lib/python3.7/site-packages/mkl/__pycache__/__init__.cpython-37.pyc",
+    "lib/python3.7/site-packages/mkl/__pycache__/setup.cpython-37.pyc",
+    "lib/python3.7/site-packages/mkl/_mklinit.cpython-37m-x86_64-linux-gnu.so",
+    "lib/python3.7/site-packages/mkl/_py_mkl_service.cpython-37m-x86_64-linux-gnu.so",
+    "lib/python3.7/site-packages/mkl/setup.py",
+    "lib/python3.7/site-packages/mkl/tests/__pycache__/test_mkl_service.cpython-37.pyc",
+    "lib/python3.7/site-packages/mkl/tests/test_mkl_service.py",
+    "lib/python3.7/site-packages/mkl_service-2.0.2-py3.7.egg-info/PKG-INFO",
+    "lib/python3.7/site-packages/mkl_service-2.0.2-py3.7.egg-info/SOURCES.txt",
+    "lib/python3.7/site-packages/mkl_service-2.0.2-py3.7.egg-info/dependency_links.txt",
+    "lib/python3.7/site-packages/mkl_service-2.0.2-py3.7.egg-info/requires.txt",
+    "lib/python3.7/site-packages/mkl_service-2.0.2-py3.7.egg-info/top_level.txt"
+  ],
+  "fn": "mkl-service-2.0.2-py37h7b6447c_0.tar.bz2",
+  "license": "BSD-3-Clause",
+  "license_family": "BSD",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/mkl-service-2.0.2-py37h7b6447c_0",
+    "type": 1
+  },
+  "md5": "097979936403926185e70cd2a260ad5a",
+  "name": "mkl-service",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 71790,
+  "subdir": "linux-64",
+  "timestamp": 1559316371110,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/mkl-service-2.0.2-py37h7b6447c_0.tar.bz2",
+  "version": "2.0.2",
+  "with_features_depends": {}
+}

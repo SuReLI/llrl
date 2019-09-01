@@ -1,0 +1,13 @@
+prefix=/home/e.lecarpentier/Documents/git/llrl/llrl-code/myvenv
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/qt
+
+
+Name: Qt5 WebChannel
+Description: Qt WebChannel module
+Version: 5.9.7
+Libs: -L${libdir} -lQt5WebChannel 
+Cflags: -I${includedir}/QtWebChannel -I${includedir}
+Requires: Qt5Core Qt5Qml
+

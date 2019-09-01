@@ -1,0 +1,14 @@
+prefix=/home/e.lecarpentier/Documents/git/llrl/llrl-code/myvenv
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include/qt
+
+
+Name: Qt5 OpenGLExtensions
+Description: Qt OpenGLExtensions module
+Version: 5.9.7
+Libs: -L${libdir} -lQt5OpenGLExtensions 
+Libs.private: -L/home/e.lecarpentier/Documents/git/llrl/llrl-code/myvenv/lib -L/home/e.lecarpentier/Documents/git/llrl/llrl-code/myvenv/lib -lQt5Gui -lQt5Core -lpthread -lGL 
+Cflags: -I${includedir}/QtOpenGLExtensions -I${includedir}
+Requires: Qt5Core Qt5Gui
+
