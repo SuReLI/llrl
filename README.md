@@ -12,6 +12,11 @@ In order to use this virtual environment, you need to run the following command 
     
 From there, you can run the script using the embedded python version.
 
+TODO update this section.
+New
+
+    source activate myvenv
+
 ## Experiments
 
 To run the experiments of the Lipschitz Lifelong Reinforcement Learning paper, go to the experiments repository and run the following scripts:

@@ -105,6 +105,7 @@ def run_agents_lifelong(
                 run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
                                           track_disc_reward, reset_at_terminal, path, verbose)
 
+    # Plot
     if do_plot:
         lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title)
 
