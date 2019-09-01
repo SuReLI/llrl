@@ -1,0 +1,14 @@
+(MDP)
+	lifelong-deterministic-tight-small_h-7_w-7
+(Agents)
+	RMax,0
+	LRMax,1
+	LRMax(Dmax=0.1),2
+	MaxQInit,3
+	LRMaxQInit,4
+	LRMaxQInit(Dmax=0.1),5
+(Params)
+	samples : 100
+	episodes : 100
+	steps : 50
+	track_disc_reward : False
