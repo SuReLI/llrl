@@ -207,8 +207,8 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
             reward, next_state = mdp.execute_agent_action(action)
 
             # Track value.
-            return_per_episode[episode - 1] += reward * (gamma ** step)
-            discounted_return_per_episode[episode - 1] += reward
+            return_per_episode[episode - 1] += reward
+            discounted_return_per_episode[episode - 1] += reward * (gamma ** step)
             cumulative_episodic_reward += reward
 
             # Record the experience.
