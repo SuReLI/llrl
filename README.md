@@ -13,9 +13,13 @@ In order to use this virtual environment, you need to run the following command 
 From there, you can run the script using the embedded python version.
 
 TODO update this section.
-New
+New:
 
-    source activate myvenv
+    source activate [absolute-path-to-this-repo]/myvenv
+    
+To deactivate:
+
+    source deactivate
 
 ## Experiments
 
