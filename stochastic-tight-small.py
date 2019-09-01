@@ -15,7 +15,7 @@ from llrl.experiments import run_agents_lifelong
 def experiment():
     # Parameters
     gamma = .9
-    env_distribution = make_env_distribution(env_class='stochastic-tight', env_name='stochastic-tight', gamma=gamma)
+    env_distribution = make_env_distribution(env_class='stochastic-tight-small', env_name='stochastic-tight-small', gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
     p_min = 1. / 6.
@@ -53,7 +53,7 @@ def experiment():
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=10, n_tasks=100, n_episodes=100, n_steps=100,
-                        reset_at_terminal=False, open_plot=True, plot_title=True,
+                        reset_at_terminal=False, open_plot=True, plot_title=True, do_run=False, do_plot=True,
                         parallel_run=True, n_processes=None)
 
 
