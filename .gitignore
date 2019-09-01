@@ -1,5 +1,7 @@
 .idea
 
+myvenv
+
 experiments/results/
 examples/results/
 results/backup/
