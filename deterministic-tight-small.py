@@ -18,15 +18,17 @@ def experiment():
     env_distribution = make_env_distribution(env_class='deterministic-tight-small', env_name='deterministic-tight-small',
                                              gamma=gamma)
     actions = env_distribution.get_actions()
-    n_known = 10
     p_min = 1. / 6.
     epsilon_q = .01
+    n_states = 4
+    r_max = 1.
+
+    n_known = 10
+    max_mem = 20
+    v_max = 1.
     epsilon_m = .01
     delta = .1
-    r_max = 1.
-    v_max = 1.
-    n_states = 4
-    max_mem = 5
+
 
     # Agents
     rmax = RMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
@@ -53,7 +55,7 @@ def experiment():
     agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit, lrmaxqinitprior]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=100, n_episodes=100, n_steps=50,
+    run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=80, n_episodes=80, n_steps=50,
                         reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
                         parallel_run=True, n_processes=None)
 
