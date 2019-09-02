@@ -15,7 +15,7 @@ from llrl.experiments import run_agents_lifelong
 def experiment():
     # Parameters
     gamma = .9
-    env_distribution = make_env_distribution(env_class='deterministic-tight', env_name='deterministic-tight-bignknown',
+    env_distribution = make_env_distribution(env_class='deterministic-tight-small', env_name='deterministic-tight-bignknown',
                                              gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 100
@@ -53,8 +53,8 @@ def experiment():
     agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit, lrmaxqinitprior]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=80, n_episodes=80, n_steps=100,
-                        reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
+    run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=100, n_episodes=1000, n_steps=100,
+                        reset_at_terminal=False, open_plot=True, plot_title=True, do_run=False, do_plot=True,
                         parallel_run=True, n_processes=None)
 
 
