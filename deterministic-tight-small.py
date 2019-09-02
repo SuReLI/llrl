@@ -18,7 +18,7 @@ def experiment():
     env_distribution = make_env_distribution(env_class='deterministic-tight-small', env_name='deterministic-tight-small',
                                              gamma=gamma)
     actions = env_distribution.get_actions()
-    p_min = 1. / 6.
+    p_min = 1. / 5.
     epsilon_q = .01
     n_states = 4
     r_max = 1.

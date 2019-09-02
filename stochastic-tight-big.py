@@ -18,7 +18,7 @@ def experiment():
     env_distribution = make_env_distribution(env_class='stochastic-tight-big', env_name='stochastic-tight-big', gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
-    p_min = 1. / 6.
+    p_min = 1. / 5.
     epsilon_q = .01
     epsilon_m = .01
     delta = .1
@@ -52,7 +52,7 @@ def experiment():
     agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit, lrmaxqinitprior]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, n_instances=10, n_tasks=80, n_episodes=80, n_steps=100,
+    run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=80, n_episodes=80, n_steps=100,
                         reset_at_terminal=False, open_plot=True, plot_title=True, do_run=False, do_plot=True,
                         parallel_run=True, n_processes=None)
 

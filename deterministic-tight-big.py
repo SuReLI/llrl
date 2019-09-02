@@ -19,7 +19,7 @@ def experiment():
                                              gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
-    p_min = 1. / 6.
+    p_min = 1. / 5.
     epsilon_q = .01
     epsilon_m = .01
     delta = .1
