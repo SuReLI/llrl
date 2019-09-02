@@ -26,7 +26,7 @@ def experiment():
     r_max = 1.
     v_max = 1.
     n_states = 4
-    max_mem = 20
+    max_mem = 11
 
     # Agents
     rmax = RMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,

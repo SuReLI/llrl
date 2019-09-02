@@ -26,7 +26,7 @@ def experiment():
     r_max = 1.
     v_max = 1.
     n_states = 4
-    max_mem = 20
+    max_mem = 11
 
     # Agents
     rmax = RMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
@@ -53,7 +53,7 @@ def experiment():
     agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit, lrmaxqinitprior]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=80, n_episodes=80, n_steps=100,
+    run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=100, n_episodes=100, n_steps=100,
                         reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
                         parallel_run=True, n_processes=None)
 

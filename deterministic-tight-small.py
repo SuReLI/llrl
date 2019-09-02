@@ -24,7 +24,7 @@ def experiment():
     r_max = 1.
 
     n_known = 10
-    max_mem = 20
+    max_mem = 11
     v_max = 1.
     epsilon_m = .01
     delta = .1
