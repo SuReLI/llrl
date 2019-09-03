@@ -53,7 +53,7 @@ def experiment():
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=80, n_episodes=80, n_steps=100,
-                        reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
+                        reset_at_terminal=False, open_plot=False, plot_title=True, do_run=False, do_plot=True,
                         parallel_run=True, n_processes=None)
 
 
