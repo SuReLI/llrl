@@ -1,0 +1,21 @@
+(24)    node043
+nbtask = 24
+Warning: Tensorflow not installed.
+Warning: OpenAI gym not installed.
+Creating environments of class stochastic-tight-small
+Running experiment:
+(MDP)
+	lifelong-stochastic-tight-small_h-7_w-7
+(Agents)
+	RMax,0
+	LRMax,1
+	LRMax(Dmax=0.2),2
+	MaxQInit,3
+	LRMaxQInit,4
+	LRMaxQInit(Dmax=0.2),5
+(Params)
+	samples : 80
+	episodes : 80
+	steps : 100
+	track_disc_reward : False
+

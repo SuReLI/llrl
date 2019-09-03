@@ -1,0 +1,21 @@
+(24)    node015
+nbtask = 24
+Warning: Tensorflow not installed.
+Warning: OpenAI gym not installed.
+Creating environments of class deterministic-tight-super-big
+Running experiment:
+(MDP)
+	lifelong-deterministic-tight-super-big_h-15_w-15
+(Agents)
+	RMax,0
+	LRMax,1
+	LRMax(Dmax=0.1),2
+	MaxQInit,3
+	LRMaxQInit,4
+	LRMaxQInit(Dmax=0.1),5
+(Params)
+	samples : 100
+	episodes : 100
+	steps : 100
+	track_disc_reward : False
+

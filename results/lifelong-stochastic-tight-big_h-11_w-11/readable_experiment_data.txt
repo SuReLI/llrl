@@ -1,0 +1,14 @@
+(MDP)
+	lifelong-stochastic-tight-big_h-11_w-11
+(Agents)
+	RMax,0
+	LRMax,1
+	LRMax(Dmax=0.2),2
+	MaxQInit,3
+	LRMaxQInit,4
+	LRMaxQInit(Dmax=0.2),5
+(Params)
+	samples : 80
+	episodes : 80
+	steps : 100
+	track_disc_reward : False
