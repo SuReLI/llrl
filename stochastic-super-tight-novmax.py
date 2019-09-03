@@ -15,8 +15,8 @@ from llrl.experiments import run_agents_lifelong
 def experiment():
     # Parameters
     gamma = .9
-    env_distribution = make_env_distribution(env_class='deterministic-super-tight',
-                                             env_name='deterministic-super-tight',
+    env_distribution = make_env_distribution(env_class='stochastic-super-tight',
+                                             env_name='stochastic-super-tight-novmax',
                                              gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
@@ -25,7 +25,7 @@ def experiment():
     epsilon_m = .01
     delta = .1
     r_max = 1.
-    v_max = 1.
+    v_max = 10.
     n_states = 4
     max_mem = 9
 
