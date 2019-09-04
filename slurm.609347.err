@@ -1,0 +1,34 @@
+Currently Loaded Modulefiles:
+  1) python/3.7
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/home/disc/e.lecarpentier/.conda/envs/myenv/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "/home/disc/e.lecarpentier/git/llrl/llrl/experiments.py", line 17, in run_dill_encoded
+    return fun(*args)
+  File "/home/disc/e.lecarpentier/git/llrl/llrl/experiments.py", line 148, in run_single_agent_lifelong
+    reset_at_terminal=reset_at_terminal, resample_at_terminal=False
+  File "/home/disc/e.lecarpentier/git/llrl/llrl/experiments.py", line 243, in run_single_agent_on_mdp
+    experiment.end_of_episode(agent)
+  File "/home/disc/e.lecarpentier/.conda/envs/myenv/lib/python3.7/site-packages/simple_rl/experiments/ExperimentClass.py", line 269, in end_of_episode
+    self.write_datum_to_file(agent, sum(self.times[agent]), extra_dir="times/")
+  File "/home/disc/e.lecarpentier/.conda/envs/myenv/lib/python3.7/site-packages/simple_rl/experiments/ExperimentClass.py", line 304, in write_datum_to_file
+    os.makedirs(os.path.join(self.exp_directory, extra_dir))
+  File "/home/disc/e.lecarpentier/.conda/envs/myenv/lib/python3.7/os.py", line 221, in makedirs
+    mkdir(name, mode)
+FileExistsError: [Errno 17] File exists: '/home/disc/e.lecarpentier/git/llrl/results/lifelong-soft-four-room-big-novmax_h-11_w-11/times/'
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "four-room-big-novmax.py", line 61, in <module>
+    experiment()
+  File "four-room-big-novmax.py", line 57, in experiment
+    parallel_run=True, n_processes=None)
+  File "/home/disc/e.lecarpentier/git/llrl/llrl/experiments.py", line 107, in run_agents_lifelong
+    job.get()
+  File "/home/disc/e.lecarpentier/.conda/envs/myenv/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+FileExistsError: [Errno 17] File exists: '/home/disc/e.lecarpentier/git/llrl/results/lifelong-soft-four-room-big-novmax_h-11_w-11/times/'
