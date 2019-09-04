@@ -20,7 +20,7 @@ def experiment():
     n_known = 10
     p_min = 1. / 4.
     epsilon_q = .01
-    epsilon_m = .01
+    epsilon_m = .0000001
     delta = .1
     r_max = 1.
     v_max = 10.
@@ -52,7 +52,7 @@ def experiment():
     agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit, lrmaxqinitprior]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, n_instances=1, n_tasks=100, n_episodes=100, n_steps=100,
+    run_agents_lifelong(agents_pool, env_distribution, n_instances=1, n_tasks=100, n_episodes=50, n_steps=100,
                         reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
                         parallel_run=True, n_processes=None)
 

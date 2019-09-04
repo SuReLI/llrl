@@ -9,6 +9,6 @@
 	LRMaxQInit(Dmax=0.1),5
 (Params)
 	samples : 100
-	episodes : 100
+	episodes : 50
 	steps : 100
 	track_disc_reward : False
