@@ -1,0 +1,9 @@
+(MDP)
+	lifelong-four-room_h-9_w-9
+(Agents)
+	RMax,0
+(Params)
+	samples : 80
+	episodes : 80
+	steps : 100
+	track_disc_reward : False

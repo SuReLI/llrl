@@ -306,6 +306,38 @@ def deterministic_spread_collection(gamma, env_name):
     return env_dist_dict
 
 
+def four_room_collection(gamma, env_name, size=9, sto=True):
+    # Walls
+    mid, qua = int(size / 2), int(int(size / 2) / 2)
+    walls_map = np.zeros(shape=(size, size))
+    walls_map[mid, 0:mid + 1] = 1
+    walls_map[mid + 1, mid + 1:] = 1
+    walls_map[:, mid] = 1
+    walls_map[qua, mid], walls_map[mid, qua - 1], walls_map[mid + 1, mid + qua + 1], walls_map[mid + qua + 2, mid] = 0, 0, 0, 0
+    walls = coord_from_binary_list(walls_map)
+
+    # Goals
+    goals_map = np.zeros(shape=(size, size))
+    goals_map[0, 0] = goals_map[0, 1] = goals_map[1, 0] = 1
+    possible_goals = coord_from_binary_list(goals_map)
+    n_goals = int(sum([sum(p) for p in goals_map]))
+
+    init_loc = (size - 1, size - 1)
+
+    env_dist_dict = {}
+    w = h = size
+    sampling_probability = 1. / float(n_goals)
+
+    for g in possible_goals:
+        sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
+        env = GridWorld(
+            width=w, height=h, init_loc=init_loc, rand_init=False, goal_locs=[g], walls=walls,
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
+        )
+        env_dist_dict[env] = sampling_probability
+    return env_dist_dict
+
+
 def octo_grid_collection(gamma, env_name):
     env_dist_dict = {}
     w, h = 13, 13
@@ -524,6 +556,8 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
         return MDPDistribution(tight_collection_small(gamma, env_name, sto=True), horizon=horizon)
     elif env_class == 'deterministic-spread':
         return MDPDistribution(deterministic_spread_collection(gamma, env_name), horizon=horizon)
+    elif env_class == 'four-room':
+        return MDPDistribution(four_room_collection(gamma, env_name), horizon=horizon)
 
 
 
