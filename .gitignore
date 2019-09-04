@@ -1,7 +1,7 @@
 .idea
 
 *.pyc
-__pychach__
+__pycache__
 
 myvenv
 
