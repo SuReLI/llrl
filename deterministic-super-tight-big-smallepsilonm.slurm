@@ -6,7 +6,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --mail-user=erwan.lecarpentier@isae-supaero.fr
 #SBATCH --mail-type=FAIL,END
-#SBATCH --job-name=exp-deterministic-super-tight-smallepsilonm
+#SBATCH --job-name=exp-deterministic-super-tight-big-smallepsilonm
 #SBATCH --output=slurm.%j.out
 #SBATCH --error=slurm.%j.err
 
@@ -23,7 +23,7 @@ echo nbtask = $SLURM_NTASKS
 source deactivate
 source activate myenv
 sleep 1
-python deterministic-super-tight-smallepsilonm.py
+python deterministic-super-tight-big-smallepsilonm.py
 source deactivate
 
 
