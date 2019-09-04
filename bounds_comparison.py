@@ -17,7 +17,7 @@ from llrl.utils.save import csv_write
 from llrl.envs.gridworld import GridWorld
 from llrl.agents.experimental.lrmax_bounds_use import ExpLRMax
 from llrl.agents.experimental.rmax_bounds_use import ExpRMax
-from simple_rl.run_experiments import run_agents_on_mdp
+from llrl.experiments import run_agents_on_mdp
 
 
 def plot_bound_use(path):
@@ -58,6 +58,7 @@ def bounds_comparison_experiment(verbose=False):
     prior_min = (1. + gamma) / (1. - gamma)
     prior_max = 0.
     priors = [round(p, 1) for p in np.linspace(start=prior_min, stop=prior_max, num=5)]
+    # priors = [0.1]  # TODO remove
     save_path = 'results/bounds_comparison_results.csv'
 
     # Environments
@@ -70,27 +71,45 @@ def bounds_comparison_experiment(verbose=False):
     r_max = 1.
     n_known = 1
     epsilon_q = .01
+    epsilon_m = .01
+    delta = .1
+
+    n_episodes = 10  # 100
+    n_steps = 10  # 30
 
     results = []
 
     for _ in range(n_instances):
-        for prior in priors:
+        lrmax, rmax, df_lrmax, df_rmax = None, None, None, None
+        for i in range(len(priors)):
             lrmax = ExpLRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=None, deduce_v_max=True, n_known=n_known,
-                             deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=.01, delta=.1, n_states=n_states,
-                             max_memory_size=None, prior=prior, estimate_distances_online=True,
-                             min_sampling_probability=.5, path=save_path, name="ExpLRMax")
-            rmax = ExpRMax(actions=mdp1.get_actions(), gamma=GAMMA, count_threshold=1, path=RMAX_TMP_SAVE_PATH)  # TODO here
+                             deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
+                             n_states=n_states, max_memory_size=None, prior=priors[i], estimate_distances_online=True,
+                             min_sampling_probability=.5, name="ExpLRMax")
+            rmax = ExpRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=None, deduce_v_max=True, n_known=n_known,
+                           deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
+                           n_states=n_states, name="ExpRMax")
+
+            if i > 0:
+                lrmax.data = df_lrmax
+                rmax.data = df_rmax
 
             # Run twice
-            run_agents_on_mdp([lrmax], mdp1, instances=1, episodes=100, steps=30,
-                              reset_at_terminal=True, verbose=False, open_plot=False)
+            lrmax.write_data = False
+            run_agents_on_mdp([lrmax], mdp1, n_instances=1, n_episodes=n_episodes, n_steps=n_steps,
+                              reset_at_terminal=False, verbose=False)
 
-            run_agents_on_mdp([lrmax, rmax], mdp2, instances=1, episodes=100, steps=30,
-                              reset_at_terminal=True, verbose=False, open_plot=False)
+            lrmax.write_data = True
+            run_agents_on_mdp([lrmax, rmax], mdp2, n_instances=1, n_episodes=n_episodes, n_steps=n_steps,
+                              reset_at_terminal=False, verbose=False)
 
-        # Retrieve data
-        df_lrmax = lrmax.get_data()
-        df_rmax = rmax.get_data()
+            # Retrieve data
+            df_lrmax = lrmax.data
+            df_rmax = rmax.data
+
+        print(df_lrmax)
+        print(df_rmax)
+
         exit()  # TODO here
 
 
