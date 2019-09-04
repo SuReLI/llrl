@@ -1,4 +1,6 @@
+import sys
 import csv
+from shutil import copyfile
 
 
 def csv_path_from_agent(root_path, agent):
@@ -121,3 +123,8 @@ def csv_write(row, path, mode):
     with open(path, mode) as csv_file:
         w = csv.writer(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         w.writerow(row)
+
+def save_script(path, script_name='original_script.py'):
+    if path[-1] != '/':
+        path = path + '/'
+    copyfile(sys.argv[0], path + script_name)

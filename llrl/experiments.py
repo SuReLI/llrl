@@ -7,7 +7,7 @@ import dill
 from multiprocessing import Pool
 from collections import defaultdict
 
-from llrl.utils.save import lifelong_save
+from llrl.utils.save import lifelong_save, save_script
 from llrl.utils.chart_utils import lifelong_plot
 from simple_rl.experiments import Experiment
 
@@ -56,6 +56,7 @@ def run_agents_lifelong(
     :param n_episodes: (int)
     :param n_steps: (int)
     :param parallel_run: (bool)
+    :param n_processes: (int)
     :param clear_old_results: (bool)
     :param track_disc_reward: (bool) If true records and plots discounted reward, discounted over episodes.
     So, if each episode is 100 steps, then episode 2 will start discounting as though it's step 101.
@@ -76,6 +77,7 @@ def run_agents_lifelong(
                             track_disc_reward=track_disc_reward, cumulative_plot=cumulative_plot,
                             dir_for_plot=dir_for_plot)
     path = experiment.exp_directory
+    save_script(path)
 
     print("Running experiment:\n" + str(experiment))
 
