@@ -1,0 +1,22 @@
+(24)    node050
+nbtask = 24
+Warning: Tensorflow not installed.
+Warning: OpenAI gym not installed.
+Creating environments of class corridor
+Sampled corridor - goal location: (20, 1) - goal reward: 0.9100422242867662
+Sampled corridor - goal location: (20, 1) - goal reward: 0.921941135757659
+Sampled corridor - goal location: (20, 1) - goal reward: 0.9931066335430214
+Sampled corridor - goal location: (20, 1) - goal reward: 0.9331359379320754
+Sampled corridor - goal location: (20, 1) - goal reward: 0.9204549386132741
+Running experiment:
+(MDP)
+	lifelong-corridor_h-1_w-20
+(Agents)
+	RMax,0
+	MaxQInit,1
+(Params)
+	samples : 20
+	episodes : 20
+	steps : 11
+	track_disc_reward : False
+
