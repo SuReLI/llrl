@@ -64,9 +64,10 @@ def bounds_comparison_experiment(verbose=False, plot=True):
 
     # Environments
     sz = 2
+    gl = [(sz, sz)]
     n_states = int(sz * sz)
-    mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_rewards=[0.8])
-    mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_rewards=[1.0])
+    mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=gl, goal_rewards=[0.8])
+    mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=gl, goal_rewards=[1.0])
 
     actions = mdp1.get_actions()
     r_max = 1.
