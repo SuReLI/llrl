@@ -5,6 +5,7 @@ Useful functions for experiments (e.g. Lifelong RL)
 import time
 import dill
 from multiprocessing import Pool
+from collections import defaultdict
 
 from llrl.utils.save import lifelong_save
 from llrl.utils.chart_utils import lifelong_plot
@@ -155,13 +156,13 @@ def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episode
         lifelong_save(path, agent, data, instance, True if instance == 1 else False)
 
 
-def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_disc_reward=False,
+def run_single_agent_on_mdp(agent, mdp, n_episodes, n_steps, experiment=None, track_disc_reward=False,
                             reset_at_terminal=False, resample_at_terminal=False, verbose=False):
     """
     :param agent:
     :param mdp:
-    :param episodes:
-    :param steps:
+    :param n_episodes:
+    :param n_steps:
     :param experiment:
     :param track_disc_reward:
     :param reset_at_terminal:
@@ -172,22 +173,22 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
     if reset_at_terminal and resample_at_terminal:
         raise ValueError("ExperimentError: Can't have reset_at_terminal and resample_at_terminal set to True.")
 
-    return_per_episode = [0] * episodes
-    discounted_return_per_episode = [0] * episodes
+    return_per_episode = [0] * n_episodes
+    discounted_return_per_episode = [0] * n_episodes
     gamma = mdp.get_gamma()
 
     # For each episode.
-    for episode in range(1, episodes + 1):
+    for episode in range(1, n_episodes + 1):
         cumulative_episodic_reward = 0.
 
         if verbose:
-            print("      Episode", str(episode), "/", str(episodes))
+            print("      Episode", str(episode), "/", str(n_episodes))
 
         # Compute initial state/reward.
         state = mdp.get_init_state()
         reward = 0.
 
-        for step in range(1, steps + 1):
+        for step in range(1, n_steps + 1):
 
             # step time
             step_start = time.clock()
@@ -197,7 +198,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
 
             # Terminal check.
             if state.is_terminal():
-                if episodes == 1 and not reset_at_terminal and experiment is not None and action != "terminate":
+                if n_episodes == 1 and not reset_at_terminal and experiment is not None and action != "terminate":
                     # Self loop if we're not episodic or resetting and in a terminal state.
                     experiment.add_experience(agent, state, action, 0, state, time_taken=time.clock()-step_start)
                     continue
@@ -213,7 +214,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
 
             # Record the experience.
             if experiment is not None:
-                reward_to_track = mdp.get_gamma()**(step + 1 + episode*steps) * reward if track_disc_reward else reward
+                reward_to_track = mdp.get_gamma()**(step + 1 + episode*n_steps) * reward if track_disc_reward else reward
                 reward_to_track = round(reward_to_track, 5)
                 experiment.add_experience(agent, state, action, reward_to_track, next_state,
                                           time_taken=time.clock() - step_start)
@@ -223,7 +224,7 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
                     # Reset the MDP.
                     next_state = mdp.get_init_state()
                     mdp.reset()
-                elif resample_at_terminal and step < steps:
+                elif resample_at_terminal and step < n_steps:
                     mdp.reset()
                     return True, step, return_per_episode, discounted_return_per_episode
 
@@ -245,4 +246,72 @@ def run_single_agent_on_mdp(agent, mdp, episodes, steps, experiment=None, track_
     if experiment is not None:
         experiment.end_of_instance(agent)
 
-    return False, steps, return_per_episode, discounted_return_per_episode
+    return False, n_steps, return_per_episode, discounted_return_per_episode
+
+def run_agents_on_mdp(agents, mdp, n_instances, n_episodes, n_steps, clear_old_results=True, track_disc_reward=False,
+                      verbose=False, reset_at_terminal=False, cumulative_plot=True, dir_for_plot="results",
+                      experiment_name_prefix="", name_identifier=None, track_success=False, success_reward=None):
+    """
+    Run each agent of a list of agents in a single environment.
+    TODO implement save / plot routines if needed.
+
+    :param agents:
+    :param mdp:
+    :param n_instances:
+    :param n_episodes:
+    :param n_steps:
+    :param clear_old_results:
+    :param track_disc_reward:
+    :param open_plot:
+    :param verbose:
+    :param reset_at_terminal:
+    :param cumulative_plot:
+    :param dir_for_plot:
+    :param experiment_name_prefix:
+    :param name_identifier:
+    :param track_success:
+    :param success_reward:
+    :return: None
+    """
+    if track_success and success_reward is None:
+        raise ValueError("(simple_rl): run_agents_on_mdp must set param @success_reward when @track_success=True.")
+
+    exp_params = {"instances":n_instances, "episodes": n_episodes, "steps": n_steps}
+    experiment = Experiment(agents=agents, mdp=mdp, name_identifier=name_identifier, params=exp_params,
+                            is_episodic=n_episodes > 1, clear_old_results=clear_old_results,
+                            track_disc_reward=track_disc_reward, cumulative_plot=cumulative_plot,
+                            dir_for_plot=dir_for_plot, experiment_name_prefix=experiment_name_prefix,
+                            track_success=track_success, success_reward=success_reward)
+
+    # Record how long each agent spends learning.
+    print("Running experiment: \n" + str(experiment))
+    time_dict = defaultdict(float)
+
+    # Learn.
+    for agent in agents:
+        print(str(agent) + " is learning.")
+
+        start = time.clock()
+
+        # For each instance.
+        for instance in range(1, n_instances + 1):
+            print("  Instance " + str(instance) + " / " + str(n_instances))
+
+            # Run on task
+            _, _, returns, discounted_returns = run_single_agent_on_mdp(
+                agent, mdp, n_episodes=n_episodes, n_steps=n_steps, experiment=experiment, verbose=verbose,
+                track_disc_reward=track_disc_reward, reset_at_terminal=reset_at_terminal, resample_at_terminal=False
+            )
+
+            # Reset between each instance
+            agent.reset()
+            # mdp.end_of_instance()
+
+        # Track how much time this agent took.
+        end = time.clock()
+        time_dict[agent] = round(end - start, 3)
+
+    # Time stuff.
+    print("Elapsed times:")
+    for agent in time_dict.keys():
+        print(str(agent) + " agent took " + str(round(time_dict[agent], 2)) + " seconds.")
