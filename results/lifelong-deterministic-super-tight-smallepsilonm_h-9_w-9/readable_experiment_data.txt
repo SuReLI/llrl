@@ -1,0 +1,14 @@
+(MDP)
+	lifelong-deterministic-super-tight-smallepsilonm_h-9_w-9
+(Agents)
+	RMax,0
+	LRMax,1
+	LRMax(Dmax=0.1),2
+	MaxQInit,3
+	LRMaxQInit,4
+	LRMaxQInit(Dmax=0.1),5
+(Params)
+	samples : 80
+	episodes : 80
+	steps : 100
+	track_disc_reward : False
