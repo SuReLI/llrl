@@ -79,7 +79,7 @@ class RMax(Agent):
         self.v_max = v_max
         self.deduce_v_max = deduce_v_max
         if deduce_v_max:
-            self.v_max = self.r_max / (1. - gamma) if v_max is None else v_max
+            self.v_max = self.r_max / (1. - gamma)
 
         self.epsilon_q = epsilon_q
         self.epsilon_m = epsilon_m

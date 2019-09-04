@@ -60,17 +60,18 @@ def bounds_comparison_experiment(verbose=False, plot=True):
     prior_min = 1.  # (1. + gamma) / (1. - gamma)
     prior_max = 0.
     priors = [round(p, 1) for p in np.linspace(start=prior_min, stop=prior_max, num=10)]
-    # priors = [0.1]  # TODO remove
     save_path = 'results/bounds_comparison_results.csv'
 
     # Environments
     sz = 2
     n_states = int(sz * sz)
-    mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=0.8)
-    mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_reward=1.0)
+    mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_rewards=[0.8])
+    mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=[(sz, sz)], goal_rewards=[1.0])
 
     actions = mdp1.get_actions()
     r_max = 1.
+    v_max = None
+    deduce_v_max = True  # erase previous definition of v_max
     n_known = 1
     epsilon_q = .01
     epsilon_m = .01
@@ -81,12 +82,12 @@ def bounds_comparison_experiment(verbose=False, plot=True):
     for _ in range(n_instances):
         lrmax, rmax, df_lrmax, df_rmax = None, None, None, None
         for i in range(len(priors)):
-            lrmax = ExpLRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=None, deduce_v_max=True, n_known=n_known,
-                             deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
-                             n_states=n_states, max_memory_size=None, prior=priors[i], estimate_distances_online=True,
-                             min_sampling_probability=.5, name="ExpLRMax")
-            rmax = ExpRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=None, deduce_v_max=True, n_known=n_known,
-                           deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
+            lrmax = ExpLRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
+                             n_known=n_known, deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
+                             delta=delta, n_states=n_states, max_memory_size=None, prior=priors[i],
+                             estimate_distances_online=True, min_sampling_probability=.5, name="ExpLRMax")
+            rmax = ExpRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
+                           n_known=n_known, deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                            n_states=n_states, name="ExpRMax")
 
             if i > 0:
@@ -118,16 +119,8 @@ def bounds_comparison_experiment(verbose=False, plot=True):
         results.append(instance_result)
 
     # Gather results
-    csv_write(
-        ['prior',
-         'ratio_lip_bound_use_mean',
-         'ratio_lip_bound_use_upper',
-         'ratio_lip_bound_use_lower',
-         'speed_up_mean',
-         'speed_up_upper',
-         'speed_up_lower'],
-        save_path, 'w'
-    )
+    csv_write(['prior', 'ratio_lip_bound_use_mean', 'ratio_lip_bound_use_upper', 'ratio_lip_bound_use_lower',
+               'speed_up_mean', 'speed_up_upper', 'speed_up_lower'], save_path, 'w')
     for i in range(len(priors)):
         rlbu = []
         su = []
