@@ -15,9 +15,7 @@ from llrl.experiments import run_agents_lifelong
 def experiment():
     # Parameters
     gamma = .9
-    env_distribution = make_env_distribution(env_class='four-room',
-                                             env_name='four-room',
-                                             gamma=gamma)
+    env_distribution = make_env_distribution(env_class='four-room', env_name='four-room', gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
     p_min = 1. / 3.
@@ -51,13 +49,12 @@ def experiment():
                                  deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                                  n_states=n_states, max_memory_size=max_mem, prior=0.1, estimate_distances_online=True,
                                  min_sampling_probability=p_min, name='LRMaxQInit(Dmax=0.1)')
-    agents_pool = [rmax]  #, lrmax, lrmaxprior, maxqinit, lrmaxqinit, lrmaxqinitprior]
-    
+    agents_pool = [rmax, lrmax, lrmaxprior, maxqinit, lrmaxqinit, lrmaxqinitprior]
+
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=1, n_tasks=80, n_episodes=80, n_steps=100,
-                        reset_at_terminal=False, open_plot=False, plot_title=True, do_run=False, do_plot=True,
+                        reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
                         parallel_run=True, n_processes=None)
-
 
 if __name__ == '__main__':
     np.random.seed(1993)
