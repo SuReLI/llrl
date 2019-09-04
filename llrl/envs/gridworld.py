@@ -37,7 +37,7 @@ class GridWorld(GridWorldMDP):
             slip_prob=0.0,
             step_cost=0.0,
             lava_cost=0.01,
-            goal_reward=1.0,
+            goal_rewards=[1.],
             name="Grid-world"
     ):
         GridWorldMDP.__init__(
@@ -56,7 +56,7 @@ class GridWorld(GridWorldMDP):
             lava_cost=lava_cost,
             name=name
         )
-        self.goal_reward = goal_reward
+        self.goal_rewards = goal_rewards
         self.slip_unidirectional = True
 
     def transition(self, s, a):
@@ -96,7 +96,11 @@ class GridWorld(GridWorldMDP):
             s_p.set_terminal(True)
 
         if (s_p.x, s_p.y) in self.goal_locs:
-            r = self.goal_reward - self.step_cost
+            r = - self.step_cost
+            for i in range(len(self.goal_locs)):
+                if (s_p.x, s_p.y) == self.goal_locs[i]:
+                    r +=self.goal_rewards[i]
+                    break
         elif (s_p.x, s_p.y) in self.lava_locs:
             r = 0. - self.lava_cost
         else:

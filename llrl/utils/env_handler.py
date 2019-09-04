@@ -22,7 +22,7 @@ def sample_grid_world(gamma, env_name, w, h, verbose=False):
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
         width=w, height=h, init_loc=(1, 1), goal_locs=[sampled_goal],
-        gamma=gamma, slip_prob=0.0, goal_reward=sampled_reward, name=env_name
+        gamma=gamma, slip_prob=0.0, goal_rewards=[sampled_reward], name=env_name
     )
 
     if verbose:
@@ -44,7 +44,7 @@ def sample_corridor(gamma, env_name, w, verbose=False):
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(
         width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal],
-        gamma=gamma, slip_prob=0.0, goal_reward=sampled_reward, name=env_name
+        gamma=gamma, slip_prob=0.0, goal_rewards=[sampled_reward], name=env_name
     )
 
     env.actions = ['left', 'right']
@@ -68,7 +68,7 @@ def sample_heat_map(gamma, env_name, w, h, verbose=False):
     env = HeatMap(
         width=w, height=h, init_loc=(int(w / 2), int(h / 2)), rand_init=False, goal_locs=[sampled_goal], lava_locs=[()],
         walls=[], is_goal_terminal=False, gamma=gamma, slip_prob=0.0, step_cost=0.0, lava_cost=0.01,
-        goal_reward=sampled_reward, reward_span=sampled_span, name=env_name
+        goal_rewards=[sampled_reward], reward_span=sampled_span, name=env_name
     )
 
     if verbose:
@@ -95,7 +95,7 @@ def sample_test_environment(gamma):
     env = GridWorld(
         width=w, height=h, init_loc=init_loc, rand_init=False, goal_locs=[g], lava_locs=[()], walls=walls,
         is_goal_terminal=True, gamma=gamma, slip_prob=s, step_cost=0.0, lava_cost=0.01,
-        goal_reward=1, name="test"
+        goal_rewards=[1], name="test"
     )
     print('Goal:', g, 'slip probability:', s)
     return env
@@ -127,7 +127,7 @@ def super_tight_collection_big(gamma, env_name, sto=False):
         sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
             width=w, height=h, init_loc=(7, 7), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_rewards=[0.1], name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
@@ -155,7 +155,7 @@ def super_tight_collection(gamma, env_name, sto=False):
         sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
             width=w, height=h, init_loc=(5, 5), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_rewards=[0.1], name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
@@ -183,7 +183,7 @@ def tight_collection(gamma, env_name, sto=False):
         sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
             width=w, height=h, init_loc=(5, 5), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_rewards=[0.1], name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
@@ -217,7 +217,7 @@ def tight_collection_super_big(gamma, env_name, sto=False):
         sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
             width=w, height=h, init_loc=(8, 8), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_rewards=[0.1], name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
@@ -247,7 +247,7 @@ def tight_collection_big(gamma, env_name, sto=False):
         sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
             width=w, height=h, init_loc=(6, 6), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_rewards=[0.1], name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
@@ -273,7 +273,7 @@ def tight_collection_small(gamma, env_name, sto=False):
         sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
         env = GridWorld(
             width=w, height=h, init_loc=(4, 4), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_rewards=[0.1], name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
@@ -300,13 +300,13 @@ def deterministic_spread_collection(gamma, env_name):
     for g in possible_goals:
         env = GridWorld(
             width=w, height=h, init_loc=(1, 1), rand_init=False, goal_locs=[g],
-            is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, goal_reward=0.1, name=env_name
+            is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, goal_rewards=[0.1], name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
 
 
-def four_room_collection(gamma, env_name, size=9, sto=True):
+def four_room_collection(gamma, env_name, n_envs=4, size=9, sto=True):
     # Walls
     mid, qua = int(size / 2), int(int(size / 2) / 2)
     walls_map = np.zeros(shape=(size, size))
@@ -319,7 +319,7 @@ def four_room_collection(gamma, env_name, size=9, sto=True):
     # Goals
     goals_map = np.zeros(shape=(size, size))
     goals_map[0, 0] = goals_map[0, 1] = goals_map[1, 0] = 1
-    possible_goals = coord_from_binary_list(goals_map)
+    goals = coord_from_binary_list(goals_map)
     n_goals = int(sum([sum(p) for p in goals_map]))
 
     init_loc = (size - 1, size - 1)
@@ -328,12 +328,16 @@ def four_room_collection(gamma, env_name, size=9, sto=True):
     w = h = size
     sampling_probability = 1. / float(n_goals)
 
-    for g in possible_goals:
-        sampled_slip = np.random.uniform(0.0, 1.0) if sto else 0
-        env = GridWorld(
-            width=w, height=h, init_loc=init_loc, rand_init=False, goal_locs=[g], walls=walls,
-            is_goal_terminal=True, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0, goal_reward=0.1, name=env_name
-        )
+    for i in range(n_envs):
+        sampled_slip = np.random.uniform(0.0, 0.1) if sto else 0
+
+        sampled_rewards = []
+        for _ in range(3):
+            sampled_rewards.append(np.random.uniform(0.0, 0.1))
+
+        env = GridWorld(width=w, height=h, init_loc=init_loc, rand_init=False, goal_locs=goals, walls=walls,
+                        is_goal_terminal=False, gamma=gamma, slip_prob=sampled_slip, step_cost=0.0,
+                        goal_rewards=sampled_rewards, name=env_name)
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
 
@@ -382,7 +386,7 @@ def octo_grid_collection(gamma, env_name):
         env = GridWorld(
             width=w, height=h, init_loc=(7, 7), rand_init=False, goal_locs=[possible_goals[i]], lava_locs=[()],
             walls=walls, is_goal_terminal=True, gamma=gamma, slip_prob=0, step_cost=0.0, lava_cost=0.01,
-            goal_reward=1, name=env_name
+            goal_rewards=[1], name=env_name
         )
         env_dist_dict[env] = sampling_probability
     return env_dist_dict
@@ -431,7 +435,7 @@ def sample_maze_mono(gamma, env_name, verbose=False):
     env = GridWorld(
         width=w, height=h, init_loc=(6, 6), rand_init=False, goal_locs=goals, lava_locs=[()], walls=wa,
         is_goal_terminal=True, gamma=gamma, slip_prob=sl, step_cost=0.0, lava_cost=0.01,
-        goal_reward=1, name=env_name
+        goal_rewards=[1], name=env_name
     )
 
     if verbose:
@@ -501,7 +505,7 @@ def sample_maze_multi(gamma, env_name, verbose=False):
     env = GridWorld(
         width=w, height=h, init_loc=(6, 6), rand_init=False, goal_locs=goals, lava_locs=[()], walls=wa,
         is_goal_terminal=True, gamma=gamma, slip_prob=sl, step_cost=0.0, lava_cost=0.01,
-        goal_reward=1, name=env_name
+        goal_rewards=[1], name=env_name
     )
 
     if verbose:
@@ -557,9 +561,9 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
     elif env_class == 'deterministic-spread':
         return MDPDistribution(deterministic_spread_collection(gamma, env_name), horizon=horizon)
     elif env_class == 'four-room':
-        return MDPDistribution(four_room_collection(gamma, env_name), horizon=horizon)
-
-
+        return MDPDistribution(four_room_collection(gamma, env_name, size=7), horizon=horizon)
+    elif env_class == 'four-room-big':
+        return MDPDistribution(four_room_collection(gamma, env_name, size=11), horizon=horizon)
 
     for _ in range(n_env):
         if env_class == 'grid-world':

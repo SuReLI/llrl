@@ -26,7 +26,7 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
     :return: None
     """
     # Parameters
-    path = 'results/'
+    path = 'results/prior-use/'
     gamma = .9
     r_max = 1.
     v_max = None
@@ -46,8 +46,6 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
     h = 4
     walls = [(2, 2), (3, 2), (4, 2), (2, 4)]
     n_states = w * h - len(walls)
-    print(n_states)
-    exit()
     env1 = HeatMap(
         width=w, height=h, init_loc=(1, 1), goal_locs=[(w, h)], is_goal_terminal=False,
         walls=walls, slip_prob=0.1, goal_reward=1.0, reward_span=1.0

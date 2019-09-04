@@ -1,4 +1,3 @@
-import numpy as np
 from collections import defaultdict
 
 from llrl.agents.lrmax import LRMax

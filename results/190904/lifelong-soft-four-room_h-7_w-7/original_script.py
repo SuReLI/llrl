@@ -15,7 +15,7 @@ from llrl.experiments import run_agents_lifelong
 def experiment():
     # Parameters
     gamma = .9
-    env_distribution = make_env_distribution(env_class='four-room', env_name='soft-four-room', gamma=gamma)
+    env_distribution = make_env_distribution(env_class='four-room', env_name='four-room', gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
     p_min = 1. / 3.
@@ -25,7 +25,7 @@ def experiment():
     r_max = 1.
     v_max = 10.
     n_states = 4
-    max_mem = 3
+    max_mem = 4
 
     # Agents
     rmax = RMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,

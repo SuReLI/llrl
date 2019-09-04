@@ -97,11 +97,12 @@ def plot_time_step_results(root_path, names, open_plot=True):
     plt.close()
 
 
-def plot_computation_number_results(root_path, names, open_plot=True):
+def plot_computation_number_results(root_path, names, open_plot=True, latex_rendering=True):
     # LaTeX rendering
-    rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
-    plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
+    if latex_rendering:
+        rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='serif')
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_prop_cycle(cycler('color', COLORS))
