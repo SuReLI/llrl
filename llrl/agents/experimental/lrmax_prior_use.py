@@ -4,53 +4,58 @@ from collections import defaultdict
 from llrl.agents.lrmax import LRMax
 
 
-class LRMaxExp(LRMax):
+class ExpLRMax(LRMax):
     """
-    Lipschitz R-Max agent for experiment.
+    Lipschitz R-Max agent for experiments.
     """
 
     def __init__(
             self,
             actions,
-            gamma=0.9,
-            count_threshold=1,
-            epsilon=0.1,
+            gamma=.9,
+            r_max=1.,
+            v_max=None,
+            deduce_v_max=True,
+            n_known=None,
+            deduce_n_known=True,
+            epsilon_q=0.1,
+            epsilon_m=None,
+            delta=None,
+            n_states=None,
             max_memory_size=None,
-            prior=np.Inf,
-            name="LRMax-prior"
+            prior=None,
+            estimate_distances_online=True,
+            min_sampling_probability=.1,
+            name="ExpLRMax"
     ):
         """
         See LRMax class.
         """
-        name = name + str(prior) if name[-6:] == "-prior" else name
-        LRMax.__init__(
-            self,
-            actions=actions,
-            gamma=gamma,
-            count_threshold=count_threshold,
-            epsilon=epsilon,
-            max_memory_size=max_memory_size,
-            prior=prior,
-            name=name
-        )
+        LRMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
+                       n_known=n_known, deduce_n_known=deduce_n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
+                       delta=delta, n_states=n_states, max_memory_size=max_memory_size, prior=prior,
+                       estimate_distances_online=estimate_distances_online,
+                       min_sampling_probability=min_sampling_probability, name=name)
 
         self.time_step = 0
         self.time_step_counter = []
-        self.prior_use_counter = [[0, 0]]  # 'n_computation', 'n_prior_use'
+
+        self.data = {'n_computation': [0], 'n_prior_use': [0]}
 
     def _set_distance(self, dsa):
-        self.prior_use_counter[-1][0] += 1
+        self.data['n_computation'][-1] += 1
         if dsa > self.prior:
-            self.prior_use_counter[-1][1] += 1
+            self.data['n_prior_use'][-1] += 1
             return self.prior
         else:
             return dsa
 
     def get_results(self):
+        assert len(self.data['n_computation']) == len(self.data['n_prior_use'])
         result = []
-        for i in range(len(self.prior_use_counter) - 1):
+        for i in range(len(self.data['n_computation']) - 1):
             recorded_time_step = self.time_step_counter[i]
-            prior_use_ratio = round(100. * float(self.prior_use_counter[i][1]) / float(self.prior_use_counter[i][0]), 2)
+            prior_use_ratio = round(100. * float(self.data['n_prior_use'][i]) / float(self.data['n_computation'][i]), 2)
             result.append([recorded_time_step, prior_use_ratio])
         return result
 
@@ -68,46 +73,63 @@ class LRMaxExp(LRMax):
         See LRMax class.
         Overrides method of LRMax for prior use counter.
         """
-        distances_dict = defaultdict(lambda: defaultdict(lambda: self.prior))
+        distances_cur = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt current MDP
+        distances_mem = defaultdict(lambda: defaultdict(lambda: self.prior))  # distances computed wrt memory MDP
 
-        if len(self.U_memory) > 1:  # No computation after the second environment
-            return distances_dict
+        if len(self.U_memory) > 1:  # NEW: no computation after the second environment
+            return distances_cur, distances_mem
 
         # Compute model's distances upper-bounds for known-known (s, a)
         for s, a in s_a_kk:
-            weighted_sum = 0.
+            weighted_sum_wrt_cur = 0.
+            weighted_sum_wrt_mem = 0.
             for s_p in self.T[s][a]:
-                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * abs(self.T[s][a][s_p] - t_mem[s][a][s_p])
+                dt = abs(self.T[s][a][s_p] - t_mem[s][a][s_p])
+                weighted_sum_wrt_cur += max([self.U[s_p][a] for a in self.actions]) * dt
+                weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * dt
             for s_p in t_mem[s][a]:
                 if s_p not in self.T[s][a]:
-                    weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
+                    weighted_sum_wrt_cur += max([self.U[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
+                    weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
 
-            dsa = abs(self.R[s][a] - r_mem[s][a]) + self.gamma * weighted_sum
-            distances_dict[s][a] = self._set_distance(dsa)
+            dr = abs(self.R[s][a] - r_mem[s][a])
+            # distances_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + 2. * self.b, self.prior)  # PREV
+            # distances_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + 2. * self.b, self.prior)  # PREV
+            distances_cur[s][a] = self._set_distance(dr + self.gamma * weighted_sum_wrt_cur + 2. * self.b)  # NEW
+            distances_mem[s][a] = self._set_distance(dr + self.gamma * weighted_sum_wrt_mem + 2. * self.b)  # NEW
+
+        ma = self.gamma * self.v_max + self.b
 
         # Compute model's distances upper-bounds for known-unknown (s, a)
         for s, a in s_a_ku:
-            weighted_sum = 0.
+            weighted_sum_wrt_cur = 0.
+            weighted_sum_wrt_mem = 0.
             for s_p in self.T[s][a]:
-                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * self.T[s][a][s_p]
+                weighted_sum_wrt_cur += max([self.U[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
+                weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * self.T[s][a][s_p]
 
-            dsa = max(self.r_max - self.R[s][a], self.R[s][a]) + \
-                  self.gamma * weighted_sum + \
-                  self.gamma * self.r_max / (1. - self.gamma)
-            distances_dict[s][a] = self._set_distance(dsa)
+            dr = max(self.r_max - self.R[s][a], self.R[s][a])
+            # distances_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + ma, self.prior)  # PREV
+            # distances_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + ma, self.prior)  # PREV
+            distances_cur[s][a] = self._set_distance(dr + self.gamma * weighted_sum_wrt_cur + ma)  # NEW
+            distances_mem[s][a] = self._set_distance(dr + self.gamma * weighted_sum_wrt_mem + ma)  # NEW
 
         # Compute model's distances upper-bounds for unknown-known (s, a)
         for s, a in s_a_uk:
-            weighted_sum = 0.
+            weighted_sum_wrt_cur = 0.
+            weighted_sum_wrt_mem = 0.
             for s_p in t_mem[s][a]:
-                weighted_sum += u_mem[s_p][self.greedy_action(s_p, u_mem)] * t_mem[s][a][s_p]
+                weighted_sum_wrt_cur += max([self.U[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
+                weighted_sum_wrt_mem += max([u_mem[s_p][a] for a in self.actions]) * t_mem[s][a][s_p]
 
-            dsa = max(self.r_max - r_mem[s][a], r_mem[s][a]) + \
-                  self.gamma * weighted_sum + \
-                  self.gamma * self.r_max / (1. - self.gamma)
-            distances_dict[s][a] = self._set_distance(dsa)
+            dr = max(self.r_max - r_mem[s][a], r_mem[s][a])
+            # distances_cur[s][a] = min(dr + self.gamma * weighted_sum_wrt_cur + ma, self.prior)  # PREV
+            # distances_mem[s][a] = min(dr + self.gamma * weighted_sum_wrt_mem + ma, self.prior)  # PREV
+            distances_cur[s][a] = self._set_distance(dr + self.gamma * weighted_sum_wrt_cur + ma)  # NEW
+            distances_mem[s][a] = self._set_distance(dr + self.gamma * weighted_sum_wrt_mem + ma)  # NEW
 
-        self.time_step_counter.append(self.time_step)
-        self.prior_use_counter.append([0, 0])  # Add a new counter for the next computation
+        self.time_step_counter.append(self.time_step)  # NEW: record the number of time steps
+        self.data['n_computation'].append(0)  # NEW: add a new counter for the next computation
+        self.data['n_prior_use'].append(0)  # NEW: idem
 
-        return distances_dict
+        return distances_cur, distances_mem
