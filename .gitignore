@@ -3,6 +3,9 @@
 *.pyc
 __pycache__
 
+my_slurm_node.*
+slurm.*
+
 myvenv
 
 experiments/results/
