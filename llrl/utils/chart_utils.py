@@ -18,7 +18,7 @@ color_ls = [
 ]
 
 
-def lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title):
+def lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title, latex_rendering=False):
     dfs = []
     for agent in agents:
         agent_path = csv_path_from_agent(path, agent)
@@ -73,20 +73,21 @@ def lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot
     x_label_t = r'Task number'
     plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
          x_label=x_label_e, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title)
+         plot_title=plot_title, latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
          x_label=x_label_e, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title)
+         open_plot=open_plot, plot_title=plot_title, latex_rendering=latex_rendering)
     plot(path, pdf_name='return_vs_task', agents=agents, x=x_t, y=trt, y_lo=trt_lo, y_up=trt_up,
          x_label=x_label_t, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title)
+         plot_title=plot_title, latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_task', agents=agents, x=x_t, y=drt, y_lo=drt_lo, y_up=drt_up,
          x_label=x_label_t, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title)
+         open_plot=open_plot, plot_title=plot_title, latex_rendering=latex_rendering)
 
 
 
-def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True, plot_title=True):
+def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True, plot_title=True,
+         latex_rendering=False):
     """
     Tweaked version of simple_rl.utils.chart_utils.plot
     Method made less specific, no specification of the type of data.
@@ -102,12 +103,14 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
     :param title_prefix: (str)
     :param open_plot: (Bool)
     :param plot_title: (Bool)
+    :param latex_rendering: (Bool)
     :return: None
     """
     # LaTeX rendering
-    rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
-    plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
+    if latex_rendering:
+        rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='serif')
     ax = plt.figure().gca()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 

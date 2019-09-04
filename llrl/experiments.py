@@ -42,7 +42,8 @@ def run_agents_lifelong(
         do_plot=False,
         confidence=.9,
         open_plot=False,
-        plot_title=True
+        plot_title=True,
+        latex_rendering=False
 ):
     """
     Runs each agent on the MDP distribution according to the given parameters.
@@ -69,6 +70,7 @@ def run_agents_lifelong(
     :param confidence: (float)
     :param open_plot: (bool)
     :param plot_title: (bool)
+    :param latex_rendering: (bool)
     :return:
     """
     exp_params = {"samples": n_tasks, "episodes": n_episodes, "steps": n_steps}
@@ -110,7 +112,7 @@ def run_agents_lifelong(
 
     # Plot
     if do_plot:
-        lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title)
+        lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title, latex_rendering)
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
