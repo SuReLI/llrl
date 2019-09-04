@@ -317,9 +317,6 @@ def four_room_collection(gamma, env_name, n_envs=4, size=9, sto=True):
     walls_map[mid, qua - 1], walls_map[mid + 1, mid + qua + 1], walls_map[mid + qua + 2, mid] = 0, 0, 0
     walls = coord_from_binary_list(walls_map)
 
-    print(walls_map)
-    exit()
-
     # Goals
     goals_map = np.zeros(shape=(size, size))
     goals_map[0, 0] = goals_map[0, 1] = goals_map[1, 0] = 1
