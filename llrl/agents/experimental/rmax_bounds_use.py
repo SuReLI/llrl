@@ -46,7 +46,8 @@ class ExpRMax(RMax):
         self.cnt_time_steps_cv = 0
 
     def write_data(self, cnt_time_steps, cnt_time_steps_cv):
-        self.data = self.data.append([cnt_time_steps, cnt_time_steps_cv])
+        self.data = self.data.append({'cnt_time_steps': cnt_time_steps, 'cnt_time_steps_cv': cnt_time_steps_cv},
+                                     ignore_index=True)
 
     def act(self, s, r):
         """

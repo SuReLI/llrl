@@ -44,6 +44,7 @@ class ExpLRMax(LRMax):
         self.cnt_time_steps = 0  # number of time steps
         self.cnt_time_steps_cv = 0  # number of time steps before convergence with high probability
 
+        self.write_data = True  # Enable data writing
         self.data = pd.DataFrame(columns=['prior', 'ratio_rmax_bound_use', 'ratio_lip_bound_use', 'cnt_time_steps',
                                           'cnt_time_steps_cv'])
 
@@ -74,7 +75,8 @@ class ExpLRMax(LRMax):
             # Save ratio
             ratio_rmax_bound_use = self.cnt_rmax / cnt_bound_use
             ratio_lip_bound_use = self.cnt_lip / cnt_bound_use
-            self.write_data(ratio_rmax_bound_use, ratio_lip_bound_use)
+            if self.write_data:
+                self.write(ratio_rmax_bound_use, ratio_lip_bound_use)
 
             # Reset
             self.cnt_rmax = 0
@@ -82,9 +84,11 @@ class ExpLRMax(LRMax):
         self.cnt_time_steps = 0
         self.cnt_time_steps_cv = 0
 
-    def write_data(self, ratio_rmax_bound_use, ratio_lip_bound_use):
-        self.data = self.data.append([self.prior, ratio_rmax_bound_use, ratio_lip_bound_use, self.cnt_time_steps,
-                                      self.cnt_time_steps_cv])
+    def write(self, ratio_rmax_bound_use, ratio_lip_bound_use):
+        self.data = self.data.append({'prior': self.prior, 'ratio_rmax_bound_use': ratio_rmax_bound_use,
+                                     'ratio_lip_bound_use': ratio_lip_bound_use, 'cnt_time_steps': self.cnt_time_steps,
+                                      'cnt_time_steps_cv': self.cnt_time_steps_cv},
+                                     ignore_index=True)
 
     def initialize_upper_bound(self):
         """
