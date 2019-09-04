@@ -1,0 +1,10 @@
+(MDP)
+	Grid-world_h-2_w-2
+(Agents)
+	ExpLRMax,0
+	ExpRMax,1
+(Params)
+	instances : 1
+	episodes : 10
+	steps : 10
+	track_disc_reward : False
