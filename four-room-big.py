@@ -15,7 +15,7 @@ from llrl.experiments import run_agents_lifelong
 def experiment():
     # Parameters
     gamma = .9
-    env_distribution = make_env_distribution(env_class='four-room', env_name='soft-four-room', gamma=gamma)
+    env_distribution = make_env_distribution(env_class='four-room-big', env_name='soft-four-room-big', gamma=gamma)
     actions = env_distribution.get_actions()
     n_known = 10
     p_min = 1. / 4.
