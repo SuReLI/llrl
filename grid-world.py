@@ -18,7 +18,7 @@ def experiment():
     n_env = 5
     w, h = 20, 20
     n_states = w * h
-    env_distribution = make_env_distribution(env_class='grid-world', env_name='grid-world-two-goals-large', n_env=n_env,
+    env_distribution = make_env_distribution(env_class='grid-world', env_name='grid-world', n_env=n_env,
                                              gamma=gamma, w=w, h=h)
     actions = env_distribution.get_actions()
     n_known = 1
