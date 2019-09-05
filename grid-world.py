@@ -17,7 +17,7 @@ def experiment():
     gamma = .9
     n_env = 5
     n_states = 20
-    env_distribution = make_env_distribution(env_class='corridor', n_env=n_env, gamma=gamma, w=n_states, h=1)
+    env_distribution = make_env_distribution(env_class='grid-world', env_name='grid-world', n_env=n_env, gamma=gamma, w=n_states, h=1)
     actions = env_distribution.get_actions()
     n_known = 1
     p_min = 1. / float(n_env)
@@ -53,7 +53,7 @@ def experiment():
     agents_pool = [rmax, lrmax, lrmaxprior02, maxqinit, lrmaxqinit, lrmaxqinitprior02]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=2, n_tasks=20, n_episodes=20,
+    run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=1, n_tasks=20, n_episodes=20,
                         n_steps=11, reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True,
                         do_plot=True, parallel_run=True, n_processes=None)
 

@@ -11,8 +11,7 @@ from llrl.envs.heatmap import HeatMap
 
 
 def sample_grid_world(gamma, env_name, w, h, verbose=False):
-    if env_name is None:
-        env_name = "grid-world"
+    env_name = "grid-world" if env_name is None else env_name
 
     r_min = 0.9
     r_max = 1.0
