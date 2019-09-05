@@ -10,19 +10,25 @@ from llrl.envs.gridworld import coord_from_binary_list
 from llrl.envs.heatmap import HeatMap
 
 
-def sample_grid_world(gamma, env_name, w, h, verbose=False):
-    env_name = "grid-world" if env_name is None else env_name
+def sample_grid_world(gamma, env_name, w, h, multi_goal=True, verbose=False):
+    env_name = 'grid-world' if env_name is None else env_name
 
     r_min = 0.9
     r_max = 1.0
-    possible_goals = [(w, h), (w-1, h), (w, h-1), (w-2, h)]
+    possible_goals = [(w, h), (w, h - 1)]
+    init_loc = (w - 10, h - 1)
 
-    sampled_reward = np.random.uniform(r_min, r_max)
-    sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
-    env = GridWorld(
-        width=w, height=h, init_loc=(1, 1), goal_locs=[sampled_goal],
-        gamma=gamma, slip_prob=0.0, goal_rewards=[sampled_reward], name=env_name
-    )
+    if multi_goal:
+        sampled_goal = possible_goals
+        sampled_reward = np.random.uniform(low=r_min, high=r_max, size=len(possible_goals))
+        is_goal_terminal = False
+    else:
+        sampled_goal = [possible_goals[np.random.randint(0, len(possible_goals))]]
+        sampled_reward = [np.random.uniform(r_min, r_max)]
+        is_goal_terminal = True
+
+    env = GridWorld(width=w, height=h, init_loc=init_loc, goal_locs=sampled_goal, gamma=gamma, slip_prob=0.0,
+                    goal_rewards=sampled_reward, name=env_name, is_goal_terminal=is_goal_terminal)
 
     if verbose:
         print('Sampled grid-world - goal location:', sampled_goal, '- goal reward:', sampled_reward)
@@ -31,8 +37,7 @@ def sample_grid_world(gamma, env_name, w, h, verbose=False):
 
 
 def sample_corridor(gamma, env_name, w, verbose=False):
-    if env_name is None:
-        env_name = "corridor"
+    env_name = 'corridor' if env_name is None else env_name
 
     r_min = 0.9
     r_max = 1.0
@@ -41,10 +46,8 @@ def sample_corridor(gamma, env_name, w, verbose=False):
 
     sampled_reward = np.random.uniform(r_min, r_max)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
-    env = GridWorld(
-        width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal],
-        gamma=gamma, slip_prob=0.0, goal_rewards=[sampled_reward], name=env_name
-    )
+    env = GridWorld(width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal], gamma=gamma, slip_prob=0.0,
+                    goal_rewards=[sampled_reward], name=env_name)
 
     env.actions = ['left', 'right']
 
