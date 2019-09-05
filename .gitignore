@@ -1,13 +1,21 @@
+# Pycharm IDE parameters
 .idea
 
+# Python
 *.pyc
 __pycache__
 
+# C
+*.so
+
+# Pando
 my_slurm_node.*
 slurm.*
 
-myvenv
+# Virtual environment ignored
+venv
 
+# Files
 experiments/results/
 examples/results/
 results/backup/
