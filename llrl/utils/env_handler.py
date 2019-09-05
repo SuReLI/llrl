@@ -313,7 +313,7 @@ def four_room_collection(gamma, env_name, n_envs=4, size=9, sto=True):
     walls_map[mid, 0:mid + 1] = 1
     walls_map[mid + 1, mid + 1:] = 1
     walls_map[:, mid] = 1
-    # walls_map[qua, mid], walls_map[mid, qua - 1], walls_map[mid + 1, mid + qua + 1], walls_map[mid + qua + 2, mid] = 0, 0, 0, 0
+    # walls_map[qua, mid] = 0
     walls_map[mid, qua - 1], walls_map[mid + 1, mid + qua + 1], walls_map[mid + qua + 2, mid] = 0, 0, 0
     walls = coord_from_binary_list(walls_map)
 
@@ -327,7 +327,7 @@ def four_room_collection(gamma, env_name, n_envs=4, size=9, sto=True):
 
     env_dist_dict = {}
     w = h = size
-    sampling_probability = 1. / n_goals
+    sampling_probability = 1. / float(n_goals)
 
     for i in range(n_envs):
         sampled_slip = np.random.uniform(0.0, 0.1) if sto else 0
