@@ -327,7 +327,7 @@ def four_room_collection(gamma, env_name, n_envs=4, size=9, sto=True):
 
     env_dist_dict = {}
     w = h = size
-    sampling_probability = 1. / float(n_goals)
+    sampling_probability = 1. / n_goals
 
     for i in range(n_envs):
         sampled_slip = np.random.uniform(0.0, 0.1) if sto else 0

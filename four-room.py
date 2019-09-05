@@ -56,6 +56,7 @@ def experiment():
                         reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
                         parallel_run=True, n_processes=None)
 
+
 if __name__ == '__main__':
     np.random.seed(1993)
     experiment()
