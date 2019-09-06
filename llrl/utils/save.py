@@ -13,29 +13,31 @@ def csv_path_from_agent(root_path, agent):
     return root_path + '/results-' + agent.get_name() + '.csv'
 
 
-def lifelong_save(path, agent, data, instance_number, is_first_save):
+def lifelong_save(init, path, agent, data=None, instance_number=None):
     """
     Save according to a specific data structure designed for lifelong RL experiments.
+    :param init: (bool)
     :param path: (str)
     :param agent: agent object
     :param data: (dictionary)
     :param instance_number: (int)
-    :param is_first_save: (bool)
     :return: None
     """
     full_path = csv_path_from_agent(path, agent)
-    n_tasks = len(data['returns_per_tasks'])
-    n_episodes = len(data['returns_per_tasks'][0])
-
-    if is_first_save:
+    if init:
         names = ['instance', 'task', 'episode', 'return', 'discounted_return']
         csv_write(names, full_path, 'w')
+    else:
+        assert data is not None
+        assert instance_number is not None
+        n_tasks = len(data['returns_per_tasks'])
+        n_episodes = len(data['returns_per_tasks'][0])
 
-    for i in range(n_tasks):
-        for j in range(n_episodes):
-            row = [str(instance_number), str(i + 1), str(j + 1), data['returns_per_tasks'][i][j],
-                   data['discounted_returns_per_tasks'][i][j]]
-            csv_write(row, full_path, 'a')
+        for i in range(n_tasks):
+            for j in range(n_episodes):
+                row = [str(instance_number), str(i + 1), str(j + 1), data['returns_per_tasks'][i][j],
+                       data['discounted_returns_per_tasks'][i][j]]
+                csv_write(row, full_path, 'a')
 
 
 def csv_write(row, path, mode):

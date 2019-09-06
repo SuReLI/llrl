@@ -48,7 +48,6 @@ def sample_corridor(gamma, env_name, w, verbose=False):
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
     env = GridWorld(width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal], gamma=gamma, slip_prob=0.0,
                     goal_rewards=[sampled_reward], name=env_name)
-
     env.actions = ['left', 'right']
 
     if verbose:

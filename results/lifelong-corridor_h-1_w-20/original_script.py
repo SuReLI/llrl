@@ -50,13 +50,13 @@ def experiment():
                                    deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                                    n_states=n_states, max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
                                    min_sampling_probability=p_min, name='LRMaxQInit(Dmax0.2)')
-    agents_pool = [rmax, maxqinit]
+    # agents_pool = [rmax, lrmax, lrmaxprior02, maxqinit, lrmaxqinit, lrmaxqinitprior02]
+    agents_pool = [rmax, lrmaxprior02]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=1, n_tasks=20, n_episodes=20,
-                        n_steps=11, reset_at_terminal=False, open_plot=False, plot_title=True,
-                        do_run=True, do_plot=True,
-                        parallel_run=True, n_processes=None)
+    run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=10, n_tasks=20, n_episodes=20,
+                        n_steps=11, reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True,
+                        do_plot=True, parallel_run=True, n_processes=None)
 
 
 if __name__ == '__main__':

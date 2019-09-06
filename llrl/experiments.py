@@ -4,7 +4,7 @@ Useful functions for experiments (e.g. Lifelong RL)
 
 import time
 import dill
-from multiprocessing import Pool
+import multiprocessing
 from collections import defaultdict
 
 from llrl.utils.save import lifelong_save, save_script
@@ -20,6 +20,13 @@ def run_dill_encoded(payload):
 def apply_async(pool, fun, args):
     payload = dill.dumps((fun, args))
     return pool.apply_async(run_dill_encoded, (payload,))
+
+
+def dispatch(n_processes, n_agents):
+    assert n_agents < n_processes + 1
+    n_parallel_agents = n_agents
+    n_parallel_instances = int(n_processes / n_agents)
+    return n_parallel_instances, n_parallel_agents
 
 
 def run_agents_lifelong(
@@ -87,32 +94,113 @@ def run_agents_lifelong(
     tasks = []
     for _ in range(n_tasks):
         tasks.append(mdp_distribution.sample())
+    n_agents = len(agents)
 
     # Run
     if do_run:
         if parallel_run:
-            n_agents = len(agents)
-            n_processes = n_agents if n_processes is None else n_processes
-            pool = Pool(processes=n_processes)
+            n_processes = multiprocessing.cpu_count() if n_processes is None else n_processes
+            print('Using', n_processes, 'threads.')
+            pool = multiprocessing.Pool(processes=n_processes)
+            n_parallel_instances, n_parallel_agents = dispatch(n_processes, n_agents)
 
             # Asynchronous execution
             jobs = []
             for i in range(n_agents):
-                job = apply_async(pool, run_single_agent_lifelong, (agents[i], experiment, n_instances, n_tasks,
-                                                                    n_episodes, n_steps, tasks, track_disc_reward,
-                                                                    reset_at_terminal, path, verbose))
-                jobs.append(job)
+                for j in range(n_instances):
+                    job = apply_async(
+                        pool, run_agent_lifelong,
+                        (agents[i], experiment, j, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
+                         reset_at_terminal, path, verbose)
+                    )
+                    jobs.append(job)
 
             for job in jobs:
                 job.get()
         else:
-            for agent in agents:
-                run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks,
-                                          track_disc_reward, reset_at_terminal, path, verbose)
+            for i in range(n_agents):
+                for j in range(n_instances):
+                    run_agent_lifelong(agents[i], experiment, j, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
+                                       reset_at_terminal, path, verbose)
 
     # Plot
     if do_plot:
         lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title, latex_rendering)
+
+
+def multi_instances_run_agent_lifelong(agent, experiment, parallel_run, n_parallel_instances, n_instances, n_tasks,
+                                       n_episodes, n_steps, tasks, track_disc_reward, reset_at_terminal, path, verbose):
+    """
+    :param agent: ()
+    :param experiment: ()
+    :param parallel_run: (bool)
+    :param n_parallel_instances: (int)
+    :param n_instances: (int)
+    :param n_tasks: (int)
+    :param n_episodes: (int)
+    :param n_steps: (int)
+    :param tasks: (list)
+    :param track_disc_reward: (bool)
+    :param reset_at_terminal: (bool)
+    :param path: (str)
+    :param verbose: (bool)
+    :return: None
+    """
+    print(str(agent) + " is learning.")
+
+    # Initialize save
+    lifelong_save(init=True, path=path, agent=agent)
+
+    if parallel_run:
+        for instance in range(1, n_parallel_instances + 1):
+            print("  Instance " + str(instance) + " / " + str(n_parallel_instances))
+    else:
+        for instance in range(1, n_instances + 1):
+            print("  Instance " + str(instance) + " / " + str(n_instances))
+            run_agent_lifelong(agent, experiment, instance, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
+                               reset_at_terminal, path, verbose)
+
+
+def run_agent_lifelong(agent, experiment, instance_number, n_tasks, n_episodes, n_steps, tasks, track_disc_reward, reset_at_terminal,
+                       path, verbose):
+    """
+    :param agent: ()
+    :param experiment: ()
+    :param instance_number: (int)
+    :param n_tasks: (int)
+    :param n_episodes: (int)
+    :param n_steps: (int)
+    :param tasks: (list)
+    :param track_disc_reward: (bool)
+    :param reset_at_terminal: (bool)
+    :param path: (str)
+    :param verbose: (bool)
+    :return: None
+    """
+    agent.re_init()  # re-initialize before each instance
+    data = {'returns_per_tasks': [], 'discounted_returns_per_tasks': []}
+
+    start = time.clock()
+    for i in range(1, n_tasks + 1):
+        print("    Experience task " + str(i) + " / " + str(n_tasks))
+        task = tasks[i - 1]  # task selection
+
+        # Run on task
+        _, _, returns, discounted_returns = run_single_agent_on_mdp(
+            agent, task, n_episodes, n_steps, experiment, verbose=verbose, track_disc_reward=track_disc_reward,
+            reset_at_terminal=reset_at_terminal, resample_at_terminal=False
+        )
+
+        # Store
+        data['returns_per_tasks'].append(returns)
+        data['discounted_returns_per_tasks'].append(discounted_returns)
+
+        # Reset the agent
+        agent.reset()
+    print("    Total time elapsed: " + str(round(time.clock() - start, 3)))
+
+    # Save
+    lifelong_save(init=False, path=path, agent=agent, data=data, instance_number=instance_number)
 
 
 def run_single_agent_lifelong(agent, experiment, n_instances, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
@@ -251,6 +339,7 @@ def run_single_agent_on_mdp(agent, mdp, n_episodes, n_steps, experiment=None, tr
         experiment.end_of_instance(agent)
 
     return False, n_steps, return_per_episode, discounted_return_per_episode
+
 
 def run_agents_on_mdp(agents, mdp, n_instances, n_episodes, n_steps, clear_old_results=True, track_disc_reward=False,
                       verbose=False, reset_at_terminal=False, cumulative_plot=True, dir_for_plot="results",
