@@ -98,4 +98,4 @@ def experiment(p):
 
 if __name__ == '__main__':
     # np.random.seed(1993)
-    experiment(PARAM[0])
+    experiment(PARAM[1])

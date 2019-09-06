@@ -42,7 +42,7 @@ def sample_tight(gamma, env_name, w, h, stochastic, verbose):
     r_max = 1.0
 
     goals = [(w, h), (w, h - 1), (w - 1, h)]
-    init_loc = (int(w / 2.), int(h / 2.))
+    init_loc = (int(w / 2.) + 1, int(h / 2.) + 1)
     rewards = np.random.uniform(low=r_min, high=r_max, size=len(goals))
     slip = np.random.uniform(0.0, 0.1) if stochastic else 0.0
 
@@ -52,10 +52,10 @@ def sample_tight(gamma, env_name, w, h, stochastic, verbose):
     if verbose:
         print('Sampled tight:')
         print('  Goals:', goals)
+        print('  Initial location:', init_loc)
         print('  Rewards:', rewards)
         print('  Slip probability:', slip)
 
-    exit()
     return env
 
 
