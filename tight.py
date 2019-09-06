@@ -2,7 +2,9 @@
 Lifelong RL experiment in constant transition function setting
 """
 
+
 import numpy as np
+
 
 from llrl.agents.rmax import RMax
 from llrl.agents.lrmax import LRMax
@@ -12,19 +14,31 @@ from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments import run_agents_lifelong
 
 
-def experiment():
+PARAM = [
+    {'name': 'tight', 'size': 7, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 7, 'n_known': 1, 'stochastic': False, 'v_max': 10.}
+]
+
+
+def experiment(p):
     # Parameters
     gamma = .9
     n_env = 5
-    env_distribution = make_env_distribution(env_class='tight', env_name='tight', n_env=n_env, gamma=gamma, stochastic=True)
+    size = p['size']
+    env_distribution = make_env_distribution(
+        env_class='tight', n_env=n_env, gamma=gamma,
+        env_name=p['name'],
+        w=size,
+        h=size,
+        stochastic=p['stochastic']
+    )
     actions = env_distribution.get_actions()
-    n_known = 1
+    n_known = p['n_known']
     p_min = 1. / float(n_env)
     epsilon_q = .01
     epsilon_m = .01
     delta = .1
     r_max = 1.
-    v_max = 10.
+    v_max = p['v_max']
     n_states = 4
     max_mem = 1
 
@@ -61,11 +75,12 @@ def experiment():
     agents_pool = [rmax, lrmax, lrmax_p01, lrmax_p02, maxqinit, lrmaxqinit, lrmaxqinit_p01, lrmaxqinit_p02]
 
     # Run
-    run_agents_lifelong(agents_pool, env_distribution, n_instances=3, n_tasks=100, n_episodes=200, n_steps=100,
+    run_agents_lifelong(agents_pool, env_distribution, n_instances=3, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
+                        n_steps=p['n_steps'],
                         reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
                         parallel_run=True, n_processes=None)
 
 
 if __name__ == '__main__':
     # np.random.seed(1993)
-    experiment()
+    experiment(PARAM[0])
