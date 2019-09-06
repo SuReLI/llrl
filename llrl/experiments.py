@@ -107,6 +107,7 @@ def run_agents_lifelong(
             # Asynchronous execution
             jobs = []
             for i in range(n_agents):
+                lifelong_save(init=True, path=path, agent=agents[i])
                 for j in range(n_instances):
                     job = apply_async(
                         pool, run_agent_lifelong,
@@ -119,6 +120,7 @@ def run_agents_lifelong(
                 job.get()
         else:
             for i in range(n_agents):
+                lifelong_save(init=True, path=path, agent=agents[i])
                 for j in range(n_instances):
                     run_agent_lifelong(agents[i], experiment, j, n_tasks, n_episodes, n_steps, tasks, track_disc_reward,
                                        reset_at_terminal, path, verbose)
