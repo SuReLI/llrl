@@ -16,7 +16,7 @@ def experiment():
     # Parameters
     gamma = .9
     n_env = 5
-    env_distribution = make_env_distribution(env_class='tight', env_name='tight', n_env=n_env, gamma=gamma)
+    env_distribution = make_env_distribution(env_class='tight', env_name='tight', n_env=n_env, gamma=gamma, stochastic=True)
     actions = env_distribution.get_actions()
     n_known = 1
     p_min = 1. / float(n_env)
@@ -67,5 +67,5 @@ def experiment():
 
 
 if __name__ == '__main__':
-    np.random.seed(1993)
+    # np.random.seed(1993)
     experiment()

@@ -36,6 +36,29 @@ def sample_grid_world(gamma, env_name, w, h, multi_goal=True, verbose=False):
     return env
 
 
+def sample_tight(gamma, env_name, w, h, stochastic, verbose):
+    env_name = 'tight' if env_name is None else env_name
+    r_min = 0.9
+    r_max = 1.0
+
+    goals = [(w, h), (w, h - 1), (w - 1, h)]
+    init_loc = (int(w / 2.), int(h / 2.))
+    rewards = np.random.uniform(low=r_min, high=r_max, size=len(goals))
+    slip = np.random.uniform(0.0, 0.1) if stochastic else 0.0
+
+    env = GridWorld(width=w, height=h, init_loc=init_loc, goal_locs=goals, gamma=gamma, slip_prob=slip,
+                    goal_rewards=rewards, name=env_name, is_goal_terminal=False)
+
+    if verbose:
+        print('Sampled tight:')
+        print('  Goals:', goals)
+        print('  Rewards:', rewards)
+        print('  Slip probability:', slip)
+
+    exit()
+    return env
+
+
 def sample_corridor(gamma, env_name, w, verbose=False):
     env_name = 'corridor' if env_name is None else env_name
 
@@ -516,7 +539,17 @@ def sample_maze_multi(gamma, env_name, verbose=False):
     return env
 
 
-def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma=.9, w=5, h=5, horizon=0, verbose=True):
+def make_env_distribution(
+        env_class='grid-world',
+        env_name=None,
+        n_env=10,
+        gamma=.9,
+        w=5,
+        h=5,
+        horizon=0,
+        stochastic=False,
+        verbose=True
+):
     """
     Create a distribution over environments.
     This function is specialized to the included environments.
@@ -528,6 +561,7 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
     :param h: (int) height for grid-world
     :param horizon: (int)
     :param verbose: (bool) print info if True
+    :param stochastic: (bool) some environments may be stochastic
     :return: (MDPDistribution)
     """
     if verbose:
@@ -578,6 +612,8 @@ def make_env_distribution(env_class='grid-world', env_name=None, n_env=10, gamma
             new_env = sample_maze_multi(gamma, env_name, verbose)
         elif env_class == 'maze-mono-goal':
             new_env = sample_maze_mono(gamma, env_name, verbose)
+        elif env_class == 'tight':
+            new_env = sample_tight(gamma, env_name, w, h, stochastic, verbose)
         elif env_class == 'test':
             new_env = sample_test_environment(gamma)
         else:
