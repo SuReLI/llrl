@@ -1,0 +1,16 @@
+(MDP)
+	lifelong-tight-l_h-14_w-14
+(Agents)
+	RMax,0
+	LRMax,1
+	LRMax(Dmax=0.1),2
+	LRMax(Dmax=0.2),3
+	MaxQInit,4
+	LRMaxQInit,5
+	LRMaxQInit(Dmax=0.1),6
+	LRMaxQInit(Dmax=0.2),7
+(Params)
+	samples : 100
+	episodes : 200
+	steps : 12
+	track_disc_reward : False
