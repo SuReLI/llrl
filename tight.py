@@ -13,7 +13,7 @@ from llrl.agents.lrmaxqinit import LRMaxQInit
 from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments import run_agents_lifelong
 
-NEW_PARAM = [
+PARAM = [
     {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': False},
     {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': True},
     {'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 4, 'n_known': 3, 'stochastic': True},
@@ -24,13 +24,18 @@ NEW_PARAM = [
     {'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 7, 'n_known': 3, 'stochastic': True},
     {'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 7, 'n_known': 10, 'stochastic': True},
 
+    {'size': 11, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 10, 'n_known': 1, 'stochastic': False},
+    {'size': 11, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 10, 'n_known': 1, 'stochastic': True},
+    {'size': 11, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 10, 'n_known': 3, 'stochastic': True},
+    {'size': 11, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 10, 'n_known': 10, 'stochastic': True},
+
     {'size': 14, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False},
     {'size': 14, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 12, 'n_known': 1, 'stochastic': True},
     {'size': 14, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 12, 'n_known': 3, 'stochastic': True},
-    {'size': 14, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 12, 'n_known': 10, 'stochastic': True},
+    {'size': 14, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 12, 'n_known': 10, 'stochastic': True}
 ]
 
-PARAM = [
+PREVIOUS_PARAM = [
     {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 10.},  # 00:08
     {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 1.},  # 00:03
     {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 10.},  # 00:12
@@ -126,8 +131,6 @@ def experiment(p, name):
 
 if __name__ == '__main__':
     # np.random.seed(1993)
-    alpha = 'abcdefghijklmnopqrstuvwxyz'
-
     experiment_index = int(sys.argv[1])
-    experiment_name = 'tight-' + alpha[experiment_index]
+    experiment_name = 'tight-' + str(experiment_index)
     experiment(PARAM[experiment_index], experiment_name)
