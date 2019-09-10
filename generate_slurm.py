@@ -26,7 +26,7 @@ def slurm_from_script_name(script_name, arguments=''):
         'echo nbtask = $SLURM_NTASKS',
         '',
         'source deactivate',
-        'source activate myenv',
+        'source activate venv',  # 'source activate myenv',
         'python ' + script_name + '.py ' + arguments,
         'source deactivate',
         '',
@@ -53,7 +53,7 @@ def my_generate(script_name, max_index):
 
     print('Generating slurm files:')
     for i in range(max_index):
-        print('Script name:', script_name + '.py', str(i))
+        print(script_name + '.py', str(i))
         generate_from_script_name(script_name, str(i))
 
 
