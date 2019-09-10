@@ -22,13 +22,6 @@ def apply_async(pool, fun, args):
     return pool.apply_async(run_dill_encoded, (payload,))
 
 
-def dispatch(n_processes, n_agents):
-    assert n_agents < n_processes + 1
-    n_parallel_agents = n_agents
-    n_parallel_instances = int(n_processes / n_agents)
-    return n_parallel_instances, n_parallel_agents
-
-
 def run_agents_lifelong(
         agents,
         mdp_distribution,
@@ -102,7 +95,6 @@ def run_agents_lifelong(
             n_processes = multiprocessing.cpu_count() if n_processes is None else n_processes
             print('Using', n_processes, 'threads.')
             pool = multiprocessing.Pool(processes=n_processes)
-            n_parallel_instances, n_parallel_agents = dispatch(n_processes, n_agents)
 
             # Asynchronous execution
             jobs = []
