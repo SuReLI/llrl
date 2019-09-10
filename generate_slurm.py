@@ -47,7 +47,7 @@ def remove_py(s):
     return s if s[-3:] != '.py' else s[:-3]
 
 
-def mygenerate(script_name, max_index):
+def my_generate(script_name, max_index):
     script_name = remove_py(script_name)
     max_index = int(max_index)
 
@@ -58,4 +58,4 @@ def mygenerate(script_name, max_index):
 
 
 if __name__ == '__main__':
-    mygenerate(sys.argv[1], sys.argv[2])
+    my_generate(sys.argv[1], sys.argv[2])
