@@ -103,8 +103,7 @@ def experiment(p, name):
 
 if __name__ == '__main__':
     # np.random.seed(1993)
-    alpha = 'abcdefghijklmnopqrstuvwxyz'
 
     experiment_index = sys.argv[1]
-    experiment_name = 'tight-' + alpha[int(experiment_index)]
+    experiment_name = 'tight' + experiment_index
     experiment(PARAM[0], experiment_name)
