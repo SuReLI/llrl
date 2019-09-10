@@ -1,7 +1,7 @@
 import sys
 
 
-def slurm_from_script_name(script_name):
+def slurm_from_script_name(script_name, arguments=''):
     return [
         '#!/bin/bash',
         '',
@@ -12,7 +12,7 @@ def slurm_from_script_name(script_name):
         '#SBATCH --time=24:00:00',
         '#SBATCH --mail-user=erwan.lecarpentier@isae-supaero.fr',
         '#SBATCH --mail-type=FAIL,END',
-        '#SBATCH --job-name=' + script_name,
+        '#SBATCH --job-name=' + script_name + arguments,
         '#SBATCH --output=slurm.%j.out',
         '#SBATCH --error=slurm.%j.err',
         '',
@@ -27,16 +27,16 @@ def slurm_from_script_name(script_name):
         '',
         'source deactivate',
         'source activate myenv',
-        'python ' + script_name + '.py',
+        'python ' + script_name + '.py ' + arguments,
         'source deactivate',
         '',
         'rm $SLURM_NODEFILE'
     ]
 
 
-def generate_from_script_name(script_name):
-    file_name = script_name + '.slurm'
-    content = slurm_from_script_name(script_name)
+def generate_from_script_name(script_name, arguments=''):
+    file_name = script_name + arguments + '.slurm'
+    content = slurm_from_script_name(script_name, arguments=arguments)
     f = open(file_name, "w+")
     for row in content:
         f.write(row + '\n')
@@ -47,10 +47,15 @@ def remove_py(s):
     return s if s[-3:] != '.py' else s[:-3]
 
 
-def generate(script_list):
-    for s in script_list:
-        generate_from_script_name(remove_py(s))
+def mygenerate(script_name, max_index):
+    script_name = remove_py(script_name)
+    max_index = int(max_index)
+
+    print('Generating slurm files:')
+    for i in range(max_index):
+        print('Script name:', script_name + '.py', str(i))
+        generate_from_script_name(script_name, str(i))
 
 
 if __name__ == '__main__':
-    generate(sys.argv[1:])
+    mygenerate(sys.argv[1], sys.argv[2])
