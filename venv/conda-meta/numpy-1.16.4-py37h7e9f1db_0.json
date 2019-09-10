@@ -1,0 +1,37 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "py37h7e9f1db_0",
+  "build_number": 0,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [
+    "blas 1.0 mkl",
+    "libgcc-ng >=7.3.0",
+    "libgfortran-ng >=7,<8.0a0",
+    "mkl >=2019.3,<2020.0a0",
+    "mkl_fft >=1.0.6,<2.0a0",
+    "mkl_random >=1.0.2,<2.0a0",
+    "numpy-base 1.16.4 py37hde5b4d6_0",
+    "python >=3.7,<3.8.0a0"
+  ],
+  "files": [],
+  "fn": "numpy-1.16.4-py37h7e9f1db_0.tar.bz2",
+  "license": "BSD 3-Clause",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/numpy-1.16.4-py37h7e9f1db_0",
+    "type": 1
+  },
+  "md5": "6dd737e6160dc917a791f0ccf2a8dc3b",
+  "name": "numpy",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 50001,
+  "subdir": "linux-64",
+  "timestamp": 1559140484633,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/numpy-1.16.4-py37h7e9f1db_0.tar.bz2",
+  "version": "1.16.4",
+  "with_features_depends": {}
+}

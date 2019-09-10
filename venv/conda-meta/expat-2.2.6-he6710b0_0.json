@@ -1,0 +1,45 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "he6710b0_0",
+  "build_number": 0,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [
+    "libgcc-ng >=7.3.0",
+    "libstdcxx-ng >=7.3.0"
+  ],
+  "files": [
+    "bin/xmlwf",
+    "include/expat.h",
+    "include/expat_config.h",
+    "include/expat_external.h",
+    "lib/libexpat.a",
+    "lib/libexpat.la",
+    "lib/libexpat.so",
+    "lib/libexpat.so.1",
+    "lib/libexpat.so.1.6.8",
+    "lib/pkgconfig/expat.pc",
+    "share/doc/expat/AUTHORS",
+    "share/doc/expat/changelog",
+    "share/man/man1/xmlwf.1"
+  ],
+  "fn": "expat-2.2.6-he6710b0_0.tar.bz2",
+  "license": "MIT",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/expat-2.2.6-he6710b0_0",
+    "type": 1
+  },
+  "md5": "fa5e74d741afa1964bd703dd29a9cae9",
+  "name": "expat",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 191153,
+  "subdir": "linux-64",
+  "timestamp": 1535396538938,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/expat-2.2.6-he6710b0_0.tar.bz2",
+  "version": "2.2.6",
+  "with_features_depends": {}
+}

@@ -1,0 +1,33 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "243",
+  "build_number": 243,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [],
+  "files": [
+    "lib/libiomp5.so",
+    "lib/libiomp5_db.so",
+    "lib/libiompstubs5.so"
+  ],
+  "fn": "intel-openmp-2019.4-243.tar.bz2",
+  "license": "proprietary - Intel",
+  "license_family": "Proprietary",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/intel-openmp-2019.4-243",
+    "type": 1
+  },
+  "md5": "4e69e689d708e6dc17a9ada383e8e25e",
+  "name": "intel-openmp",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 897146,
+  "subdir": "linux-64",
+  "timestamp": 1559526508129,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/intel-openmp-2019.4-243.tar.bz2",
+  "version": "2019.4",
+  "with_features_depends": {}
+}

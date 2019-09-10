@@ -1,0 +1,44 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "py37_1",
+  "build_number": 1,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [
+    "python >=3.7,<3.8.0a0"
+  ],
+  "files": [
+    "lib/python3.7/site-packages/certifi-2019.6.16-py3.7.egg-info/PKG-INFO",
+    "lib/python3.7/site-packages/certifi-2019.6.16-py3.7.egg-info/SOURCES.txt",
+    "lib/python3.7/site-packages/certifi-2019.6.16-py3.7.egg-info/dependency_links.txt",
+    "lib/python3.7/site-packages/certifi-2019.6.16-py3.7.egg-info/installed-files.txt",
+    "lib/python3.7/site-packages/certifi-2019.6.16-py3.7.egg-info/not-zip-safe",
+    "lib/python3.7/site-packages/certifi-2019.6.16-py3.7.egg-info/top_level.txt",
+    "lib/python3.7/site-packages/certifi/__init__.py",
+    "lib/python3.7/site-packages/certifi/__main__.py",
+    "lib/python3.7/site-packages/certifi/__pycache__/__init__.cpython-37.pyc",
+    "lib/python3.7/site-packages/certifi/__pycache__/__main__.cpython-37.pyc",
+    "lib/python3.7/site-packages/certifi/__pycache__/core.cpython-37.pyc",
+    "lib/python3.7/site-packages/certifi/cacert.pem",
+    "lib/python3.7/site-packages/certifi/core.py"
+  ],
+  "fn": "certifi-2019.6.16-py37_1.tar.bz2",
+  "license": "ISC",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/certifi-2019.6.16-py37_1",
+    "type": 1
+  },
+  "md5": "2c802b096ae72a4f6563f3818aac36ef",
+  "name": "certifi",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 159404,
+  "subdir": "linux-64",
+  "timestamp": 1564158795394,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/certifi-2019.6.16-py37_1.tar.bz2",
+  "version": "2019.6.16",
+  "with_features_depends": {}
+}

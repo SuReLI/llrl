@@ -1,0 +1,41 @@
+{
+  "arch": "x86_64",
+  "auth": null,
+  "build": "py37hf484d3e_0",
+  "build_number": 0,
+  "channel": "https://repo.continuum.io/pkgs/main/linux-64",
+  "depends": [
+    "libgcc-ng >=7.2.0",
+    "libstdcxx-ng >=7.2.0",
+    "python >=3.7,<3.8.0a0"
+  ],
+  "files": [
+    "bin/sip",
+    "include/python3.7m/sip.h",
+    "lib/python3.7/site-packages/__pycache__/sipconfig.cpython-37.pyc",
+    "lib/python3.7/site-packages/__pycache__/sipdistutils.cpython-37.pyc",
+    "lib/python3.7/site-packages/sip.pyi",
+    "lib/python3.7/site-packages/sip.so",
+    "lib/python3.7/site-packages/sipconfig.py",
+    "lib/python3.7/site-packages/sipdistutils.py"
+  ],
+  "fn": "sip-4.19.8-py37hf484d3e_0.tar.bz2",
+  "license": "GPL-3.0",
+  "link": {
+    "source": "/home/e.lecarpentier/anaconda/anaconda3/pkgs/sip-4.19.8-py37hf484d3e_0",
+    "type": 1
+  },
+  "md5": "128cd74c4a5f3ec92872bfb7f5b288c2",
+  "name": "sip",
+  "noarch": null,
+  "platform": "linux",
+  "preferred_env": null,
+  "priority": 0,
+  "schannel": "defaults",
+  "size": 297157,
+  "subdir": "linux-64",
+  "timestamp": 1530793400234,
+  "url": "https://repo.continuum.io/pkgs/main/linux-64/sip-4.19.8-py37hf484d3e_0.tar.bz2",
+  "version": "4.19.8",
+  "with_features_depends": {}
+}
