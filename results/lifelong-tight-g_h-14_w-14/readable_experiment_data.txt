@@ -10,7 +10,7 @@
 	LRMaxQInit(Dmax=0.1),6
 	LRMaxQInit(Dmax=0.2),7
 (Params)
-	samples : 100
-	episodes : 200
+	samples : 50
+	episodes : 100
 	steps : 12
 	track_disc_reward : False

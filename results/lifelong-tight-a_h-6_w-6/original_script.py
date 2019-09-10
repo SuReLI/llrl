@@ -13,10 +13,11 @@ from llrl.agents.lrmaxqinit import LRMaxQInit
 from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments import run_agents_lifelong
 
-
+NT = 50
+NE = 50
 PARAM = [
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 10.},
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 1.},
+    {'size': 6, 'n_tasks': NT, 'n_episodes': NE, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 10.},
+    {'size': 6, 'n_tasks': NT, 'n_episodes': NE, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 1.},
     {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 10.},
     {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 1.},
     {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 10, 'stochastic': True, 'v_max': 10.},
@@ -92,13 +93,12 @@ def experiment(p, name):
                                 n_states=n_states, max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
                                 min_sampling_probability=p_min, name='LRMaxQInit(Dmax=0.2)')
     agents_pool = [rmax, lrmax, lrmax_p01, lrmax_p02, maxqinit, lrmaxqinit, lrmaxqinit_p01, lrmaxqinit_p02]
-    agents_pool = [rmax, lrmax, lrmax_p01, maxqinit, lrmaxqinit, lrmaxqinit_p01]
+    # agents_pool = [rmax, lrmax, lrmax_p01, maxqinit, lrmaxqinit, lrmaxqinit_p01]
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=3, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
-                        n_steps=p['n_steps'],
-                        reset_at_terminal=False, open_plot=True, plot_title=True, do_run=False, do_plot=True,
-                        parallel_run=True, n_processes=None)
+                        n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=True, do_run=False,
+                        do_plot=True, parallel_run=True, n_processes=None)
 
 
 if __name__ == '__main__':

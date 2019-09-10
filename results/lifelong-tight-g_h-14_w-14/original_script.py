@@ -2,6 +2,10 @@
 Lifelong RL experiment
 """
 
+
+import sys
+
+
 from llrl.agents.rmax import RMax
 from llrl.agents.lrmax import LRMax
 from llrl.agents.maxqinit import MaxQInit
@@ -9,39 +13,40 @@ from llrl.agents.lrmaxqinit import LRMaxQInit
 from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments import run_agents_lifelong
 
-
+NT = 50
+NE = 50
 PARAM = [
-    {'name': 'tight-a', 'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 10.},
-    {'name': 'tight-b', 'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 1.},
-    {'name': 'tight-c', 'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 10.},
-    {'name': 'tight-d', 'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 1.},
-    {'name': 'tight-e', 'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 10, 'stochastic': True, 'v_max': 10.},
-    {'name': 'tight-f', 'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 10, 'stochastic': True, 'v_max': 1.},
+    {'size': 6, 'n_tasks': NT, 'n_episodes': NE, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 10.},
+    {'size': 6, 'n_tasks': NT, 'n_episodes': NE, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 1.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 10.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 1.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 10, 'stochastic': True, 'v_max': 10.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 10, 'stochastic': True, 'v_max': 1.},
 
-    {'name': 'tight-g', 'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False, 'v_max': 10.},
-    {'name': 'tight-h', 'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False, 'v_max': 1.},
-    {'name': 'tight-i', 'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': True, 'v_max': 10.},
-    {'name': 'tight-j', 'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': True, 'v_max': 1.},
-    {'name': 'tight-k', 'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 10, 'stochastic': True, 'v_max': 10.},
-    {'name': 'tight-l', 'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 10, 'stochastic': True, 'v_max': 1.},
+    {'size': 14, 'n_tasks': NT, 'n_episodes': 2 * NE, 'n_steps': 12, 'n_known': 1, 'stochastic': False, 'v_max': 10.},
+    {'size': 14, 'n_tasks': NT, 'n_episodes': 2 * NE, 'n_steps': 12, 'n_known': 1, 'stochastic': False, 'v_max': 1.},
+    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': True, 'v_max': 10.},
+    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': True, 'v_max': 1.},
+    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 10, 'stochastic': True, 'v_max': 10.},
+    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 10, 'stochastic': True, 'v_max': 1.},
 
-    {'name': 'tight-m', 'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': False, 'v_max': 10.},
-    {'name': 'tight-n', 'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': False, 'v_max': 1.},
-    {'name': 'tight-o', 'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': True, 'v_max': 10.},
-    {'name': 'tight-p', 'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': True, 'v_max': 1.},
-    {'name': 'tight-q', 'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 10, 'stochastic': True, 'v_max': 10.},
-    {'name': 'tight-r', 'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 10, 'stochastic': True, 'v_max': 1.}
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': False, 'v_max': 10.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': False, 'v_max': 1.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': True, 'v_max': 10.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': True, 'v_max': 1.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 10, 'stochastic': True, 'v_max': 10.},
+    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 10, 'stochastic': True, 'v_max': 1.}
 ]
 
 
-def experiment(p):
+def experiment(p, name):
     # Parameters
     gamma = .9
     n_env = 5
     size = p['size']
     env_distribution = make_env_distribution(
         env_class='tight', n_env=n_env, gamma=gamma,
-        env_name=p['name'],
+        env_name=name,
         w=size,
         h=size,
         stochastic=p['stochastic']
@@ -88,14 +93,18 @@ def experiment(p):
                                 n_states=n_states, max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
                                 min_sampling_probability=p_min, name='LRMaxQInit(Dmax=0.2)')
     agents_pool = [rmax, lrmax, lrmax_p01, lrmax_p02, maxqinit, lrmaxqinit, lrmaxqinit_p01, lrmaxqinit_p02]
+    # agents_pool = [rmax, lrmax, lrmax_p01, maxqinit, lrmaxqinit, lrmaxqinit_p01]
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=3, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
-                        n_steps=p['n_steps'],
-                        reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True, do_plot=True,
-                        parallel_run=True, n_processes=None)
+                        n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=True, do_run=False,
+                        do_plot=True, parallel_run=True, n_processes=None)
 
 
 if __name__ == '__main__':
     # np.random.seed(1993)
-    experiment(PARAM[6])
+    alpha = 'abcdefghijklmnopqrstuvwxyz'
+
+    experiment_index = int(sys.argv[1])
+    experiment_name = 'tight-' + alpha[experiment_index]
+    experiment(PARAM[experiment_index], experiment_name)
