@@ -14,25 +14,25 @@ from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments import run_agents_lifelong
 
 PARAM = [
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': False},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': True},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 4, 'n_known': 3, 'stochastic': True},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 4, 'n_known': 10, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': False},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 4, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 4, 'n_known': 10, 'stochastic': True},
 
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 7, 'n_known': 1, 'stochastic': False},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 7, 'n_known': 1, 'stochastic': True},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 7, 'n_known': 3, 'stochastic': True},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 7, 'n_known': 10, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 7, 'n_known': 1, 'stochastic': False},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 7, 'n_known': 1, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 7, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 7, 'n_known': 10, 'stochastic': True},
 
-    {'size': 11, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 10, 'n_known': 1, 'stochastic': False},
-    {'size': 11, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 10, 'n_known': 1, 'stochastic': True},
-    {'size': 11, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 10, 'n_known': 3, 'stochastic': True},
-    {'size': 11, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 10, 'n_known': 10, 'stochastic': True},
+    {'version': 2, 'size': 11, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 10, 'n_known': 1, 'stochastic': False},
+    {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 10, 'n_known': 1, 'stochastic': True},
+    {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 10, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 10, 'n_known': 10, 'stochastic': True},
 
-    {'size': 14, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False},
-    {'size': 14, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 12, 'n_known': 1, 'stochastic': True},
-    {'size': 14, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 12, 'n_known': 3, 'stochastic': True},
-    {'size': 14, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 12, 'n_known': 10, 'stochastic': True}
+    {'version': 2, 'size': 14, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False},
+    {'version': 2, 'size': 14, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 12, 'n_known': 1, 'stochastic': True},
+    {'version': 2, 'size': 14, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 12, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 14, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 12, 'n_known': 10, 'stochastic': True}
 ]
 
 PREVIOUS_PARAM = [
@@ -67,6 +67,7 @@ def experiment(p, name):
     env_distribution = make_env_distribution(
         env_class='tight', n_env=n_env, gamma=gamma,
         env_name=name,
+        version=p['version'],
         w=size,
         h=size,
         stochastic=p['stochastic']
@@ -131,6 +132,9 @@ def experiment(p, name):
 
 if __name__ == '__main__':
     # np.random.seed(1993)
+
     experiment_index = int(sys.argv[1])
-    experiment_name = 'tight-' + str(experiment_index)
+    tight_version = PARAM[experiment_index]['version']
+    experiment_name = 'tight-v' + str(tight_version) + '-' + str(experiment_index)
+
     experiment(PARAM[experiment_index], experiment_name)
