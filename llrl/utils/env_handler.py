@@ -36,18 +36,39 @@ def sample_grid_world(gamma, env_name, w, h, multi_goal=True, verbose=False):
     return env
 
 
-def sample_tight(gamma, env_name, w, h, stochastic, verbose):
+def sample_tight(gamma, env_name, version, w, h, stochastic, verbose):
+    """
+    Sample a tight environment.
+    :param gamma: (float)
+    :param env_name: (str)
+    :param version: (int)
+    :param w: (int)
+    :param h: (int)
+    :param stochastic: (bool)
+    :param verbose: (bool)
+    :return: (GridWorld) Tight environment.
+    """
     env_name = 'tight' if env_name is None else env_name
     r_min = 0.9
     r_max = 1.0
 
-    goals = [(w, h), (w, h - 1), (w - 1, h)]
+    goals_locations = [(w, h), (w, h - 1), (w - 1, h)]
     init_loc = (int(w / 2.) + 1, int(h / 2.) + 1)
-    rewards = np.random.uniform(low=r_min, high=r_max, size=len(goals))
     slip = np.random.uniform(0.0, 0.1) if stochastic else 0.0
 
+    if version == 1:
+        is_goal_terminal = True
+        goals = np.random.choice(goals_locations)
+        rewards = [1.]
+    elif version == 2:
+        is_goal_terminal = False
+        goals = goals_locations
+        rewards = np.random.uniform(low=r_min, high=r_max, size=len(goals))
+    else:
+        raise ValueError('Tight version not implemented ( version =', version, ')')
+
     env = GridWorld(width=w, height=h, init_loc=init_loc, goal_locs=goals, gamma=gamma, slip_prob=slip,
-                    goal_rewards=rewards, name=env_name, is_goal_terminal=False)
+                    goal_rewards=rewards, name=env_name, is_goal_terminal=is_goal_terminal)
 
     if verbose:
         print('Sampled tight:')
@@ -544,10 +565,11 @@ def make_env_distribution(
         env_name=None,
         n_env=10,
         gamma=.9,
+        version=1,
         w=5,
         h=5,
-        horizon=0,
         stochastic=False,
+        horizon=0,
         verbose=True
 ):
     """
@@ -557,6 +579,7 @@ def make_env_distribution(
     :param env_name: (str) name of the environment for save path
     :param n_env: (int) number of environments in the distribution
     :param gamma: (float) discount factor
+    :param version: (int) in case a version indicator is needed
     :param w: (int) width for grid-world
     :param h: (int) height for grid-world
     :param horizon: (int)
@@ -613,7 +636,7 @@ def make_env_distribution(
         elif env_class == 'maze-mono-goal':
             new_env = sample_maze_mono(gamma, env_name, verbose)
         elif env_class == 'tight':
-            new_env = sample_tight(gamma, env_name, w, h, stochastic, verbose)
+            new_env = sample_tight(gamma, env_name, version, w, h, stochastic, verbose)
         elif env_class == 'test':
             new_env = sample_test_environment(gamma)
         else:
