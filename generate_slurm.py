@@ -26,7 +26,7 @@ def slurm_from_script_name(script_name, arguments=''):
         'echo nbtask = $SLURM_NTASKS',
         '',
         'source deactivate',
-        'source activate venv',  # 'source activate myenv',
+        'source activate myenv',  # 'source activate venv',
         'python ' + script_name + '.py ' + arguments,
         'source deactivate',
         '',

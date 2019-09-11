@@ -21,7 +21,7 @@ sort $SLURM_NODEFILE | uniq -c | xargs printf "(%d)    %s\n"
 echo nbtask = $SLURM_NTASKS
 
 source deactivate
-source activate venv
+source activate myenv
 python tight.py 15
 source deactivate
 
