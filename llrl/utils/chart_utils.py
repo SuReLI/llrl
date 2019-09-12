@@ -202,6 +202,8 @@ def plot(
     for i in range(len(agents)):
         if moving_average:
             _x, y[i], y_lo[i], y_up[i] = compute_moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
+        else:
+            _x = x
         if y_lo is not None and y_up is not None:
             plt.fill_between(_x, y_lo[i], y_up[i], alpha=0.25, facecolor=colors[i], edgecolor=colors[i])
         plt.plot(_x, y[i], '-o', label=agents[i], marker=markers[i])
