@@ -14,25 +14,25 @@ from llrl.utils.env_handler import make_env_distribution
 from llrl.experiments import run_agents_lifelong
 
 PARAM = [
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': False},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': True},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 4, 'n_known': 3, 'stochastic': True},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 4, 'n_known': 10, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': False},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 4, 'n_known': 1, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 4, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 4, 'n_known': 10, 'stochastic': True},
 
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 7, 'n_known': 1, 'stochastic': False},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 7, 'n_known': 1, 'stochastic': True},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 7, 'n_known': 3, 'stochastic': True},
-    {'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 7, 'n_known': 10, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 7, 'n_known': 1, 'stochastic': False},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 50, 'n_steps': 7, 'n_known': 1, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 150, 'n_steps': 7, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 6, 'n_tasks': 20, 'n_episodes': 500, 'n_steps': 7, 'n_known': 10, 'stochastic': True},
 
-    {'size': 11, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 10, 'n_known': 1, 'stochastic': False},
-    {'size': 11, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 10, 'n_known': 1, 'stochastic': True},
-    {'size': 11, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 10, 'n_known': 3, 'stochastic': True},
-    {'size': 11, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 10, 'n_known': 10, 'stochastic': True},
+    {'version': 2, 'size': 11, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 10, 'n_known': 1, 'stochastic': False},
+    {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 10, 'n_known': 1, 'stochastic': True},
+    {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 10, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 10, 'n_known': 10, 'stochastic': True},  # 11
 
-    {'size': 14, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False},
-    {'size': 14, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 12, 'n_known': 1, 'stochastic': True},
-    {'size': 14, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 12, 'n_known': 3, 'stochastic': True},
-    {'size': 14, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 12, 'n_known': 10, 'stochastic': True}
+    {'version': 2, 'size': 14, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False},
+    {'version': 2, 'size': 14, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 12, 'n_known': 1, 'stochastic': True},
+    {'version': 2, 'size': 14, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 12, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 14, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 12, 'n_known': 10, 'stochastic': True}  # FAIL
 ]
 
 PREVIOUS_PARAM = [
@@ -67,6 +67,7 @@ def experiment(p, name):
     env_distribution = make_env_distribution(
         env_class='tight', n_env=n_env, gamma=gamma,
         env_name=name,
+        version=p['version'],
         w=size,
         h=size,
         stochastic=p['stochastic']
@@ -121,16 +122,22 @@ def experiment(p, name):
                                 n_states=n_states, max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
                                 min_sampling_probability=p_min, name='LRMaxQInit(Dmax=0.2)')
     agents_pool = [rmax, lrmax, lrmax_p01, lrmax_p015, lrmax_p02, maxqinit, lrmaxqinit, lrmaxqinit_p01, lrmaxqinit_p015, lrmaxqinit_p02]
-    # agents_pool = [rmax, lrmax, lrmax_p01, maxqinit, lrmaxqinit, lrmaxqinit_p01]
+    agents_pool = [rmax, lrmax, lrmax_p02, lrmax_p01, maxqinit, lrmaxqinit, lrmaxqinit_p01]
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
-                        n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=True, do_run=True,
-                        do_plot=True, parallel_run=True, n_processes=None)
+                        n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=False,
+                        plot_legend=True, do_run=False, do_plot=True, parallel_run=True, n_processes=None,
+                        episodes_moving_average=True, episodes_ma_width=100, tasks_moving_average=True, tasks_ma_width=2,
+                        latex_rendering=True)
 
 
 if __name__ == '__main__':
     # np.random.seed(1993)
+
     experiment_index = int(sys.argv[1])
+    tight_version = PARAM[experiment_index]['version']
+    # experiment_name = 'tight-v' + str(tight_version) + '-' + str(experiment_index)
     experiment_name = 'tight-' + str(experiment_index)
+
     experiment(PARAM[experiment_index], experiment_name)

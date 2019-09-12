@@ -3,14 +3,11 @@
 (Agents)
 	RMax,0
 	LRMax,1
-	LRMax(Dmax=0.1),2
-	LRMax(Dmax=0.15),3
-	LRMax(Dmax=0.2),4
-	MaxQInit,5
-	LRMaxQInit,6
-	LRMaxQInit(Dmax=0.1),7
-	LRMaxQInit(Dmax=0.15),8
-	LRMaxQInit(Dmax=0.2),9
+	LRMax(Dmax=0.2),2
+	LRMax(Dmax=0.1),3
+	MaxQInit,4
+	LRMaxQInit,5
+	LRMaxQInit(Dmax=0.1),6
 (Params)
 	samples : 20
 	episodes : 50

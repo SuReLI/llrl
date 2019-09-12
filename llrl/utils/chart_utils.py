@@ -12,9 +12,31 @@ from llrl.utils.save import csv_path_from_agent
 
 COLOR_SHIFT = 0
 
+'''
 color_ls = [
-    [118, 167, 125], [102, 120, 173], [198, 113, 113], [94, 94, 94], [169, 193, 213],
-    [230, 169, 132], [192, 197, 182], [210, 180, 226], [167, 167, 125], [125, 167, 125]
+    [118, 167, 125],
+    [102, 120, 173],
+    [198, 113, 113],
+    [94, 94, 94],
+    [169, 193, 213],
+    [230, 169, 132],
+    [192, 197, 182],
+    [210, 180, 226],
+    [167, 167, 125],
+    [125, 167, 125]
+]
+'''
+color_ls = [
+    [153, 194, 255],
+
+    [159, 198, 177],
+    [128, 179, 151],
+    [96, 160, 126],
+
+    [90, 90, 90],
+
+    [255, 166, 77],
+    [255, 102, 102]
 ]
 
 
@@ -81,26 +103,32 @@ def lifelong_plot(
         drt_lo.append(drt_lo_i)
         drt_up.append(drt_up_i)
 
-    x_e = range(1, n_episodes + 1)
-    x_t = range(1, n_tasks + 1)
+    x_e = np.array(range(1, n_episodes + 1))
+    x_t = np.array(range(1, n_tasks + 1))
     x_label_e = r'Episode number'
     x_label_t = r'Task number'
+
+    # Plots w.r.t. episodes
+    plot_legend = False
     plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
          x_label=x_label_e, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
          plot_title=plot_title, plot_legend=plot_legend, moving_average=episodes_moving_average,
-         ma_width=episodes_ma_width, latex_rendering=latex_rendering)
+         ma_width=episodes_ma_width, latex_rendering=latex_rendering, x_cut=2000)
     plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
          x_label=x_label_e, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
          open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, moving_average=episodes_moving_average,
-         ma_width=episodes_ma_width, latex_rendering=latex_rendering)
+         ma_width=episodes_ma_width, latex_rendering=latex_rendering, x_cut=2000)
+
+    # Plots w.r.t. tasks
+    plot_legend = True
     plot(path, pdf_name='return_vs_task', agents=agents, x=x_t, y=trt, y_lo=trt_lo, y_up=trt_up,
          x_label=x_label_t, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, plot_legend=plot_legend, moving_average=tasks_moving_average, ma_width=tasks_ma_width,
-         latex_rendering=latex_rendering)
+         plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=True, moving_average=tasks_moving_average,
+         ma_width=tasks_ma_width, latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_task', agents=agents, x=x_t, y=drt, y_lo=drt_lo, y_up=drt_up,
          x_label=x_label_t, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, moving_average=tasks_moving_average,
-         ma_width=tasks_ma_width, latex_rendering=latex_rendering)
+         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=True,
+         moving_average=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
 
 
 def compute_moving_average(w, x, y, y_lo=None, y_up=None):
@@ -161,9 +189,12 @@ def plot(
         x_label,
         y_label,
         title_prefix,
+        x_cut=None,
         open_plot=True,
         plot_title=True,
+        plot_markers=True,
         plot_legend=True,
+        legend_at_bottom=False,
         moving_average=True,
         ma_width=10,
         latex_rendering=False
@@ -181,14 +212,25 @@ def plot(
     :param x_label: (str)
     :param y_label: (str)
     :param title_prefix: (str)
+    :param x_cut: (int) cut the x_axis, does nothing if set to None
     :param open_plot: (Bool)
     :param plot_title: (Bool)
+    :param plot_markers: (Bool)
     :param plot_legend: (Bool)
+    :param legend_at_bottom: (Bool)
     :param moving_average: (Bool)
     :param ma_width: (int)
     :param latex_rendering: (Bool)
     :return: None
     """
+    # x-cut
+    if x_cut is not None:
+        x = x[:x_cut]
+        for i in range(len(agents)):
+            y[i] = y[i][:x_cut]
+            y_lo[i] = y_lo[i][:x_cut]
+            y_up[i] = y_up[i][:x_cut]
+
     # LaTeX rendering
     if latex_rendering:
         rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
@@ -204,19 +246,34 @@ def plot(
     ax.set_prop_cycle(cycler('color', colors))
 
     for i in range(len(agents)):
+        label_i = _format_label(str(agents[i]), latex_rendering)
         if moving_average:
             _x, y[i], y_lo[i], y_up[i] = compute_moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
         else:
             _x = x
         if y_lo is not None and y_up is not None:
             plt.fill_between(_x, y_lo[i], y_up[i], alpha=0.25, facecolor=colors[i], edgecolor=colors[i])
-        plt.plot(_x, y[i], '-o', label=agents[i], marker=markers[i])
+        if plot_markers:
+            plt.plot(_x, y[i], '-o', label=label_i, marker=markers[i])
+        else:
+            plt.plot(_x, y[i], label=label_i)
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
+    # plt.ylim(bottom=0)
+
     if plot_legend:
-        plt.legend(loc='best')
-    plt.grid(True)  # , linestyle='--')
+        if legend_at_bottom:
+            # Shrink current axis's height by p% on the bottom
+            p = 0.4
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0 + box.height * p, box.width, box.height * (1.0 - p)])
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=False, shadow=False, ncol=2)
+        else:
+            plt.legend(loc='best')
+
+    plt.grid(True, linestyle='--')
+
     exp_dir_split_list = path.split("/")
     if 'results' in exp_dir_split_list:
         exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
@@ -240,8 +297,14 @@ def plot(
     plt.close()
 
 
-def _format_title(plot_title):
-    plot_title = plot_title.replace("_", " ")
-    plot_title = plot_title.replace("-", " ")
-    if len(plot_title.split(" ")) > 1:
-        return " ".join([w[0].upper() + w[1:] for w in plot_title.strip().split(" ")])
+def _format_title(title):
+    title = title.replace("_", " ")
+    title = title.replace("-", " ")
+    if len(title.split(" ")) > 1:
+        return " ".join([w[0].upper() + w[1:] for w in title.strip().split(" ")])
+
+
+def _format_label(label, latex_rendering):
+    if latex_rendering:
+        label = label.replace('Dmax=', r'$D_{\max} =$ ')
+    return label
