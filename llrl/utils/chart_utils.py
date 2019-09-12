@@ -109,6 +109,10 @@ def compute_moving_average(w, x, y, y_lo=None, y_up=None):
     :param y_up: (array-like)
     :return:
     """
+    assert w > 1, 'Error: moving average width must be > 1: w = {}'.format(w)
+    assert len(x) == len(y), 'Error: x and y vector should have the same length: len(x) = {}, len(y) = {}'.format(
+        len(x), len(y))
+
     n = len(x)
     w_2 = int(w / 2)
     x, y = np.array(x), np.array(y)
@@ -116,8 +120,6 @@ def compute_moving_average(w, x, y, y_lo=None, y_up=None):
     y_lo_new = None if y_lo is None else []
     y_up_new = None if y_up is None else []
     indexes = list(range(w_2, n, w))
-
-    assert n == len(y)
 
     for i in indexes:
         x_new.append(np.mean(x[i - w_2: i + w_2 - 1]))
