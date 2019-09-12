@@ -127,7 +127,7 @@ def experiment(p, name):
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
                         n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=True, do_run=False,
-                        do_plot=True, parallel_run=True, n_processes=None, moving_average=True, ma_width=2)
+                        do_plot=True, parallel_run=True, n_processes=None)
 
 
 if __name__ == '__main__':
@@ -135,7 +135,6 @@ if __name__ == '__main__':
 
     experiment_index = int(sys.argv[1])
     tight_version = PARAM[experiment_index]['version']
-    # experiment_name = 'tight-v' + str(tight_version) + '-' + str(experiment_index)
-    experiment_name = 'tight-' + str(experiment_index)
+    experiment_name = 'tight-v' + str(tight_version) + '-' + str(experiment_index)
 
     experiment(PARAM[experiment_index], experiment_name)

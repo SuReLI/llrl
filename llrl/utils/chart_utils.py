@@ -18,7 +18,18 @@ color_ls = [
 ]
 
 
-def lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title, latex_rendering=False):
+def lifelong_plot(
+        agents,
+        path,
+        n_tasks,
+        n_episodes,
+        confidence,
+        open_plot,
+        plot_title,
+        moving_average=False,
+        ma_width=1,
+        latex_rendering=False
+):
     dfs = []
     for agent in agents:
         agent_path = csv_path_from_agent(path, agent)
@@ -73,21 +84,84 @@ def lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot
     x_label_t = r'Task number'
     plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
          x_label=x_label_e, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, latex_rendering=latex_rendering)
+         plot_title=plot_title, moving_average=moving_average, ma_width=ma_width, latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
          x_label=x_label_e, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, latex_rendering=latex_rendering)
+         open_plot=open_plot, plot_title=plot_title, moving_average=moving_average, ma_width=ma_width,
+         latex_rendering=latex_rendering)
     plot(path, pdf_name='return_vs_task', agents=agents, x=x_t, y=trt, y_lo=trt_lo, y_up=trt_up,
          x_label=x_label_t, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, latex_rendering=latex_rendering)
+         plot_title=plot_title, moving_average=moving_average, ma_width=ma_width,
+         latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_task', agents=agents, x=x_t, y=drt, y_lo=drt_lo, y_up=drt_up,
          x_label=x_label_t, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, latex_rendering=latex_rendering)
+         open_plot=open_plot, plot_title=plot_title, moving_average=moving_average, ma_width=ma_width,
+         latex_rendering=latex_rendering)
 
 
+def compute_moving_average(w, x, y, y_lo=None, y_up=None):
+    """
+    Compute the moving average.
+    :param w: (int) width
+    :param x: (array-like)
+    :param y: (array-like)
+    :param y_lo: (array-like)
+    :param y_up: (array-like)
+    :return:
+    """
+    n = len(x)
+    w_2 = int(w / 2)
+    x, y = np.array(x), np.array(y)
+    x_new, y_new = [], []
+    y_lo_new = None if y_lo is None else []
+    y_up_new = None if y_up is None else []
+    indexes = list(range(w_2, n, w))
 
-def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefix, open_plot=True, plot_title=True,
-         latex_rendering=False):
+    assert n == len(y)
+
+    for i in indexes:
+        x_new.append(np.mean(x[i - w_2: i + w_2 - 1]))
+        y_new.append(np.mean(y[i - w_2: i + w_2 - 1]))
+        if y_lo is not None:
+            y_lo_new.append(np.mean(y_lo[i - w_2: i + w_2 - 1]))
+        if y_up is not None:
+            y_up_new.append(np.mean(y_up[i - w_2: i + w_2 - 1]))
+
+    x_new = np.insert(x_new, 0, x[0])
+    x_new = np.append(x_new, x[-1])
+
+    y_new = np.insert(y_new, 0, np.mean(y[0:w_2]))
+    y_new = np.append(y_new, np.mean(y[-w_2:]))
+
+    if y_lo is not None:
+        y_lo_new = np.insert(y_lo_new, 0, np.mean(y_lo[0:w_2]))
+        y_lo_new = np.append(y_lo_new, np.mean(y_lo[-w_2:]))
+
+    if y_up is not None:
+        y_up_new = np.insert(y_up_new, 0, np.mean(y_up[0:w_2]))
+        y_up_new = np.append(y_up_new, np.mean(y_up[-w_2:]))
+
+    return x_new, y_new, y_lo_new, y_up_new
+
+
+def plot(
+        path,
+        pdf_name,
+        agents,
+        x,
+        y,
+        y_lo,
+        y_up,
+        x_label,
+        y_label,
+        title_prefix,
+        open_plot=True,
+        plot_title=True,
+        plot_legend=False,
+        moving_average=True,
+        ma_width=10,
+        latex_rendering=False
+):
     """
     Tweaked version of simple_rl.utils.chart_utils.plot
     Method made less specific, no specification of the type of data.
@@ -103,6 +177,9 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
     :param title_prefix: (str)
     :param open_plot: (Bool)
     :param plot_title: (Bool)
+    :param plot_legend: (Bool)
+    :param moving_average: (Bool)
+    :param ma_width: (int)
     :param latex_rendering: (Bool)
     :return: None
     """
@@ -121,13 +198,16 @@ def plot(path, pdf_name, agents, x, y, y_lo, y_up, x_label, y_label, title_prefi
     ax.set_prop_cycle(cycler('color', colors))
 
     for i in range(len(agents)):
+        if moving_average:
+            _x, y[i], y_lo[i], y_up[i] = compute_moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
         if y_lo is not None and y_up is not None:
-            plt.fill_between(x, y_lo[i], y_up[i], alpha=0.25, facecolor=colors[i], edgecolor=colors[i])
-        plt.plot(x, y[i], '-o', label=agents[i], marker=markers[i])
+            plt.fill_between(_x, y_lo[i], y_up[i], alpha=0.25, facecolor=colors[i], edgecolor=colors[i])
+        plt.plot(_x, y[i], '-o', label=agents[i], marker=markers[i])
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
-    plt.legend(loc='best')
+    if plot_legend:
+        plt.legend(loc='best')
     plt.grid(True)  # , linestyle='--')
     exp_dir_split_list = path.split("/")
     if 'results' in exp_dir_split_list:
