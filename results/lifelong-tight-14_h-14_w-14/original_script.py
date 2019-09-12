@@ -126,8 +126,9 @@ def experiment(p, name):
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
-                        n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=True, do_run=False,
-                        do_plot=True, parallel_run=True, n_processes=None, moving_average=False, ma_width=10)
+                        n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=True,
+                        plot_legend=False, do_run=False, do_plot=True, parallel_run=True, n_processes=None,
+                        episodes_moving_average=True, episodes_ma_width=20, tasks_moving_average=True, tasks_ma_width=4)
 
 
 if __name__ == '__main__':

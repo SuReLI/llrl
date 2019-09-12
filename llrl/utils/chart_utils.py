@@ -26,8 +26,11 @@ def lifelong_plot(
         confidence,
         open_plot,
         plot_title,
-        moving_average=False,
-        ma_width=1,
+        plot_legend=True,
+        episodes_moving_average=False,
+        episodes_ma_width=10,
+        tasks_moving_average=False,
+        tasks_ma_width=10,
         latex_rendering=False
 ):
     dfs = []
@@ -84,19 +87,20 @@ def lifelong_plot(
     x_label_t = r'Task number'
     plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
          x_label=x_label_e, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, moving_average=moving_average, ma_width=ma_width, latex_rendering=latex_rendering)
+         plot_title=plot_title, plot_legend=plot_legend, moving_average=episodes_moving_average,
+         ma_width=episodes_ma_width, latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
          x_label=x_label_e, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, moving_average=moving_average, ma_width=ma_width,
-         latex_rendering=latex_rendering)
+         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, moving_average=episodes_moving_average,
+         ma_width=episodes_ma_width, latex_rendering=latex_rendering)
     plot(path, pdf_name='return_vs_task', agents=agents, x=x_t, y=trt, y_lo=trt_lo, y_up=trt_up,
          x_label=x_label_t, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, moving_average=moving_average, ma_width=ma_width,
+         plot_title=plot_title, plot_legend=plot_legend, moving_average=tasks_moving_average, ma_width=tasks_ma_width,
          latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_task', agents=agents, x=x_t, y=drt, y_lo=drt_lo, y_up=drt_up,
          x_label=x_label_t, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, moving_average=moving_average, ma_width=ma_width,
-         latex_rendering=latex_rendering)
+         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, moving_average=tasks_moving_average,
+         ma_width=tasks_ma_width, latex_rendering=latex_rendering)
 
 
 def compute_moving_average(w, x, y, y_lo=None, y_up=None):
@@ -159,7 +163,7 @@ def plot(
         title_prefix,
         open_plot=True,
         plot_title=True,
-        plot_legend=False,
+        plot_legend=True,
         moving_average=True,
         ma_width=10,
         latex_rendering=False

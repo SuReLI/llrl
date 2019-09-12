@@ -43,8 +43,11 @@ def run_agents_lifelong(
         confidence=.9,
         open_plot=False,
         plot_title=True,
-        moving_average=False,
-        ma_width=1,
+        plot_legend=True,
+        episodes_moving_average=False,
+        episodes_ma_width=10,
+        tasks_moving_average=False,
+        tasks_ma_width=10,
         latex_rendering=False
 ):
     """
@@ -72,8 +75,11 @@ def run_agents_lifelong(
     :param confidence: (float)
     :param open_plot: (bool)
     :param plot_title: (bool)
-    :param moving_average: (bool)
-    :param ma_width: (int)
+    :param plot_legend: (bool)
+    :param episodes_moving_average: (bool)
+    :param episodes_ma_width: (int)
+    :param tasks_moving_average: (bool)
+    :param tasks_ma_width: (int)
     :param latex_rendering: (bool)
     :return:
     """
@@ -123,8 +129,10 @@ def run_agents_lifelong(
 
     # Plot
     if do_plot:
-        lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title,
-                      moving_average=moving_average, ma_width=ma_width, latex_rendering=latex_rendering)
+        lifelong_plot(agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title, plot_legend,
+                      episodes_moving_average=episodes_moving_average, episodes_ma_width=episodes_ma_width,
+                      tasks_moving_average=tasks_moving_average, tasks_ma_width=tasks_ma_width,
+                      latex_rendering=latex_rendering)
 
 
 def multi_instances_run_agent_lifelong(agent, experiment, parallel_run, n_parallel_instances, n_instances, n_tasks,
