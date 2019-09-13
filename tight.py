@@ -35,29 +35,6 @@ PARAM = [
     {'version': 2, 'size': 14, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 12, 'n_known': 10, 'stochastic': True}  # FAIL
 ]
 
-PREVIOUS_PARAM = [
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 10.},  # 00:08
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': False, 'v_max': 1.},  # 00:03
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 10.},  # 00:12
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 1, 'stochastic': True, 'v_max': 1.},  # 00:03
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 10, 'stochastic': True, 'v_max': 10.},  # 00:05
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 4, 'n_known': 10, 'stochastic': True, 'v_max': 1.},  # 00:05
-
-    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False, 'v_max': 10.},  # 9:30
-    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False, 'v_max': 1.},  # 8:00
-    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': True, 'v_max': 10.},  # 14:00
-    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': True, 'v_max': 1.},  # 11:00
-    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 10, 'stochastic': True, 'v_max': 10.},  # 00:50
-    {'size': 14, 'n_tasks': 100, 'n_episodes': 200, 'n_steps': 12, 'n_known': 10, 'stochastic': True, 'v_max': 1.},  # 00:50
-
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': False, 'v_max': 10.},  # 00:08
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': False, 'v_max': 1.},  # 00:02
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': True, 'v_max': 10.},  # 00:12
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 1, 'stochastic': True, 'v_max': 1.},  # 00:02
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 10, 'stochastic': True, 'v_max': 10.},  # 00:02
-    {'size': 6, 'n_tasks': 100, 'n_episodes': 100, 'n_steps': 5, 'n_known': 10, 'stochastic': True, 'v_max': 1.}  # 00:03
-]
-
 
 def experiment(p, name):
     # Parameters
@@ -74,7 +51,7 @@ def experiment(p, name):
     )
     actions = env_distribution.get_actions()
     n_known = p['n_known']
-    p_min = 1. / float(n_env)
+    p_min = 1. / n_env
     epsilon_q = .01
     epsilon_m = .01
     delta = .1
@@ -121,13 +98,13 @@ def experiment(p, name):
                                 deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                                 n_states=n_states, max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
                                 min_sampling_probability=p_min, name='LRMaxQInit(Dmax=0.2)')
-    agents_pool = [rmax, lrmax, lrmax_p01, lrmax_p015, lrmax_p02, maxqinit, lrmaxqinit, lrmaxqinit_p01, lrmaxqinit_p015, lrmaxqinit_p02]
+    # agents_pool = [rmax, lrmax, lrmax_p01, lrmax_p015, lrmax_p02, maxqinit, lrmaxqinit, lrmaxqinit_p01, lrmaxqinit_p015, lrmaxqinit_p02]
     agents_pool = [rmax, lrmax, lrmax_p02, lrmax_p01, maxqinit, lrmaxqinit, lrmaxqinit_p01]
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
                         n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=False,
-                        plot_legend=True, do_run=False, do_plot=True, parallel_run=True, n_processes=None,
+                        plot_legend=2, do_run=False, do_plot=True, parallel_run=True, n_processes=None,
                         episodes_moving_average=True, episodes_ma_width=100, tasks_moving_average=True, tasks_ma_width=2,
                         latex_rendering=True)
 
@@ -137,7 +114,6 @@ if __name__ == '__main__':
 
     experiment_index = int(sys.argv[1])
     tight_version = PARAM[experiment_index]['version']
-    # experiment_name = 'tight-v' + str(tight_version) + '-' + str(experiment_index)
-    experiment_name = 'tight-' + str(experiment_index)
+    experiment_name = 'tight-v' + str(tight_version) + '-' + str(experiment_index)
 
     experiment(PARAM[experiment_index], experiment_name)
