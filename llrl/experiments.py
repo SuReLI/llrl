@@ -362,7 +362,6 @@ def run_agents_on_mdp(agents, mdp, n_instances, n_episodes, n_steps, clear_old_r
     :param n_steps:
     :param clear_old_results:
     :param track_disc_reward:
-    :param open_plot:
     :param verbose:
     :param reset_at_terminal:
     :param cumulative_plot:
@@ -376,7 +375,7 @@ def run_agents_on_mdp(agents, mdp, n_instances, n_episodes, n_steps, clear_old_r
     if track_success and success_reward is None:
         raise ValueError("(simple_rl): run_agents_on_mdp must set param @success_reward when @track_success=True.")
 
-    exp_params = {"instances":n_instances, "episodes": n_episodes, "steps": n_steps}
+    exp_params = {"instances": n_instances, "episodes": n_episodes, "steps": n_steps}
     experiment = Experiment(agents=agents, mdp=mdp, name_identifier=name_identifier, params=exp_params,
                             is_episodic=n_episodes > 1, clear_old_results=clear_old_results,
                             track_disc_reward=track_disc_reward, cumulative_plot=cumulative_plot,
@@ -384,18 +383,21 @@ def run_agents_on_mdp(agents, mdp, n_instances, n_episodes, n_steps, clear_old_r
                             track_success=track_success, success_reward=success_reward)
 
     # Record how long each agent spends learning.
-    print("Running experiment: \n" + str(experiment))
+    if verbose:
+        print("Running experiment: \n" + str(experiment))
     time_dict = defaultdict(float)
 
     # Learn.
     for agent in agents:
-        print(str(agent) + " is learning.")
+        if verbose:
+            print(str(agent) + " is learning.")
 
         start = time.clock()
 
         # For each instance.
         for instance in range(1, n_instances + 1):
-            print("  Instance " + str(instance) + " / " + str(n_instances))
+            if verbose:
+                print("  Instance " + str(instance) + " / " + str(n_instances))
 
             # Run on task
             _, _, returns, discounted_returns = run_single_agent_on_mdp(
@@ -407,11 +409,12 @@ def run_agents_on_mdp(agents, mdp, n_instances, n_episodes, n_steps, clear_old_r
             agent.reset()
             # mdp.end_of_instance()
 
-        # Track how much time this agent took.
+        # Track how much time this agent took
         end = time.clock()
         time_dict[agent] = round(end - start, 3)
 
-    # Time stuff.
-    print("Elapsed times:")
-    for agent in time_dict.keys():
-        print(str(agent) + " agent took " + str(round(time_dict[agent], 2)) + " seconds.")
+    # Display time
+    if verbose:
+        print("Elapsed times:")
+        for agent in time_dict.keys():
+            print(str(agent) + " agent took " + str(round(time_dict[agent], 2)) + " seconds.")

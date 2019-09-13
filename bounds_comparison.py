@@ -11,7 +11,9 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import rc
+from tqdm import trange
 
+from llrl.utils.env_handler import make_env_distribution
 from llrl.utils.utils import mean_confidence_interval
 from llrl.utils.save import csv_write
 from llrl.envs.gridworld import GridWorld
@@ -69,6 +71,12 @@ def bounds_comparison_experiment(verbose=False, plot=True):
     mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=gl, goal_rewards=[0.8])
     mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=gl, goal_rewards=[1.0])
 
+    env_distribution = make_env_distribution(env_class='tight', n_env=2, gamma=gamma, env_name='tight', version=2,
+                                             w=11, h=11, stochastic=True, verbose=False)
+    mdps = env_distribution.get_all_mdps()
+    mdp1 = mdps[0]
+    mdp2 = mdps[1]
+
     actions = mdp1.get_actions()
     r_max = 1.
     v_max = None
@@ -80,9 +88,9 @@ def bounds_comparison_experiment(verbose=False, plot=True):
 
     results = []
 
-    for _ in range(n_instances):
+    for _ in trange(n_instances, desc='{:>10}'.format('instances')):
         lrmax, rmax, df_lrmax, df_rmax = None, None, None, None
-        for i in range(len(priors)):
+        for i in trange(len(priors), desc='{:>10}'.format('priors')):
             lrmax = ExpLRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
                              n_known=n_known, deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
                              delta=delta, n_states=n_states, max_memory_size=None, prior=priors[i],
@@ -107,9 +115,6 @@ def bounds_comparison_experiment(verbose=False, plot=True):
             # Retrieve data
             df_lrmax = lrmax.data
             df_rmax = rmax.data
-
-        print(df_lrmax)
-        print(df_rmax)
 
         instance_result = []
         for i, _ in df_lrmax.iterrows():
