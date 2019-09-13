@@ -49,6 +49,7 @@ def lifelong_plot(
         open_plot,
         plot_title,
         plot_legend=0,
+        legend_at_bottom=False,
         episodes_moving_average=False,
         episodes_ma_width=10,
         tasks_moving_average=False,
@@ -56,25 +57,26 @@ def lifelong_plot(
         latex_rendering=False
 ):
     """
-
-    :param agents:
-    :param path:
-    :param n_tasks:
-    :param n_episodes:
-    :param confidence:
-    :param open_plot:
-    :param plot_title:
+    Special plot routine for lifelong experiments.
+    :param agents: (list)
+    :param path: (str)
+    :param n_tasks: (int)
+    :param n_episodes: (int)
+    :param confidence: (float)
+    :param open_plot: (bool)
+    :param plot_title: (bool)
     :param plot_legend: (int) takes several possible values:
         0: no legend
         1: only plot the legend for graphs displaying results w.r.t. episodes
         2: only plot the legend for graphs displaying results w.r.t. tasks
         3: legend for all
-    :param episodes_moving_average:
-    :param episodes_ma_width:
-    :param tasks_moving_average:
-    :param tasks_ma_width:
-    :param latex_rendering:
-    :return:
+    :param legend_at_bottom: (bool)
+    :param episodes_moving_average: (bool)
+    :param episodes_ma_width: (int)
+    :param tasks_moving_average: (bool)
+    :param tasks_ma_width: (int)
+    :param latex_rendering: (bool)
+    :return: None
     """
     dfs = []
     for agent in agents:
@@ -133,11 +135,12 @@ def lifelong_plot(
     plot_legend = True if plot_legend == 1 or plot_legend == 3 else False
     plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
          x_label=x_label_e, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=True, moving_average=episodes_moving_average,
-         ma_width=episodes_ma_width, latex_rendering=latex_rendering, x_cut=None)
+         plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
+         moving_average=episodes_moving_average, ma_width=episodes_ma_width, latex_rendering=latex_rendering,
+         x_cut=None)
     plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
          x_label=x_label_e, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=True,
+         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
          moving_average=episodes_moving_average, ma_width=episodes_ma_width, latex_rendering=latex_rendering,
          x_cut=None)
 
@@ -145,11 +148,11 @@ def lifelong_plot(
     plot_legend = True if plot_legend == 2 or plot_legend == 3 else False
     plot(path, pdf_name='return_vs_task', agents=agents, x=x_t, y=trt, y_lo=trt_lo, y_up=trt_up,
          x_label=x_label_t, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=True, moving_average=tasks_moving_average,
-         ma_width=tasks_ma_width, latex_rendering=latex_rendering)
+         plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
+         moving_average=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_task', agents=agents, x=x_t, y=drt, y_lo=drt_lo, y_up=drt_up,
          x_label=x_label_t, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=True,
+         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
          moving_average=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
 
 
