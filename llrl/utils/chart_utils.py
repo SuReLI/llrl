@@ -113,11 +113,11 @@ def lifelong_plot(
     plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
          x_label=x_label_e, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
          plot_title=plot_title, plot_legend=plot_legend, moving_average=episodes_moving_average,
-         ma_width=episodes_ma_width, latex_rendering=latex_rendering, x_cut=2000)
+         ma_width=episodes_ma_width, latex_rendering=latex_rendering, x_cut=None)
     plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
          x_label=x_label_e, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
          open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, moving_average=episodes_moving_average,
-         ma_width=episodes_ma_width, latex_rendering=latex_rendering, x_cut=2000)
+         ma_width=episodes_ma_width, latex_rendering=latex_rendering, x_cut=None)
 
     # Plots w.r.t. tasks
     plot_legend = True
