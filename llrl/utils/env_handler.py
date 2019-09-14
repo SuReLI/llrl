@@ -58,7 +58,7 @@ def sample_tight(gamma, env_name, version, w, h, stochastic, verbose):
 
     if version == 1:
         is_goal_terminal = True
-        goals = np.random.choice(goals_locations)
+        goals = [goals_locations[np.random.randint(0, len(goals_locations))]]
         rewards = [1.]
     elif version == 2:
         is_goal_terminal = False

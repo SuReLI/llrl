@@ -63,8 +63,8 @@ def sample_environments(env_class, gamma, w, h, sto):
         mdp1 = sample_corridor(gamma, 'corridor1', 40, verbose=False, stochastic=sto)
         mdp2 = sample_corridor(gamma, 'corridor2', 40, verbose=False, stochastic=sto)
     elif env_class == 'tight':
-        mdp1 = sample_tight(gamma, 'tight1', version=1, w=w, h=h, stochastic=sto, verbose=True)
-        mdp2 = sample_tight(gamma, 'tight2', version=1, w=w, h=h, stochastic=sto, verbose=True)
+        mdp1 = sample_tight(gamma, 'tight1', version=2, w=w, h=h, stochastic=sto, verbose=True)
+        mdp2 = sample_tight(gamma, 'tight2', version=2, w=w, h=h, stochastic=sto, verbose=True)
     else:
         raise ValueError('Error: unrecognized environment class.')
     return mdp1, mdp2
@@ -75,7 +75,7 @@ def bounds_comparison_experiment(verbose=False, plot=True):
     gamma = 0.9
     n_instances = 10
     n_episodes = 100  # 100
-    n_steps = 21  # 30
+    n_steps = 10  # 30
     prior_min = 1.  # (1. + gamma) / (1. - gamma)
     prior_max = 0.
     priors = [round(p, 1) for p in np.linspace(start=prior_min, stop=prior_max, num=5)]
