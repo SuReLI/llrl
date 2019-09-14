@@ -48,7 +48,6 @@ class ExpLRMax(LRMax):
         self.data = pd.DataFrame(columns=['prior', 'ratio_rmax_bound_use', 'ratio_lip_bound_use', 'cnt_time_steps',
                                           'cnt_time_steps_cv'])
 
-    '''
     def re_init(self):
         """
         Re-initialization for multiple instances.
@@ -59,8 +58,7 @@ class ExpLRMax(LRMax):
                       epsilon_q=self.epsilon_q, epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
                       max_memory_size=self.max_memory_size, prior=self.prior,
                       estimate_distances_online=self.estimate_distances_online,
-                      min_sampling_probability=self.min_sampling_probability, path=self.path, name=self.name)
-    '''
+                      min_sampling_probability=self.min_sampling_probability, name=self.name)
 
     def reset(self):
         """

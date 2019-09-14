@@ -80,17 +80,18 @@ def sample_tight(gamma, env_name, version, w, h, stochastic, verbose):
     return env
 
 
-def sample_corridor(gamma, env_name, w, verbose=False):
+def sample_corridor(gamma, env_name, w, stochastic=False, verbose=False):
     env_name = 'corridor' if env_name is None else env_name
 
     r_min = 0.9
     r_max = 1.0
     possible_goals = [(w, 1)]
     init_loc = (int(w / 2.), 1)
+    slip = 0.1 if stochastic else 0.0
 
     sampled_reward = np.random.uniform(r_min, r_max)
     sampled_goal = possible_goals[np.random.randint(0, len(possible_goals))]
-    env = GridWorld(width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal], gamma=gamma, slip_prob=0.0,
+    env = GridWorld(width=w, height=1, init_loc=init_loc, goal_locs=[sampled_goal], gamma=gamma, slip_prob=slip,
                     goal_rewards=[sampled_reward], name=env_name)
     env.actions = ['left', 'right']
 

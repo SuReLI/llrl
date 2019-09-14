@@ -2,12 +2,12 @@
     "MDP": {
         "name": "<class 'llrl.envs.gridworld.GridWorld'>",
         "params": {
-            "width": 2,
-            "height": 2,
+            "width": 40,
+            "height": 1,
             "init_loc": {
                 "__tuple__": true,
                 "items": [
-                    1,
+                    20,
                     1
                 ]
             },
@@ -16,8 +16,8 @@
                 {
                     "__tuple__": true,
                     "items": [
-                        2,
-                        2
+                        40,
+                        1
                     ]
                 }
             ],
@@ -29,7 +29,7 @@
             ],
             "walls": [],
             "is_goal_terminal": true,
-            "gamma": 0.99,
+            "gamma": 0.9,
             "slip_prob": 0.0,
             "step_cost": 0.0,
             "lava_cost": 0.01
@@ -47,8 +47,8 @@
     },
     "MISC": {
         "instances": 1,
-        "episodes": 10,
-        "steps": 4,
+        "episodes": 100,
+        "steps": 21,
         "track_disc_reward": false
     },
     "FUNC": "run_agents_on_mdp"

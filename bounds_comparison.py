@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 from tqdm import trange
 
-from llrl.utils.env_handler import make_env_distribution
+from llrl.utils.env_handler import *
 from llrl.utils.utils import mean_confidence_interval
 from llrl.utils.save import csv_write
 from llrl.envs.gridworld import GridWorld
@@ -49,55 +49,70 @@ def plot_bound_use(path):
     plt.ylabel(r'\%')
     plt.legend(loc='best')
     # plt.title('')
-    plt.grid(True, linestyle='-')
+    plt.grid(True, linestyle='--')
     plt.show()
+
+
+def sample_environments(env_class, gamma, w, h, sto):
+    if env_class == 'grid-world':
+        gl = [(w, h)]
+        slip = 0.1 if sto else 0
+        mdp1 = GridWorld(width=w, height=h, init_loc=(1, 1), goal_locs=gl, goal_rewards=[0.8], slip_prob=slip)
+        mdp2 = GridWorld(width=w, height=h, init_loc=(1, 1), goal_locs=gl, goal_rewards=[1.0], slip_prob=slip)
+    elif env_class == 'corridor':
+        mdp1 = sample_corridor(gamma, 'corridor1', 40, verbose=False, stochastic=sto)
+        mdp2 = sample_corridor(gamma, 'corridor2', 40, verbose=False, stochastic=sto)
+    elif env_class == 'tight':
+        mdp1 = sample_tight(gamma, 'tight1', version=1, w=w, h=h, stochastic=sto, verbose=True)
+        mdp2 = sample_tight(gamma, 'tight2', version=1, w=w, h=h, stochastic=sto, verbose=True)
+    else:
+        raise ValueError('Error: unrecognized environment class.')
+    return mdp1, mdp2
 
 
 def bounds_comparison_experiment(verbose=False, plot=True):
     # Parameters
     gamma = 0.9
     n_instances = 10
-    n_episodes = 10  # 100
-    n_steps = 10  # 30
+    n_episodes = 100  # 100
+    n_steps = 21  # 30
     prior_min = 1.  # (1. + gamma) / (1. - gamma)
     prior_max = 0.
-    priors = [round(p, 1) for p in np.linspace(start=prior_min, stop=prior_max, num=10)]
-    save_path = 'results/bounds_comparison_results.csv'
+    priors = [round(p, 1) for p in np.linspace(start=prior_min, stop=prior_max, num=5)]
+    save_path = 'results/bounds_comparison/results.csv'
 
     # Environments
-    sz = 2
-    gl = [(sz, sz)]
-    n_states = int(sz * sz)
-    mdp1 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=gl, goal_rewards=[0.8])
-    mdp2 = GridWorld(width=sz, height=sz, init_loc=(1, 1), goal_locs=gl, goal_rewards=[1.0])
-
-    env_distribution = make_env_distribution(env_class='tight', n_env=2, gamma=gamma, env_name='tight', version=2,
-                                             w=11, h=11, stochastic=True, verbose=False)
-    mdps = env_distribution.get_all_mdps()
-    mdp1 = mdps[0]
-    mdp2 = mdps[1]
+    w, h = 11, 11
+    n_states = w * h
+    stochastic = True
+    mdp1, mdp2 = sample_environments('tight', gamma, w, h, stochastic)
 
     actions = mdp1.get_actions()
     r_max = 1.
     v_max = None
     deduce_v_max = True  # erase previous definition of v_max
-    n_known = 1
+    n_known = 10
     epsilon_q = .01
     epsilon_m = .01
     delta = .1
 
+    # Agents
+    lrmax = ExpLRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
+                     n_known=n_known, deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
+                     delta=delta, n_states=n_states, max_memory_size=None, prior=0.,
+                     estimate_distances_online=True, min_sampling_probability=.5, name="ExpLRMax")
+    rmax = ExpRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
+                   n_known=n_known, deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
+                   n_states=n_states, name="ExpRMax")
+
     results = []
 
     for _ in trange(n_instances, desc='{:>10}'.format('instances')):
-        lrmax, rmax, df_lrmax, df_rmax = None, None, None, None
+        df_lrmax, df_rmax = None, None
         for i in trange(len(priors), desc='{:>10}'.format('priors')):
-            lrmax = ExpLRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
-                             n_known=n_known, deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
-                             delta=delta, n_states=n_states, max_memory_size=None, prior=priors[i],
-                             estimate_distances_online=True, min_sampling_probability=.5, name="ExpLRMax")
-            rmax = ExpRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
-                           n_known=n_known, deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
-                           n_states=n_states, name="ExpRMax")
+            lrmax.prior = priors[i]
+            lrmax.re_init()
+            rmax.re_init()
 
             if i > 0:
                 lrmax.data = df_lrmax
@@ -123,6 +138,7 @@ def bounds_comparison_experiment(verbose=False, plot=True):
             speed_up = 100. * (df_rmax['cnt_time_steps_cv'][i] - df_lrmax['cnt_time_steps_cv'][i]) / df_rmax['cnt_time_steps_cv'][i]
             instance_result.append([prior, ratio_lip_bound_use, speed_up])
         results.append(instance_result)
+    print()
 
     # Gather results
     csv_write(['prior', 'ratio_lip_bound_use_mean', 'ratio_lip_bound_use_upper', 'ratio_lip_bound_use_lower',

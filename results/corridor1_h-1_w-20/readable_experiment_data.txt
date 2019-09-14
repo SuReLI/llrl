@@ -1,5 +1,5 @@
 (MDP)
-	Grid-world_h-2_w-2
+	corridor1_h-1_w-20
 (Agents)
 	ExpLRMax,0
 	ExpRMax,1
