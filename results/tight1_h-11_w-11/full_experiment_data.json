@@ -44,7 +44,7 @@
             "walls": [],
             "is_goal_terminal": false,
             "gamma": 0.9,
-            "slip_prob": 0.0393207408964083,
+            "slip_prob": 0.03496295022918895,
             "step_cost": 0.0,
             "lava_cost": 0.01
         }
@@ -58,7 +58,7 @@
     "MISC": {
         "instances": 1,
         "episodes": 100,
-        "steps": 10,
+        "steps": 1,
         "track_disc_reward": false
     },
     "FUNC": "run_agents_on_mdp"

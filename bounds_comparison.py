@@ -24,7 +24,7 @@ from llrl.agents.experimental.rmax_bounds_use import ExpRMax
 from llrl.experiments import run_agents_on_mdp
 
 
-def plot_bound_use(lrmax_path, rmax_path, n_run, confidence=.9, open_plot=False):
+def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=.9, open_plot=False):
     lrmax_df = pd.read_csv(lrmax_path)
     rmax_df = pd.read_csv(rmax_path)
 
@@ -54,7 +54,7 @@ def plot_bound_use(lrmax_path, rmax_path, n_run, confidence=.9, open_plot=False)
         su_up.append(_su_up)
 
         my_plot_bound_use(
-            path='results/bounds_comparison/',
+            path=path,
             pdf_name='bounds_comparison',
             prior=x,
             ratio=rlbu_m,
@@ -158,13 +158,10 @@ def bounds_comparison_experiment(do_run=False, do_plot=True, multi_thread=True, 
     gamma = 0.9
     n_instances = 10
     n_episodes = 100  # 100
-    n_steps = 10  # 30
+    n_steps = 1  # 30
     prior_min = 1.  # (1. + gamma) / (1. - gamma)
     prior_max = 0.
     priors = [round(p, 1) for p in np.linspace(start=prior_min, stop=prior_max, num=5)]
-    path = 'results/bounds_comparison/'
-    lrmax_path = path + 'lrmax-results.csv'
-    rmax_path = path + 'rmax-results.csv'
 
     # Environments
     w, h = 11, 11
@@ -180,6 +177,12 @@ def bounds_comparison_experiment(do_run=False, do_plot=True, multi_thread=True, 
     epsilon_q = .01
     epsilon_m = .01
     delta = .1
+
+    path = 'results/bounds_comparison/' + str(mdp1) + '/'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    lrmax_path = path + 'lrmax-results.csv'
+    rmax_path = path + 'rmax-results.csv'
 
     if do_run:
         lrmax = ExpLRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
@@ -214,8 +217,8 @@ def bounds_comparison_experiment(do_run=False, do_plot=True, multi_thread=True, 
                 for j in trange(len(priors), desc='{:>10}'.format('priors')):
                     run_twice(i, j, rmax, lrmax, priors[j], mdp1, mdp2, n_episodes, n_steps)
     if do_plot:
-        plot_bound_use(lrmax_path, rmax_path, len(priors), open_plot=open_plot)
+        plot_bound_use(path=path, lrmax_path=lrmax_path, rmax_path=rmax_path, n_run=len(priors), open_plot=open_plot)
 
 
 if __name__ == '__main__':
-    bounds_comparison_experiment(do_run=False, do_plot=True, open_plot=True)
+    bounds_comparison_experiment(do_run=True, do_plot=True, open_plot=True)
