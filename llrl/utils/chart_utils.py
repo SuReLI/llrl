@@ -214,7 +214,9 @@ def plot(
         x_label,
         y_label,
         title_prefix,
+        labels,
         x_cut=None,
+        decreasing_x_axis=False,
         open_plot=True,
         plot_title=True,
         plot_markers=True,
@@ -225,29 +227,32 @@ def plot(
         latex_rendering=False
 ):
     """
-    Tweaked version of simple_rl.utils.chart_utils.plot
-    Method made less specific, no specification of the type of data.
+    Standard plotting routine.
     :param path: (str) experiment path
     :param pdf_name: (str)
     :param agents: (list) list of agents
     :param x: (list) x axis data
     :param y: (list) list of array-like containing the x data for each agent
-    :param y_lo: (list) list of array-like containing the lower bound on the confidence interval of the x data
-    :param y_up: (list) list of array-like containing the upper bound on the confidence interval of the x data
+    :param y_lo: (list) list of array-like containing the lower bound on the confidence interval of the y data
+    :param y_up: (list) list of array-like containing the upper bound on the confidence interval of the y data
     :param x_label: (str)
     :param y_label: (str)
     :param title_prefix: (str)
+    :param labels: (list) list of labels if agents is None
     :param x_cut: (int) cut the x_axis, does nothing if set to None
-    :param open_plot: (Bool)
-    :param plot_title: (Bool)
-    :param plot_markers: (Bool)
-    :param plot_legend: (Bool)
-    :param legend_at_bottom: (Bool)
-    :param moving_average: (Bool)
+    :param decreasing_x_axis: (bool)
+    :param open_plot: (bool)
+    :param plot_title: (bool)
+    :param plot_markers: (bool)
+    :param plot_legend: (bool)
+    :param legend_at_bottom: (bool)
+    :param moving_average: (bool)
     :param ma_width: (int)
-    :param latex_rendering: (Bool)
+    :param latex_rendering: (bool)
     :return: None
     """
+    if agents is None:
+        agents = labels
     # x-cut
     if x_cut is not None:
         x = x[:x_cut]
@@ -286,6 +291,8 @@ def plot(
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     # plt.ylim(bottom=0)
+    if decreasing_x_axis:
+        plt.xlim(max(x), min(x))
 
     if plot_legend:
         if legend_at_bottom:
