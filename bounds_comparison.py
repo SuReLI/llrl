@@ -25,26 +25,33 @@ from llrl.agents.experimental.rmax_bounds_use import ExpRMax
 from llrl.experiments import run_agents_on_mdp
 
 
-TEST_PARAM = [
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01}
+PARAM = [
+    {'env': 'tight', 'n_episodes': 500, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 500, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 2000, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 2000, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
+
+    {'env': 'tight', 'n_episodes': 500, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 500, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 2000, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 2000, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01}
 ]
 
 
-PARAM = [
+PREV_PARAM = [
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
@@ -279,4 +286,4 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 if __name__ == '__main__':
     exp_id = int(sys.argv[1])
 
-    bounds_comparison_experiment(exp_id, do_run=False, do_plot=True, open_plot=False)
+    bounds_comparison_experiment(exp_id, do_run=True, do_plot=True, open_plot=False)
