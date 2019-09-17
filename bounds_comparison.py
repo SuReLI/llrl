@@ -9,7 +9,6 @@ Setting:
 
 import os
 import sys
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import multiprocessing
@@ -214,37 +213,9 @@ def bounds_comparison_experiment(do_run=False, do_plot=True, multi_thread=True, 
             for i in trange(n_instances, desc='{:>10}'.format('instances')):
                 for j in trange(len(priors), desc='{:>10}'.format('priors')):
                     run_twice(i, j, rmax, lrmax, priors[j], mdp1, mdp2, n_episodes, n_steps)
-
-            '''
-            instance_result = []
-            for i, _ in df_lrmax.iterrows():
-                prior = df_lrmax['prior'][i]
-                ratio_lip_bound_use = 100. * df_lrmax['ratio_lip_bound_use'][i]
-                speed_up = 100. * (df_rmax['cnt_time_steps_cv'][i] - df_lrmax['cnt_time_steps_cv'][i]) / df_rmax['cnt_time_steps_cv'][i]
-                instance_result.append([prior, ratio_lip_bound_use, speed_up])
-            results.append(instance_result)
-            '''
-        # Gather results
-        '''
-        csv_write(['prior', 'ratio_lip_bound_use_mean', 'ratio_lip_bound_use_upper', 'ratio_lip_bound_use_lower',
-                   'speed_up_mean', 'speed_up_upper', 'speed_up_lower'], save_path, 'w')
-        for i in range(len(priors)):
-            rlbu = []
-            su = []
-            for result in results:
-                rlbu.append(result[i][1])
-                su.append(result[i][2])
-            rlbu_mci = mean_confidence_interval(rlbu, confidence=.9)
-            su_mci = mean_confidence_interval(su, confidence=.9)
-            csv_write([priors[i]] + list(rlbu_mci) + list(su_mci), save_path, 'a')
-        if verbose:
-            for result in results:
-                print(result)
-        '''
     if do_plot:
         plot_bound_use(lrmax_path, rmax_path, len(priors), open_plot=open_plot)
 
 
 if __name__ == '__main__':
     bounds_comparison_experiment(do_run=False, do_plot=True, open_plot=True)
-    # plot_bound_use('results/bounds-use-and-speed-up/gridworld_h-2_w-2/data.csv')
