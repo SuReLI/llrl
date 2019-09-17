@@ -1,9 +1,0 @@
-(MDP)
-	corridor1_h-1_w-20
-(Agents)
-	ExpLRMax,0
-(Params)
-	instances : 1
-	episodes : 100
-	steps : 11
-	track_disc_reward : False

@@ -17,7 +17,21 @@
                     "__tuple__": true,
                     "items": [
                         11,
+                        11
+                    ]
+                },
+                {
+                    "__tuple__": true,
+                    "items": [
+                        11,
                         10
+                    ]
+                },
+                {
+                    "__tuple__": true,
+                    "items": [
+                        10,
+                        11
                     ]
                 }
             ],
@@ -28,9 +42,9 @@
                 }
             ],
             "walls": [],
-            "is_goal_terminal": true,
+            "is_goal_terminal": false,
             "gamma": 0.9,
-            "slip_prob": 0.02930996154872889,
+            "slip_prob": 0.0,
             "step_cost": 0.0,
             "lava_cost": 0.01
         }
