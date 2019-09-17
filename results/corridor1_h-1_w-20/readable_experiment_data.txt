@@ -2,9 +2,8 @@
 	corridor1_h-1_w-20
 (Agents)
 	ExpLRMax,0
-	ExpRMax,1
 (Params)
 	instances : 1
-	episodes : 10
-	steps : 4
+	episodes : 100
+	steps : 11
 	track_disc_reward : False

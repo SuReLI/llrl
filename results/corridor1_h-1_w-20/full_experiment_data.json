@@ -39,16 +39,12 @@
         "<class 'llrl.agents.experimental.lrmax_bounds_use.ExpLRMax'>": {
             "params": {},
             "index": 0
-        },
-        "<class 'llrl.agents.experimental.rmax_bounds_use.ExpRMax'>": {
-            "params": {},
-            "index": 1
         }
     },
     "MISC": {
         "instances": 1,
-        "episodes": 10,
-        "steps": 4,
+        "episodes": 100,
+        "steps": 11,
         "track_disc_reward": false
     },
     "FUNC": "run_agents_on_mdp"
