@@ -1,6 +1,7 @@
 import pandas as pd
 
 from llrl.agents.rmax import RMax
+from llrl.utils.save import csv_write
 
 
 class ExpRMax(RMax):
@@ -22,16 +23,29 @@ class ExpRMax(RMax):
             epsilon_m=None,
             delta=None,
             n_states=None,
-            name="ExpRMax"
+            name="ExpRMax",
+            path='results/'
     ):
         RMax.__init__(self, actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=deduce_v_max,
                       n_known=n_known, deduce_n_known=deduce_n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
                       delta=delta, n_states=n_states, name=name)
 
-        self.cnt_time_steps = 0  # nb of time steps
-        self.cnt_time_steps_cv = 0  # nb of time steps before convergence with high probability
+        self.n_time_steps = 0  # nb of time steps
+        self.n_time_steps_cv = 0  # nb of time steps before convergence with high probability
 
-        self.data = pd.DataFrame(columns=['cnt_time_steps', 'cnt_time_steps_cv'])
+        self.path = path
+        self.instance_number = 0
+        self.run_number = 0
+
+    def re_init(self):
+        """
+        Re-initialization for multiple instances.
+        :return: None
+        """
+        self.__init__(actions=self.actions, gamma=self.gamma, r_max=self.r_max, v_max=self.v_max,
+                      deduce_v_max=self.deduce_v_max, n_known=self.n_known, epsilon_q=self.epsilon_q,
+                      epsilon_m=self.epsilon_m, delta=self.delta, n_states=self.n_states,
+                      deduce_n_known=self.deduce_n_known, name=self.name, path=self.path)
 
     def reset(self):
         """
@@ -41,13 +55,17 @@ class ExpRMax(RMax):
         """
         RMax.reset(self)
 
-        self.write_data(self.cnt_time_steps, self.cnt_time_steps_cv)
-        self.cnt_time_steps = 0
-        self.cnt_time_steps_cv = 0
+        self.write(init=False)
+        self.n_time_steps = 0
+        self.n_time_steps_cv = 0
 
-    def write_data(self, cnt_time_steps, cnt_time_steps_cv):
-        self.data = self.data.append({'cnt_time_steps': cnt_time_steps, 'cnt_time_steps_cv': cnt_time_steps_cv},
-                                     ignore_index=True)
+    def write(self, init=False):
+        if init:
+            csv_write(['instance_number', 'run_number', 'n_time_steps', 'n_time_steps_cv'], self.path, 'w')
+        else:
+            assert self.n_time_steps is not None
+            assert self.n_time_steps_cv is not None
+            csv_write([self.instance_number, self.run_number, self.n_time_steps, self.n_time_steps_cv], self.path, 'a')
 
     def act(self, s, r):
         """
@@ -64,7 +82,7 @@ class ExpRMax(RMax):
         self.prev_a = a
         self.prev_s = s
 
-        self.cnt_time_steps += 1  # INCREMENT TIME STEPS COUNTER
+        self.n_time_steps += 1  # INCREMENT TIME STEPS COUNTER
 
         return a
 
@@ -90,5 +108,5 @@ class ExpRMax(RMax):
                         self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
 
                 if self.counter[s][a] == self.n_known:
-                    self.cnt_time_steps_cv = self.cnt_time_steps  # RECORD LAST TIME A PAIR WAS UPDATED
+                    self.n_time_steps_cv = self.n_time_steps  # RECORD LAST TIME A PAIR WAS UPDATED
                     self.update_upper_bound()
