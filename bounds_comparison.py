@@ -54,8 +54,6 @@ def plot_bound_use(lrmax_path, rmax_path, n_run, confidence=.9, open_plot=False)
         su_lo.append(_su_lo)
         su_up.append(_su_up)
 
-        exit()
-
         my_plot_bound_use(
             path='results/bounds_comparison/',
             pdf_name='bounds_comparison',
@@ -70,11 +68,24 @@ def plot_bound_use(lrmax_path, rmax_path, n_run, confidence=.9, open_plot=False)
         )
 
 
-def my_plot_bound_use(path, pdf_name, prior, ratio, ratio_up, ratio_lo, speed_up, speed_up_up, speed_up_lo, open_plot):
+def my_plot_bound_use(
+        path,
+        pdf_name,
+        prior,
+        ratio,
+        ratio_up,
+        ratio_lo,
+        speed_up,
+        speed_up_up,
+        speed_up_lo,
+        open_plot=False,
+        latex_rendering=False
+):
     # LaTeX rendering
-    rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
-    plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
+    if latex_rendering:
+        rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='serif')
 
     colors = ['steelblue', 'darkorange', 'green']
     plt.plot(prior, ratio, '-o', color=colors[0], label=r'\% use Lipschitz bound')
@@ -83,7 +94,10 @@ def my_plot_bound_use(path, pdf_name, prior, ratio, ratio_up, ratio_lo, speed_up
     plt.fill_between(prior, speed_up_up, speed_up_lo, color=colors[1], alpha=0.2)
 
     plt.xlim(max(prior), min(prior))  # decreasing upper-bound
-    plt.xlabel(r'Prior knowledge (known upper-bound on $\max_{s, a} = D^{M \bar{M}}_{\gamma V^*_{\bar{M}}}(s, a)$)')
+    if latex_rendering:
+        plt.xlabel(r'Prior knowledge (known upper-bound on $\max_{s, a} = D^{M \bar{M}}_{\gamma V^*_{\bar{M}}}(s, a)$)')
+    else:
+        plt.xlabel(r'Prior knowledge')
     plt.ylabel(r'\%')
     plt.legend(loc='best')
     # plt.title('')
@@ -228,7 +242,7 @@ def bounds_comparison_experiment(do_run=False, do_plot=True, multi_thread=True, 
                 print(result)
         '''
     if do_plot:
-        plot_bound_use(lrmax_path, rmax_path, len(priors), open_plot)
+        plot_bound_use(lrmax_path, rmax_path, len(priors), open_plot=open_plot)
 
 
 if __name__ == '__main__':

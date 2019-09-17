@@ -44,7 +44,7 @@
             "walls": [],
             "is_goal_terminal": false,
             "gamma": 0.9,
-            "slip_prob": 0.08238780724025237,
+            "slip_prob": 0.005923067759965307,
             "step_cost": 0.0,
             "lava_cost": 0.01
         }
