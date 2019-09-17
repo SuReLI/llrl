@@ -26,9 +26,15 @@ from llrl.experiments import run_agents_on_mdp
 
 
 PARAM = [
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 1, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01}
+]
+
+
+PREV_PARAM = [
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
@@ -36,11 +42,11 @@ PARAM = [
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},  #
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
     
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
@@ -63,10 +69,10 @@ PARAM = [
     {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01},
     {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01},  #
     {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 1, 'epsilon_m': 0.00001},
     {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.00001},  #
     {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.00001}
 ]
 
