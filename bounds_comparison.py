@@ -10,12 +10,13 @@ Setting:
 import os
 import sys
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing
 from matplotlib import rc
 from tqdm import trange
 
-from llrl.utils.env_handler import *
+from llrl.utils.env_handler import sample_corridor, sample_tight
 from llrl.utils.utils import mean_confidence_interval
 from llrl.experiments import apply_async
 from llrl.envs.gridworld import GridWorld
