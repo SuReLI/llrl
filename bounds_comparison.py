@@ -106,18 +106,18 @@ def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=.9, open_plot=
         su_lo.append(_su_lo)
         su_up.append(_su_up)
 
-        my_plot_bound_use(
-            path=path,
-            pdf_name='bounds_comparison',
-            prior=x,
-            ratio=rlbu_m,
-            ratio_up=rlbu_up,
-            ratio_lo=rlbu_lo,
-            speed_up=su_m,
-            speed_up_up=su_up,
-            speed_up_lo=su_lo,
-            open_plot=open_plot
-        )
+    my_plot_bound_use(
+        path=path,
+        pdf_name='bounds_comparison',
+        prior=x,
+        ratio=rlbu_m,
+        ratio_up=rlbu_up,
+        ratio_lo=rlbu_lo,
+        speed_up=su_m,
+        speed_up_up=su_up,
+        speed_up_lo=su_lo,
+        open_plot=open_plot
+    )
 
 
 def my_plot_bound_use(
@@ -276,6 +276,6 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 
 
 if __name__ == '__main__':
-    index = int(sys.argv[1])
+    exp_id = int(sys.argv[1])
 
-    bounds_comparison_experiment(index, do_run=True, do_plot=True, open_plot=False)
+    bounds_comparison_experiment(exp_id, do_run=False, do_plot=True, open_plot=False)
