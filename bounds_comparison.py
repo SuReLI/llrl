@@ -25,13 +25,13 @@ from llrl.agents.experimental.rmax_bounds_use import ExpRMax
 from llrl.experiments import run_agents_on_mdp
 
 
-PARAM = [
+TEST_PARAM = [
     {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01}
 ]
 
 
-PREV_PARAM = [
+PARAM = [
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},  #
@@ -146,6 +146,7 @@ def my_plot_bound_use(
     plt.fill_between(prior, speed_up_up, speed_up_lo, color=colors[1], alpha=0.2)
 
     plt.xlim(max(prior), min(prior))  # decreasing upper-bound
+    plt.ylim(0., 1.)  # decreasing upper-bound
     if latex_rendering:
         plt.xlabel(r'Prior knowledge (known upper-bound on $\max_{s, a} = D^{M \bar{M}}_{\gamma V^*_{\bar{M}}}(s, a)$)')
     else:
@@ -211,7 +212,7 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 
     # Parameters
     gamma = 0.9
-    n_instances = 10
+    n_instances = 100
     n_episodes = p['n_episodes']
     n_steps = p['n_steps']
     prior_min = 1.  # (1. + gamma) / (1. - gamma)

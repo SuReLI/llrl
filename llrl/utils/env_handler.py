@@ -86,7 +86,7 @@ def sample_corridor(gamma, env_name, w, stochastic=False, verbose=False):
     r_min = 0.9
     r_max = 1.0
     possible_goals = [(w, 1)]
-    init_loc = (int(w / 2.), 1)
+    init_loc = (int(w / 2.) + 1, 1)
     slip = 0.1 if stochastic else 0.0
 
     sampled_reward = np.random.uniform(r_min, r_max)
