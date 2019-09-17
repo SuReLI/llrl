@@ -24,6 +24,52 @@ from llrl.agents.experimental.rmax_bounds_use import ExpRMax
 from llrl.experiments import run_agents_on_mdp
 
 
+PARAM = [
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
+    
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
+
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 10, 'epsilon_m': 0.00001},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.00001},
+    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.00001}
+]
+
+
 def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=.9, open_plot=False):
     lrmax_df = pd.read_csv(lrmax_path)
     rmax_df = pd.read_csv(rmax_path)
@@ -116,18 +162,18 @@ def my_plot_bound_use(
     plt.close()
 
 
-def sample_environments(env_class, gamma, w, h, sto):
+def sample_environments(env_class, gamma, w, h, sto=True, version=1):
     if env_class == 'grid-world':
         gl = [(w, h)]
         slip = 0.1 if sto else 0
         mdp1 = GridWorld(width=w, height=h, init_loc=(1, 1), goal_locs=gl, goal_rewards=[0.8], slip_prob=slip)
         mdp2 = GridWorld(width=w, height=h, init_loc=(1, 1), goal_locs=gl, goal_rewards=[1.0], slip_prob=slip)
     elif env_class == 'corridor':
-        mdp1 = sample_corridor(gamma, 'corridor1', 40, verbose=False, stochastic=sto)
-        mdp2 = sample_corridor(gamma, 'corridor2', 40, verbose=False, stochastic=sto)
+        mdp1 = sample_corridor(gamma, 'corridor1', w=w, verbose=False, stochastic=sto)
+        mdp2 = sample_corridor(gamma, 'corridor2', w=w, verbose=False, stochastic=sto)
     elif env_class == 'tight':
-        mdp1 = sample_tight(gamma, 'tight1', version=2, w=w, h=h, stochastic=sto, verbose=True)
-        mdp2 = sample_tight(gamma, 'tight2', version=2, w=w, h=h, stochastic=sto, verbose=True)
+        mdp1 = sample_tight(gamma, 'tight1', version=version, w=w, h=h, stochastic=sto, verbose=False)
+        mdp2 = sample_tight(gamma, 'tight2', version=version, w=w, h=h, stochastic=sto, verbose=False)
     else:
         raise ValueError('Error: unrecognized environment class.')
     return mdp1, mdp2
@@ -153,32 +199,34 @@ def run_twice(instance_number, run_number, rmax, lrmax, prior, mdp1, mdp2, n_epi
                       reset_at_terminal=False, verbose=False)
 
 
-def bounds_comparison_experiment(do_run=False, do_plot=True, multi_thread=True, n_threads=None, open_plot=False):
+def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread=True, n_threads=None, open_plot=False):
+    p = PARAM[index]
+
     # Parameters
     gamma = 0.9
     n_instances = 10
-    n_episodes = 100  # 100
-    n_steps = 1  # 30
+    n_episodes = p['n_episodes']
+    n_steps = p['n_steps']
     prior_min = 1.  # (1. + gamma) / (1. - gamma)
     prior_max = 0.
     priors = [round(p, 1) for p in np.linspace(start=prior_min, stop=prior_max, num=5)]
 
     # Environments
-    w, h = 11, 11
+    w, h = p['w'], p['h']
     n_states = w * h
-    stochastic = True
-    mdp1, mdp2 = sample_environments('tight', gamma, w, h, stochastic)
+    mdp1, mdp2 = sample_environments(p['env'], gamma, w=w, h=h, sto=p['sto'], version=p['version'])
 
     actions = mdp1.get_actions()
     r_max = 1.
     v_max = None
     deduce_v_max = True  # erase previous definition of v_max
-    n_known = 10
+    n_known = p['n_known']
     epsilon_q = .01
-    epsilon_m = .01
+    epsilon_m = p['epsilon_m']
     delta = .1
 
-    path = 'results/bounds_comparison/' + str(mdp1) + '/'
+    # Saving parameters
+    path = 'results/bounds_comparison/exp-' + str(index) + '/'
     if not os.path.exists(path):
         os.makedirs(path)
     lrmax_path = path + 'lrmax-results.csv'
@@ -221,4 +269,6 @@ def bounds_comparison_experiment(do_run=False, do_plot=True, multi_thread=True, 
 
 
 if __name__ == '__main__':
-    bounds_comparison_experiment(do_run=True, do_plot=True, open_plot=True)
+    index = int(sys.argv[1])
+
+    bounds_comparison_experiment(index, do_run=True, do_plot=True, open_plot=False)
