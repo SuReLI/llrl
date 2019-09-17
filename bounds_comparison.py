@@ -26,7 +26,7 @@ from llrl.experiments import run_agents_on_mdp
 
 
 PARAM = [
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
+    {'env': 'tight', 'n_episodes': 100, 'n_steps': 1, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
     {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},

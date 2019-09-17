@@ -375,16 +375,18 @@ def run_agents_on_mdp(agents, mdp, n_instances, n_episodes, n_steps, clear_old_r
     if track_success and success_reward is None:
         raise ValueError("(simple_rl): run_agents_on_mdp must set param @success_reward when @track_success=True.")
 
+    '''
     exp_params = {"instances": n_instances, "episodes": n_episodes, "steps": n_steps}
     experiment = Experiment(agents=agents, mdp=mdp, name_identifier=name_identifier, params=exp_params,
                             is_episodic=n_episodes > 1, clear_old_results=clear_old_results,
                             track_disc_reward=track_disc_reward, cumulative_plot=cumulative_plot,
                             dir_for_plot=dir_for_plot, experiment_name_prefix=experiment_name_prefix,
                             track_success=track_success, success_reward=success_reward)
+    '''
 
     # Record how long each agent spends learning.
-    if verbose:
-        print("Running experiment: \n" + str(experiment))
+    # if verbose:
+    #     print("Running experiment: \n" + str(experiment))
     time_dict = defaultdict(float)
 
     # Learn.
@@ -401,7 +403,7 @@ def run_agents_on_mdp(agents, mdp, n_instances, n_episodes, n_steps, clear_old_r
 
             # Run on task
             _, _, returns, discounted_returns = run_single_agent_on_mdp(
-                agent, mdp, n_episodes=n_episodes, n_steps=n_steps, experiment=experiment, verbose=verbose,
+                agent, mdp, n_episodes=n_episodes, n_steps=n_steps, experiment=None, verbose=verbose,
                 track_disc_reward=track_disc_reward, reset_at_terminal=reset_at_terminal, resample_at_terminal=False
             )
 
