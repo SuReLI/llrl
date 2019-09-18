@@ -368,4 +368,4 @@ if __name__ == '__main__':
         for _exp_id in range(len(PARAM)):
             bounds_comparison_experiment(_exp_id, do_run=False, do_plot=True, open_plot=False)
     else:
-        bounds_comparison_experiment(exp_id, do_run=False, do_plot=True, open_plot=False)
+        bounds_comparison_experiment(exp_id, do_run=True, do_plot=False, open_plot=False)
