@@ -11,8 +11,20 @@ import numpy as np
 
 from llrl.utils.experiments import prior_use_utils as utils
 from llrl.envs.heatmap import HeatMap
-from llrl.agents.experimental.lrmax_prior_use import ExpLRMax
-from llrl.experiments import run_single_agent_on_mdp
+from llrl.agents.experimental.lrmax_prior_use import LRMaxExp
+from simple_rl.run_experiments import run_single_agent_on_mdp
+
+ROOT_PATH = 'results/prior_use/'
+
+GAMMA = 0.9
+
+N_INSTANCES = 10
+N_EPISODES = 1000
+N_STEPS = 1000
+
+PRIOR_MIN = (1. + GAMMA) / (1. - GAMMA)
+PRIOR_MAX = 0.
+PRIORS = [19.0, 17.0, 15.0, 10.0, 0.0]
 
 
 def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
@@ -25,27 +37,9 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
     :param verbose: (bool)
     :return: None
     """
-    # Parameters
-    path = 'results/prior-use/'
-    gamma = .9
-    r_max = 1.
-    v_max = None
-    epsilon_q = .01
-    epsilon_m = .01
-
-    n_instances = 10
-    n_episodes = 1000
-    n_steps = 1000
-
-    prior_min = (1. + gamma) / (1. - gamma)
-    mrior_max = 0.
-    priors = [19.0, 17.0, 15.0, 10.0, 0.0]
-
-    # Environment
     w = 4
     h = 4
     walls = [(2, 2), (3, 2), (4, 2), (2, 4)]
-    n_states = w * h - len(walls)
     env1 = HeatMap(
         width=w, height=h, init_loc=(1, 1), goal_locs=[(w, h)], is_goal_terminal=False,
         walls=walls, slip_prob=0.1, goal_reward=1.0, reward_span=1.0
@@ -54,7 +48,6 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
         width=w, height=h, init_loc=(1, 1), goal_locs=[(w-1, h)], is_goal_terminal=False,
         walls=walls, slip_prob=0.05, goal_reward=0.6, reward_span=1.5
     )
-    actions = env1.get_actions()
 
     # Compute needed number of samples for L-R-MAX to achieve epsilon optimal behavior with probability (1 - delta)
     epsilon = .1
@@ -65,25 +58,32 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
 
     names = []
 
-    for p in priors:
+    for p in PRIORS:
         results = []
         name = 'default'
-        for i in range(n_instances):
-            name = 'ExpLRMax(' + str(p) + ')'
-            agent = ExpLRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=True, n_known=None,
-                             deduce_n_known=True, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
-                             n_states=n_states, max_memory_size=None, prior=p, estimate_distances_online=False,
-                             min_sampling_probability=.1, name=name)
+        for i in range(N_INSTANCES):
+            agent = LRMaxExp(
+                actions=env1.get_actions(),
+                gamma=GAMMA,
+                count_threshold=m,
+                epsilon=epsilon,
+                prior=p
+            )
+            name = agent.name
 
             if run_experiment:
                 if verbose:
-                    print('Running instance', i + 1, 'of', n_instances, 'for agent', name)
+                    print('Running instance', i + 1, 'of', N_INSTANCES, 'for agent', name)
 
-                run_single_agent_on_mdp(agent, env1, n_episodes, n_steps, experiment=None, track_disc_reward=False,
-                            reset_at_terminal=False, resample_at_terminal=False, verbose=False)
+                run_single_agent_on_mdp(
+                    agent, env1, episodes=N_EPISODES, steps=N_STEPS, experiment=None, verbose=False,
+                    track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False
+                )
                 agent.reset()
-                run_single_agent_on_mdp(agent, env2, n_episodes, n_steps, experiment=None, track_disc_reward=False,
-                            reset_at_terminal=False, resample_at_terminal=False, verbose=False)
+                run_single_agent_on_mdp(
+                    agent, env2, episodes=N_EPISODES, steps=N_STEPS, experiment=None, verbose=False,
+                    track_disc_reward=False, reset_at_terminal=False, resample_at_terminal=False
+                )
 
                 results.append(agent.get_results())
 
@@ -91,11 +91,11 @@ def prior_use_experiment(run_experiment=True, open_plot=True, verbose=True):
 
         # Save results
         if run_experiment:
-            utils.save_result(results, path, name)
+            utils.save_result(results, ROOT_PATH, name)
 
     # Plot
-    utils.plot_computation_number_results(path, names, open_plot)
-    utils.plot_time_step_results(path, names, open_plot)
+    utils.plot_computation_number_results(ROOT_PATH, names, open_plot)
+    utils.plot_time_step_results(ROOT_PATH, names, open_plot)
 
 
 if __name__ == '__main__':
