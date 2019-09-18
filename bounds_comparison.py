@@ -180,8 +180,8 @@ def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=0.9, open_plot
         # r'\% average speed-up 2': (su_t2_m, su_t2_lo, su_t2_up),
         # r'\% average speed-up 5': (su_t5_m, su_t5_lo, su_t5_up),
         # r'\% average speed-up 10': (su_t10_m, su_t10_lo, su_t10_up),
-        r'\% average speed-up 50': (su_t50_m, su_t50_lo, su_t50_up),
-        r'\% total return gained': (tr_m, tr_lo, tr_up),
+        r'\% convergence speed-up': (su_t50_m, su_t50_lo, su_t50_up),  # r'\% average speed-up 50': (su_t50_m, su_t50_lo, su_t50_up),
+        r'\% total return gain': (tr_m, tr_lo, tr_up),
         # r'\% discounted return gained': (dr_m, dr_lo, dr_up)
     }
 
@@ -209,7 +209,8 @@ def my_plot_bound_use(
         x,
         label_data_dict,
         open_plot=False,
-        latex_rendering=False
+        plot_max_bar=True,
+        latex_rendering=True
 ):
     # LaTeX rendering
     if latex_rendering:
@@ -217,20 +218,26 @@ def my_plot_bound_use(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
-    colors = ['steelblue', 'gold', [153, 194, 255], 'red', 'black', 'purple', 'pink', 'cyan', 'magenta', 'orange']
     colors = [[shade / 255.0 for shade in rgb] for rgb in RGB_COLORS_LST]
     markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
-
-    i = 0
-    for key, value in label_data_dict.items():
-        plt.plot(x, value[0], markers[i], linestyle='-', color=colors[i], label=key)
-        plt.fill_between(x, value[1], value[2], color=colors[i], alpha=0.2)
-        i += 1
 
     x_margin = 0.05
     y_margin = 5.
     plt.xlim(max(x) + x_margin, min(x) - x_margin)  # decreasing upper-bound
-    plt.ylim(0. - y_margin, 100. + y_margin)
+    plt.ylim(0. - y_margin, 160. + y_margin)
+
+    if plot_max_bar:
+        plt.plot([max(x) + x_margin, min(x) - x_margin], [100., 100.], linestyle='-', color='black', linewidth=2)
+        plt.gca().get_yticklabels()[6].set_weight('black')  # .set_color('red')
+        plt.gca().get_yticklabels()[6].set_fontsize(20)
+        # plt.gca().get_yticklabels()[6].set_bbox(dict(facecolor="white", alpha=1))
+
+    i = 0
+    for key, value in label_data_dict.items():
+        plt.plot(x, value[0], markers[i], linestyle='-', color=colors[i], label=key)
+        plt.fill_between(x, value[1], value[2], color=colors[i], alpha=0.3)
+        i += 1
+
     if latex_rendering:
         plt.xlabel(r'Prior knowledge (known upper-bound on $\max_{s, a} = D^{M \bar{M}}_{\gamma V^*_{\bar{M}}}(s, a)$)')
     else:
@@ -239,6 +246,7 @@ def my_plot_bound_use(
     plt.legend(loc='best')
     # plt.title('')
     plt.grid(True, linestyle='--')
+    plt.subplots_adjust(bottom=0.15)
 
     # Save
     plot_file_name = os.path.join(path, pdf_name + '.pdf')
@@ -248,6 +256,7 @@ def my_plot_bound_use(
     if open_plot:
         open_prefix = 'gnome-' if sys.platform == 'linux' or sys.platform == 'linux2' else ''
         os.system(open_prefix + 'open ' + plot_file_name)
+
 
     # Clear and close
     plt.cla()
@@ -368,4 +377,4 @@ if __name__ == '__main__':
         for _exp_id in range(len(PARAM)):
             bounds_comparison_experiment(_exp_id, do_run=False, do_plot=True, open_plot=False)
     else:
-        bounds_comparison_experiment(exp_id, do_run=True, do_plot=False, open_plot=False)
+        bounds_comparison_experiment(exp_id, do_run=False, do_plot=True, open_plot=True)
