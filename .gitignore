@@ -59,6 +59,7 @@ target/
 # Pando
 my_slurm_node.*
 slurm.*
+*.slurm
 
 # Pycharm IDE parameters
 .idea
