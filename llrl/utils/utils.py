@@ -27,7 +27,10 @@ def avg_last_elts(lst, n):
               ') is smaller than number of elements (', n, ')')
         return list_average(lst)
     else:
-        return list_average(lst[-n:])
+        if n > 3:  # TODO remove
+            return list_average(lst[-n:-2])
+        else:
+            return list_average(lst[-n:])
 
 
 def close(a, b, r=13):
