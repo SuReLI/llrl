@@ -84,45 +84,99 @@ PREV_PARAM = [
 ]
 
 
-def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=.9, open_plot=False):
+def compute_speed_up(m, lo, up, lrmax_df, rmax_df, confidence=0.9):
+    lrmax_data = np.array(lrmax_df)
+    rmax_data = np.array(rmax_df)
+    speed_up = np.zeros(shape=rmax_data.shape)
+    for i in range(len(speed_up)):
+        if rmax_data[i] < 1e-10:
+            rmax_data[i] = 0.
+        speed_up[i] = 100. if rmax_data[i] == 0. else 100. * (rmax_data[i] - lrmax_data[i]) / rmax_data[i]
+    _su_m, _su_lo, _su_up = mean_confidence_interval(speed_up, confidence=confidence)
+    m.append(_su_m)
+    lo.append(_su_lo)
+    up.append(_su_up)
+    return m, lo, up
+
+
+def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=0.9, open_plot=False):
     lrmax_df = pd.read_csv(lrmax_path)
     rmax_df = pd.read_csv(rmax_path)
 
     x = []
+
     rlbu_m, rlbu_lo, rlbu_up = [], [], []
     su_m, su_lo, su_up = [], [], []
+    su_t2_m, su_t2_lo, su_t2_up = [], [], []
+    su_t5_m, su_t5_lo, su_t5_up = [], [], []
+    su_t10_m, su_t10_lo, su_t10_up = [], [], []
+    su_t50_m, su_t50_lo, su_t50_up = [], [], []
+    tr_m, tr_lo, tr_up = [], [], []
+    dr_m, dr_lo, dr_up = [], [], []
 
     for i in range(n_run):
         ldf = lrmax_df.loc[lrmax_df['run_number'] == i]
         rdf = lrmax_df.loc[rmax_df['run_number'] == i]
 
+        # Prior
         prior = ldf.iloc[0]['prior']
-
-        _rlbu_m, _rlbu_lo, _rlbu_up = mean_confidence_interval(np.array(ldf.ratio_lip_bound_use), confidence=confidence)
-
-        lrmax_ntscv = np.array(ldf.n_time_steps_cv)
-        rmax_ntscv = np.array(rdf.n_time_steps_cv)
-        speed_up = 100. * (rmax_ntscv - lrmax_ntscv) / rmax_ntscv
-        _su_m, _su_lo, _su_up = mean_confidence_interval(speed_up, confidence=confidence)
-
         x.append(prior)
+
+        # Ratio Lipschitz bound use
+        _rlbu_m, _rlbu_lo, _rlbu_up = mean_confidence_interval(np.array(ldf.ratio_lip_bound_use), confidence=confidence)
         rlbu_m.append(_rlbu_m)
         rlbu_lo.append(_rlbu_lo)
         rlbu_up.append(_rlbu_up)
-        su_m.append(_su_m)
-        su_lo.append(_su_lo)
-        su_up.append(_su_up)
+
+        # Total speed-up
+        su_m, su_lo, su_up = compute_speed_up(su_m, su_lo, su_up, ldf.n_time_steps_cv, rdf.n_time_steps_cv)
+
+        # Average speed-up 2 ts
+        su_t2_m, su_t2_lo, su_t2_up = compute_speed_up(su_t2_m, su_t2_lo, su_t2_up, ldf.avg_ts_l2, rdf.avg_ts_l2)
+
+        # Average speed-up 5 ts
+        su_t5_m, su_t5_lo, su_t5_up = compute_speed_up(su_t5_m, su_t5_lo, su_t5_up, ldf.avg_ts_l5, rdf.avg_ts_l5)
+
+        # Average speed-up 10 ts
+        su_t10_m, su_t10_lo, su_t10_up = compute_speed_up(su_t10_m, su_t10_lo, su_t10_up, ldf.avg_ts_l10, rdf.avg_ts_l10)
+
+        # Average speed-up 50 ts
+        su_t50_m, su_t50_lo, su_t50_up = compute_speed_up(su_t50_m, su_t50_lo, su_t50_up, ldf.avg_ts_l50, rdf.avg_ts_l50)
+
+        # Total return
+        tr_m, tr_lo, tr_up = compute_speed_up(tr_m, tr_lo, tr_up, ldf.total_return, rdf.total_return)
+
+        # Discounted return
+        dr_m, dr_lo, dr_up = compute_speed_up(dr_m, dr_lo, dr_up, ldf.discounted_return, rdf.discounted_return)
+
+    labels = [
+        r'\% use Lipschitz bound',
+        r'\% time-steps to convergence gained',
+        r'\% average speed-up 2',
+        r'\% average speed-up 5',
+        r'\% average speed-up 10',
+        r'\% average speed-up 50',
+        r'\% total return gained',
+        r'\% discounted return gained'
+    ]
+
+    data = [
+        (rlbu_m, rlbu_lo, rlbu_up),
+        (su_m, su_lo, su_up),
+        (su_t2_m, su_t2_lo, su_t2_up),
+        (su_t5_m, su_t5_lo, su_t5_up),
+        (su_t10_m, su_t10_lo, su_t10_up),
+        (su_t50_m, su_t50_lo, su_t50_up),
+        (tr_m, tr_lo, tr_up),
+        (dr_m, dr_lo, dr_up)
+    ]
 
     my_plot_bound_use(
         path=path,
         pdf_name='bounds_comparison',
-        prior=x,
-        ratio=rlbu_m,
-        ratio_up=rlbu_up,
-        ratio_lo=rlbu_lo,
-        speed_up=su_m,
-        speed_up_up=su_up,
-        speed_up_lo=su_lo,
+        x=x,
+        data=data,
+        labels=labels,
         open_plot=open_plot
     )
 
@@ -130,13 +184,9 @@ def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=.9, open_plot=
 def my_plot_bound_use(
         path,
         pdf_name,
-        prior,
-        ratio,
-        ratio_up,
-        ratio_lo,
-        speed_up,
-        speed_up_up,
-        speed_up_lo,
+        x,
+        data,
+        labels,
         open_plot=False,
         latex_rendering=False
 ):
@@ -146,14 +196,16 @@ def my_plot_bound_use(
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
 
-    colors = ['steelblue', 'darkorange', 'green']
-    plt.plot(prior, ratio, '-o', color=colors[0], label=r'\% use Lipschitz bound')
-    plt.fill_between(prior, ratio_up, ratio_lo, color=colors[0], alpha=0.2)
-    plt.plot(prior, speed_up, '-^', color=colors[1], label=r'\% time-steps gained (speed-up)')
-    plt.fill_between(prior, speed_up_up, speed_up_lo, color=colors[1], alpha=0.2)
+    colors = ['steelblue', 'darkorange', 'green', 'red', 'black', 'purple', 'pink', 'cyan', 'magenta', 'orange']
+    markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
 
-    plt.xlim(max(prior), min(prior))  # decreasing upper-bound
-    plt.ylim(0., 1.)  # decreasing upper-bound
+    for i in range(len(data)):
+        plt.plot(x, data[i][0], markers[i], color=colors[i], label=labels[i])
+        plt.fill_between(x, data[i][1], data[i][2], color=colors[0], alpha=0.2)
+
+    margin = 0.05
+    plt.xlim(max(x) + margin, min(x) - margin)  # decreasing upper-bound
+    plt.ylim(0. - margin, 1. + margin)  # decreasing upper-bound
     if latex_rendering:
         plt.xlabel(r'Prior knowledge (known upper-bound on $\max_{s, a} = D^{M \bar{M}}_{\gamma V^*_{\bar{M}}}(s, a)$)')
     else:
@@ -286,4 +338,4 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 if __name__ == '__main__':
     exp_id = int(sys.argv[1])
 
-    bounds_comparison_experiment(exp_id, do_run=True, do_plot=False, open_plot=False)
+    bounds_comparison_experiment(exp_id, do_run=False, do_plot=True, open_plot=False)
