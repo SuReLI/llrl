@@ -1,8 +1,8 @@
-import pandas as pd
 from collections import defaultdict
 
 from llrl.agents.lrmax import LRMax
 from llrl.utils.save import csv_write
+from llrl.utils.utils import avg_last_elts
 
 
 class ExpLRMax(LRMax):
@@ -44,7 +44,7 @@ class ExpLRMax(LRMax):
         self.n_lip = 0  # number of times the lipschitz bound is used
 
         self.n_time_steps = 0  # number of time steps
-        self.n_time_steps_cv = 0  # number of time steps before convergence with high probability
+        self.update_time_steps = []  # time steps where a model update occurred
 
         self.path = path
         self.write_data = True  # Enable data writing
@@ -84,17 +84,41 @@ class ExpLRMax(LRMax):
             self.n_rmax = 0
             self.n_lip = 0
         self.n_time_steps = 0
-        self.n_time_steps_cv = 0
+        self.update_time_steps = []
 
     def write(self, init=True, ratio_rmax_bound_use=None, ratio_lip_bound_use=None):
         if init:
-            csv_write(['instance_number', 'run_number', 'prior', 'ratio_rmax_bound_use', 'ratio_lip_bound_use',
-                       'n_time_steps', 'n_time_steps_cv'], self.path, 'w')
+            col = [
+                'instance_number',
+                'run_number',
+                'prior',
+                'ratio_rmax_bound_use',
+                'ratio_lip_bound_use',
+                'n_time_steps',
+                'n_time_steps_cv',
+                'avg_ts_l2',
+                'avg_ts_l5',
+                'avg_ts_l10',
+                'avg_ts_l50'
+            ]
+            csv_write(col, self.path, 'w')
         else:
             assert ratio_rmax_bound_use is not None
             assert ratio_lip_bound_use is not None
-            csv_write([self.instance_number, self.run_number, self.prior, ratio_rmax_bound_use, ratio_lip_bound_use,
-                       self.n_time_steps, self.n_time_steps_cv], self.path, 'a')
+            val = [
+                self.instance_number,
+                self.run_number,
+                self.prior,
+                ratio_rmax_bound_use,
+                ratio_lip_bound_use,
+                self.n_time_steps,
+                self.update_time_steps[-1],
+                avg_last_elts(self.update_time_steps, 2),
+                avg_last_elts(self.update_time_steps, 5),
+                avg_last_elts(self.update_time_steps, 10),
+                avg_last_elts(self.update_time_steps, 50)
+            ]
+            csv_write(val, self.path, 'a')
 
     def initialize_upper_bound(self):
         """
@@ -152,5 +176,5 @@ class ExpLRMax(LRMax):
                         self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
 
                 if self.counter[s][a] == self.n_known:
-                    self.n_time_steps_cv = self.n_time_steps  # RECORD LAST TIME A PAIR WAS UPDATED
+                    self.update_time_steps.append(self.n_time_steps)  # RECORD
                     self.update_upper_bound()

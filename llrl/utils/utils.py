@@ -17,6 +17,19 @@ def mean_confidence_interval(data, confidence=0.95):
     return m, m-h, m+h
 
 
+def list_average(lst):
+    return sum(lst) / len(lst)
+
+
+def avg_last_elts(lst, n):
+    if len(lst) < n:
+        print('Warning: in method avg_last_elts, list length (', len(lst),
+              ') is smaller than number of elements (', n, ')')
+        return list_average(lst)
+    else:
+        return list_average(lst[-n:])
+
+
 def close(a, b, r=13):
     return isclose(round(a,r), round(b,r), rel_tol=1e-12, abs_tol=0.0)
 

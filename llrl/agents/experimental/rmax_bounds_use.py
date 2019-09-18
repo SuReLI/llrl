@@ -1,7 +1,6 @@
-import pandas as pd
-
 from llrl.agents.rmax import RMax
 from llrl.utils.save import csv_write
+from llrl.utils.utils import avg_last_elts
 
 
 class ExpRMax(RMax):
@@ -31,7 +30,7 @@ class ExpRMax(RMax):
                       delta=delta, n_states=n_states, name=name)
 
         self.n_time_steps = 0  # nb of time steps
-        self.n_time_steps_cv = 0  # nb of time steps before convergence with high probability
+        self.update_time_steps = []  # time steps where a model update occurred
 
         self.path = path
         self.instance_number = 0
@@ -57,15 +56,34 @@ class ExpRMax(RMax):
 
         self.write(init=False)
         self.n_time_steps = 0
-        self.n_time_steps_cv = 0
+        self.update_time_steps = []
 
     def write(self, init=False):
         if init:
-            csv_write(['instance_number', 'run_number', 'n_time_steps', 'n_time_steps_cv'], self.path, 'w')
+            col = [
+                'instance_number',
+                'run_number',
+                'n_time_steps',
+                'n_time_steps_cv',
+                'avg_ts_l2',
+                'avg_ts_l5',
+                'avg_ts_l10',
+                'avg_ts_l50'
+            ]
+            csv_write(col, self.path, 'w')
         else:
             assert self.n_time_steps is not None
-            assert self.n_time_steps_cv is not None
-            csv_write([self.instance_number, self.run_number, self.n_time_steps, self.n_time_steps_cv], self.path, 'a')
+            val = [
+                self.instance_number,
+                self.run_number,
+                self.n_time_steps,
+                self.update_time_steps[-1],
+                avg_last_elts(self.update_time_steps, 2),
+                avg_last_elts(self.update_time_steps, 5),
+                avg_last_elts(self.update_time_steps, 10),
+                avg_last_elts(self.update_time_steps, 50)
+            ]
+            csv_write(val, self.path, 'a')
 
     def act(self, s, r):
         """
@@ -108,5 +126,5 @@ class ExpRMax(RMax):
                         self.T[s][a][_s_p] = self.T[s][a][_s_p] * (1 - normalizer)
 
                 if self.counter[s][a] == self.n_known:
-                    self.n_time_steps_cv = self.n_time_steps  # RECORD LAST TIME A PAIR WAS UPDATED
+                    self.update_time_steps.append(self.n_time_steps)  # RECORD
                     self.update_upper_bound()
