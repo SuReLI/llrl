@@ -43,6 +43,9 @@ class ExpLRMax(LRMax):
         self.n_rmax = 0  # number of times the rmax bound is used
         self.n_lip = 0  # number of times the lipschitz bound is used
 
+        # Recorded variables
+        self.discounted_return = 0.
+        self.total_return = 0.
         self.n_time_steps = 0  # number of time steps
         self.update_time_steps = []  # time steps where a model update occurred
 
@@ -83,6 +86,10 @@ class ExpLRMax(LRMax):
             # Reset
             self.n_rmax = 0
             self.n_lip = 0
+
+        # Reset recorded variables between MDPs
+        self.discounted_return = 0.
+        self.total_return = 0.
         self.n_time_steps = 0
         self.update_time_steps = []
 
@@ -99,7 +106,9 @@ class ExpLRMax(LRMax):
                 'avg_ts_l2',
                 'avg_ts_l5',
                 'avg_ts_l10',
-                'avg_ts_l50'
+                'avg_ts_l50',
+                'discounted_return',
+                'total_return'
             ]
             csv_write(col, self.path, 'w')
         else:
@@ -116,7 +125,9 @@ class ExpLRMax(LRMax):
                 avg_last_elts(self.update_time_steps, 2),
                 avg_last_elts(self.update_time_steps, 5),
                 avg_last_elts(self.update_time_steps, 10),
-                avg_last_elts(self.update_time_steps, 50)
+                avg_last_elts(self.update_time_steps, 50),
+                self.discounted_return,
+                self.total_return
             ]
             csv_write(val, self.path, 'a')
 
@@ -150,6 +161,8 @@ class ExpLRMax(LRMax):
         self.prev_a = a_star
         self.prev_s = s
 
+        self.discounted_return += (r * self.gamma ** float(self.n_time_steps))  # UPDATE
+        self.total_return += r  # UPDATE
         self.n_time_steps += 1  # INCREMENT TIME STEPS COUNTER
 
         return a_star

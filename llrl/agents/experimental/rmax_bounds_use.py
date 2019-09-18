@@ -29,6 +29,9 @@ class ExpRMax(RMax):
                       n_known=n_known, deduce_n_known=deduce_n_known, epsilon_q=epsilon_q, epsilon_m=epsilon_m,
                       delta=delta, n_states=n_states, name=name)
 
+        # Recorded variables
+        self.discounted_return = 0.
+        self.total_return = 0.
         self.n_time_steps = 0  # nb of time steps
         self.update_time_steps = []  # time steps where a model update occurred
 
@@ -55,6 +58,10 @@ class ExpRMax(RMax):
         RMax.reset(self)
 
         self.write(init=False)
+
+        # Reset recorded variables between MDPs
+        self.discounted_return = 0.
+        self.total_return = 0.
         self.n_time_steps = 0
         self.update_time_steps = []
 
@@ -68,7 +75,9 @@ class ExpRMax(RMax):
                 'avg_ts_l2',
                 'avg_ts_l5',
                 'avg_ts_l10',
-                'avg_ts_l50'
+                'avg_ts_l50',
+                'discounted_return',
+                'total_return'
             ]
             csv_write(col, self.path, 'w')
         else:
@@ -81,7 +90,9 @@ class ExpRMax(RMax):
                 avg_last_elts(self.update_time_steps, 2),
                 avg_last_elts(self.update_time_steps, 5),
                 avg_last_elts(self.update_time_steps, 10),
-                avg_last_elts(self.update_time_steps, 50)
+                avg_last_elts(self.update_time_steps, 50),
+                self.discounted_return,
+                self.total_return
             ]
             csv_write(val, self.path, 'a')
 
@@ -100,6 +111,8 @@ class ExpRMax(RMax):
         self.prev_a = a
         self.prev_s = s
 
+        self.discounted_return += (r * self.gamma ** float(self.n_time_steps))  # UPDATE
+        self.total_return += r  # UPDATE
         self.n_time_steps += 1  # INCREMENT TIME STEPS COUNTER
 
         return a
