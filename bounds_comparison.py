@@ -286,4 +286,4 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 if __name__ == '__main__':
     exp_id = int(sys.argv[1])
 
-    bounds_comparison_experiment(exp_id, do_run=True, do_plot=True, open_plot=False)
+    bounds_comparison_experiment(exp_id, do_run=True, do_plot=False, open_plot=False)
