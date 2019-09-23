@@ -1,6 +1,7 @@
 import sys
 import os
 import pandas
+import matplotlib
 import numpy as np
 from cycler import cycler
 from matplotlib import pyplot as plt
@@ -40,7 +41,8 @@ color_ls = [
 ]
 
 
-def lifelong_plot(
+def averaged_lifelong_plot(
+        dfs,
         agents,
         path,
         n_tasks,
@@ -56,33 +58,6 @@ def lifelong_plot(
         tasks_ma_width=10,
         latex_rendering=False
 ):
-    """
-    Special plot routine for lifelong experiments.
-    :param agents: (list)
-    :param path: (str)
-    :param n_tasks: (int)
-    :param n_episodes: (int)
-    :param confidence: (float)
-    :param open_plot: (bool)
-    :param plot_title: (bool)
-    :param plot_legend: (int) takes several possible values:
-        0: no legend
-        1: only plot the legend for graphs displaying results w.r.t. episodes
-        2: only plot the legend for graphs displaying results w.r.t. tasks
-        3: legend for all
-    :param legend_at_bottom: (bool)
-    :param episodes_moving_average: (bool)
-    :param episodes_ma_width: (int)
-    :param tasks_moving_average: (bool)
-    :param tasks_ma_width: (int)
-    :param latex_rendering: (bool)
-    :return: None
-    """
-    dfs = []
-    for agent in agents:
-        agent_path = csv_path_from_agent(path, agent)
-        dfs.append(pandas.read_csv(agent_path))
-
     tre, tre_lo, tre_up = [], [], []
     dre, dre_lo, dre_up = [], [], []
     trt, trt_lo, trt_up = [], [], []
@@ -156,6 +131,124 @@ def lifelong_plot(
          moving_average=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
 
 
+def raw_lifelong_plot(
+        dfs,
+        agents,
+        path,
+        n_tasks,
+        n_episodes,
+        confidence=None,
+        open_plot=False,
+        plot_title=True,
+        plot_legend=True,
+        legend_at_bottom=False,
+        moving_average=False,
+        ma_width=10,
+        latex_rendering=False
+):
+    # TODO remove
+    plot_title = True
+    confidence = None
+    n_episodes = 2000
+    n_tasks = 3
+
+    x = np.array(range(1, n_episodes + 1))
+    x_label = r'Episode number'
+    labels = ['Task ' + str(t) for t in range(1, n_tasks + 1)]
+    for i in range(len(agents)):
+        tr_per_task, tr_per_task_lo, tr_per_task_up = [], [], []
+        dr_per_task, dr_per_task_lo, dr_per_task_up = [], [], []
+        for j in range(1, n_tasks + 1):
+            task_j = dfs[i].loc[dfs[i]['task'] == j]
+            # n_instances = task_j['instance'].nunique()
+            tr, tr_lo, tr_up = [], [], []
+            dr, dr_lo, dr_up = [], [], []
+            for k in range(1, n_episodes + 1):
+                task_j_episodes_k = task_j.loc[task_j['episode'] == k]
+                tr_mci = mean_confidence_interval(task_j_episodes_k['return'], confidence)
+                dr_mci = mean_confidence_interval(task_j_episodes_k['discounted_return'], confidence)
+                tr.append(tr_mci[0])
+                tr_lo.append(tr_mci[1])
+                tr_up.append(tr_mci[2])
+                dr.append(dr_mci[0])
+                dr_lo.append(dr_mci[1])
+                dr_up.append(dr_mci[2])
+            tr_per_task.append(tr)
+            tr_per_task_lo.append(tr_lo)
+            tr_per_task_up.append(tr_up)
+            dr_per_task.append(dr)
+            dr_per_task_lo.append(dr_lo)
+            dr_per_task_up.append(dr_up)
+        agent_name = str(agents[i])
+        pdf_name = 'lifelong-' + agent_name
+        pdf_name = pdf_name.lower()
+        plot_color_bars(path, pdf_name=pdf_name, x=x, y=tr_per_task, y_lo=None, y_up=None, cb_min=1,
+                        cb_max=n_tasks + 1, cb_step=1, x_label=x_label,
+                        y_label='Return', title_prefix='', labels=labels, x_cut=None, decreasing_x_axis=False,
+                        open_plot=open_plot,
+                        title=agent_name, plot_title=plot_title, plot_markers=True, plot_legend=plot_legend,
+                        legend_at_bottom=legend_at_bottom, moving_average=moving_average, ma_width=ma_width,
+                        latex_rendering=latex_rendering)
+
+
+def lifelong_plot(
+        agents,
+        path,
+        n_tasks,
+        n_episodes,
+        confidence,
+        open_plot,
+        plot_title,
+        plot_legend=True,
+        legend_at_bottom=False,
+        episodes_moving_average=False,
+        episodes_ma_width=10,
+        tasks_moving_average=False,
+        tasks_ma_width=10,
+        latex_rendering=False
+):
+    """
+    Special plot routine for lifelong experiments.
+    :param agents: (list)
+    :param path: (str)
+    :param n_tasks: (int)
+    :param n_episodes: (int)
+    :param confidence: (float)
+    :param open_plot: (bool)
+    :param plot_title: (bool)
+    :param plot_legend: (int) takes several possible values:
+        0: no legend
+        1: only plot the legend for graphs displaying results w.r.t. episodes
+        2: only plot the legend for graphs displaying results w.r.t. tasks
+        3: legend for all
+    :param legend_at_bottom: (bool)
+    :param episodes_moving_average: (bool)
+    :param episodes_ma_width: (int)
+    :param tasks_moving_average: (bool)
+    :param tasks_ma_width: (int)
+    :param latex_rendering: (bool)
+    :return: None
+    """
+    dfs = []
+    for agent in agents:
+        agent_path = csv_path_from_agent(path, agent)
+        dfs.append(pandas.read_csv(agent_path))
+
+    raw_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence, open_plot=open_plot, plot_title=plot_title,
+                      plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
+                      moving_average=episodes_moving_average, ma_width=episodes_ma_width,
+                      latex_rendering=latex_rendering)
+
+    # TODO put back
+    '''
+    averaged_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title,
+                           plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
+                           episodes_moving_average=episodes_moving_average, episodes_ma_width=episodes_ma_width,
+                           tasks_moving_average=tasks_moving_average, tasks_ma_width=tasks_ma_width,
+                           latex_rendering=latex_rendering)
+    '''
+
+
 def compute_moving_average(w, x, y, y_lo=None, y_up=None):
     """
     Compute the moving average.
@@ -214,10 +307,11 @@ def plot(
         x_label,
         y_label,
         title_prefix,
-        labels,
+        labels=None,
         x_cut=None,
         decreasing_x_axis=False,
         open_plot=True,
+        title=None,
         plot_title=True,
         plot_markers=True,
         plot_legend=True,
@@ -242,6 +336,7 @@ def plot(
     :param x_cut: (int) cut the x_axis, does nothing if set to None
     :param decreasing_x_axis: (bool)
     :param open_plot: (bool)
+    :param title: (str)
     :param plot_title: (bool)
     :param plot_markers: (bool)
     :param plot_legend: (bool)
@@ -252,11 +347,17 @@ def plot(
     :return: None
     """
     if agents is None:
+        n_curves = len(labels)
         agents = labels
+    else:
+        n_curves = len(agents)
+        labels = []
+        for i in range(n_curves):
+            labels.append(_format_label(str(agents[i]), latex_rendering))
     # x-cut
     if x_cut is not None:
         x = x[:x_cut]
-        for i in range(len(agents)):
+        for i in range(n_curves):
             y[i] = y[i][:x_cut]
             y_lo[i] = y_lo[i][:x_cut]
             y_up[i] = y_up[i][:x_cut]
@@ -275,18 +376,21 @@ def plot(
     colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
     ax.set_prop_cycle(cycler('color', colors))
 
-    for i in range(len(agents)):
-        label_i = _format_label(str(agents[i]), latex_rendering)
+    for i in range(n_curves):
         if moving_average:
-            _x, y[i], y_lo[i], y_up[i] = compute_moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
+            if y_lo is not None and y_up is not None:
+                _x, y[i], y_lo[i], y_up[i] = compute_moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
+            else:
+                _x, y[i], _, _ = compute_moving_average(ma_width, x, y[i], None, None)
         else:
             _x = x
         if y_lo is not None and y_up is not None:
-            plt.fill_between(_x, y_lo[i], y_up[i], alpha=0.25, facecolor=colors[i], edgecolor=colors[i])
+            c_i = colors[i % len(colors)]
+            plt.fill_between(_x, y_lo[i], y_up[i], alpha=0.25, facecolor=c_i, edgecolor=c_i)
         if plot_markers:
-            plt.plot(_x, y[i], '-o', label=label_i, marker=markers[i])
+            plt.plot(_x, y[i], '-o', label=labels[i], marker=markers[i % len(markers)])
         else:
-            plt.plot(_x, y[i], label=label_i)
+            plt.plot(_x, y[i], label=labels[i])
 
     plt.xlabel(x_label)
     plt.ylabel(y_label)
@@ -312,7 +416,149 @@ def plot(
     else:
         exp_name = exp_dir_split_list[0]
     if plot_title:
-        plt_title = _format_title(title_prefix + exp_name)
+        plt_title = _format_title(title) if title is not None else _format_title(title_prefix + exp_name)
+        plt.title(plt_title)
+
+    # Save
+    plot_file_name = os.path.join(path, pdf_name + '.pdf')
+    plt.savefig(plot_file_name, format='pdf')
+
+    # Open
+    if open_plot:
+        open_prefix = 'gnome-' if sys.platform == 'linux' or sys.platform == 'linux2' else ''
+        os.system(open_prefix + 'open ' + plot_file_name)
+
+    # Clear and close
+    plt.cla()
+    plt.close()
+
+
+def plot_color_bars(
+        path,
+        pdf_name,
+        x,
+        y,
+        y_lo,
+        y_up,
+        cb_min,
+        cb_max,
+        cb_step,
+        x_label,
+        y_label,
+        title_prefix,
+        labels,
+        x_cut=None,
+        decreasing_x_axis=False,
+        open_plot=False,
+        title=None,
+        plot_title=False,
+        plot_markers=True,
+        plot_legend=False,
+        legend_at_bottom=False,
+        moving_average=True,
+        ma_width=10,
+        latex_rendering=False
+):
+    """
+    Standard plotting routine with color bars.
+    :param path: (str) experiment path
+    :param pdf_name: (str)
+    :param x: (list) x axis data
+    :param y: (list) list of array-like containing the x data for each agent
+    :param y_lo: (list) list of array-like containing the lower bound on the confidence interval of the y data
+    :param y_up: (list) list of array-like containing the upper bound on the confidence interval of the y data
+    :param x_label: (str)
+    :param y_label: (str)
+    :param title_prefix: (str)
+    :param labels: (list) list of labels if agents is None
+    :param x_cut: (int) cut the x_axis, does nothing if set to None
+    :param decreasing_x_axis: (bool)
+    :param open_plot: (bool)
+    :param title: (str)
+    :param plot_title: (bool)
+    :param plot_markers: (bool)
+    :param plot_legend: (bool)
+    :param legend_at_bottom: (bool)
+    :param moving_average: (bool)
+    :param ma_width: (int)
+    :param latex_rendering: (bool)
+    :return: None
+    """
+    # Labels
+    n_curves = len(labels)  # number of curves
+    for i in range(len(labels)):
+        labels[i] = _format_label(labels[i], latex_rendering)
+
+    # x-cut
+    if x_cut is not None:
+        x = x[:x_cut]
+        for i in range(n_curves):
+            y[i] = y[i][:x_cut]
+            y_lo[i] = y_lo[i][:x_cut]
+            y_up[i] = y_up[i][:x_cut]
+
+    # LaTeX rendering
+    if latex_rendering:
+        rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='serif')
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    # Markers and colors
+    markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
+    cb_parameters = np.array(range(cb_min, cb_max, cb_step))
+    norm = matplotlib.colors.Normalize(vmin=np.min(cb_parameters), vmax=np.max(cb_parameters))
+    c_m = matplotlib.cm.cool  # color map
+
+    # create a ScalarMappable and initialize a data structure
+    s_m = matplotlib.cm.ScalarMappable(cmap=c_m, norm=norm)
+    s_m.set_array([])
+
+    for i in range(n_curves):
+        color_i = s_m.to_rgba(cb_parameters[i])
+        if moving_average:
+            if y_lo is not None and y_up is not None:
+                _x, y[i], y_lo[i], y_up[i] = compute_moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
+            else:
+                _x, y[i], _, _ = compute_moving_average(ma_width, x, y[i], None, None)
+        else:
+            _x = x
+        if y_lo is not None and y_up is not None:
+            plt.fill_between(_x, y_lo[i], y_up[i], alpha=0.25, facecolor=color_i, edgecolor=color_i)
+        if plot_markers:
+            plt.plot(_x, y[i], '-o', label=labels[i], marker=markers[i % len(markers)], color=color_i)
+        else:
+            plt.plot(_x, y[i], label=labels[i], color=color_i)
+
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    # plt.ylim(bottom=0)
+    if decreasing_x_axis:
+        plt.xlim(max(x), min(x))
+
+    # Legend
+    if plot_legend:
+        if legend_at_bottom:
+            # Shrink current axis's height by p% on the bottom
+            p = 0.4
+            box = ax.get_position()
+            ax.set_position([box.x0, box.y0 + box.height * p, box.width, box.height * (1.0 - p)])
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=False, shadow=False, ncol=2)
+        else:
+            plt.legend(loc='best')
+
+    # Grid and color bar
+    plt.grid(True, linestyle='--')
+    plt.colorbar(s_m)
+
+    exp_dir_split_list = path.split("/")
+    if 'results' in exp_dir_split_list:
+        exp_name = exp_dir_split_list[exp_dir_split_list.index('results') + 1]
+    else:
+        exp_name = exp_dir_split_list[0]
+    if plot_title:
+        plt_title = _format_title(title) if title is not None else _format_title(title_prefix + exp_name)
         plt.title(plt_title)
 
     # Save

@@ -105,7 +105,7 @@ def experiment(p, name):
     run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
                         n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=False,
                         plot_legend=2, do_run=False, do_plot=True, parallel_run=True, n_processes=None,
-                        episodes_moving_average=True, episodes_ma_width=100, tasks_moving_average=True, tasks_ma_width=2,
+                        episodes_moving_average=True, episodes_ma_width=100, tasks_moving_average=False, tasks_ma_width=2,
                         latex_rendering=True)
 
 

@@ -257,7 +257,6 @@ def my_plot_bound_use(
         open_prefix = 'gnome-' if sys.platform == 'linux' or sys.platform == 'linux2' else ''
         os.system(open_prefix + 'open ' + plot_file_name)
 
-
     # Clear and close
     plt.cla()
     plt.close()

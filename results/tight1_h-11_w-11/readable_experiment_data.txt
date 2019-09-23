@@ -1,9 +1,0 @@
-(MDP)
-	tight1_h-11_w-11
-(Agents)
-	ExpLRMax,0
-(Params)
-	instances : 1
-	episodes : 100
-	steps : 10
-	track_disc_reward : False
