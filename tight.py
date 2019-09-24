@@ -27,6 +27,7 @@ PARAM = [
     {'version': 2, 'size': 11, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 10, 'n_known': 1, 'stochastic': False},
     {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 400, 'n_steps': 10, 'n_known': 1, 'stochastic': True},
     {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 1200, 'n_steps': 10, 'n_known': 3, 'stochastic': True},
+    {'version': 2, 'size': 11, 'n_tasks': 15, 'n_episodes': 2000, 'n_steps': 10, 'n_known': 10, 'stochastic': True},  # 11 -> BIS
     {'version': 2, 'size': 11, 'n_tasks': 30, 'n_episodes': 4000, 'n_steps': 10, 'n_known': 10, 'stochastic': True},  # 11 -> SELECTED
 
     {'version': 2, 'size': 14, 'n_tasks': 20, 'n_episodes': 200, 'n_steps': 12, 'n_known': 1, 'stochastic': False},
@@ -47,7 +48,8 @@ def experiment(p, name):
         version=p['version'],
         w=size,
         h=size,
-        stochastic=p['stochastic']
+        stochastic=p['stochastic'],
+        verbose=False
     )
     actions = env_distribution.get_actions()
     n_known = p['n_known']
@@ -70,15 +72,15 @@ def experiment(p, name):
     lrmax_p01 = LRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                       deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                       max_memory_size=max_mem, prior=0.1, estimate_distances_online=True,
-                      min_sampling_probability=p_min, name='LRMax(Dmax=0.1)')
+                      min_sampling_probability=p_min, name='LRMax(0.1)')
     lrmax_p015 = LRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                        deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                        max_memory_size=max_mem, prior=0.15, estimate_distances_online=True,
-                       min_sampling_probability=p_min, name='LRMax(Dmax=0.15)')
+                       min_sampling_probability=p_min, name='LRMax(0.15)')
     lrmax_p02 = LRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                       deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                       max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
-                      min_sampling_probability=p_min, name='LRMax(Dmax=0.2)')
+                      min_sampling_probability=p_min, name='LRMax(0.2)')
     maxqinit = MaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                         deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                         min_sampling_probability=p_min, name='MaxQInit')
@@ -89,15 +91,15 @@ def experiment(p, name):
     lrmaxqinit_p01 = LRMaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                                 deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                                 n_states=n_states, max_memory_size=max_mem, prior=0.1, estimate_distances_online=True,
-                                min_sampling_probability=p_min, name='LRMaxQInit(Dmax=0.1)')
+                                min_sampling_probability=p_min, name='LRMaxQInit(0.1)')
     lrmaxqinit_p015 = LRMaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                                  deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                                  n_states=n_states, max_memory_size=max_mem, prior=0.15, estimate_distances_online=True,
-                                 min_sampling_probability=p_min, name='LRMaxQInit(Dmax=0.15)')
+                                 min_sampling_probability=p_min, name='LRMaxQInit(0.15)')
     lrmaxqinit_p02 = LRMaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                                 deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                                 n_states=n_states, max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
-                                min_sampling_probability=p_min, name='LRMaxQInit(Dmax=0.2)')
+                                min_sampling_probability=p_min, name='LRMaxQInit(0.2)')
     # agents_pool = [rmax, lrmax, lrmax_p01, lrmax_p015, lrmax_p02, maxqinit, lrmaxqinit, lrmaxqinit_p01, lrmaxqinit_p015, lrmaxqinit_p02]
     agents_pool = [rmax, lrmax, lrmax_p02, lrmax_p01, maxqinit, lrmaxqinit, lrmaxqinit_p01]
 
@@ -105,7 +107,7 @@ def experiment(p, name):
     run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
                         n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=False,
                         plot_legend=2, do_run=False, do_plot=True, parallel_run=True, n_processes=None,
-                        episodes_moving_average=True, episodes_ma_width=100, tasks_moving_average=False, tasks_ma_width=2,
+                        episodes_moving_average=True, episodes_ma_width=100, tasks_moving_average=False,
                         latex_rendering=True)
 
 

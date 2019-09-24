@@ -41,6 +41,16 @@ color_ls = [
 ]
 
 
+def unzip(lst):
+    x, x_lo, x_up = [], [], []
+    for e in lst:
+        tmp = list(zip(*e))
+        x.append(np.array(tmp[0]))
+        x_lo.append(np.array(tmp[1]))
+        x_up.append(np.array(tmp[2]))
+    return x, x_lo, x_up
+
+
 def averaged_lifelong_plot(
         dfs,
         agents,
@@ -50,6 +60,8 @@ def averaged_lifelong_plot(
         confidence,
         open_plot,
         plot_title,
+        norm_ag=None,  # normalize everything w.r.t. the agent of the specified index
+        which_norm_ag=0,  # 0: normalize everything; 1: normalize w.r.t. episodes; 2: normalize w.r.t. tasks
         plot_legend=0,
         legend_at_bottom=False,
         episodes_moving_average=False,
@@ -58,77 +70,97 @@ def averaged_lifelong_plot(
         tasks_ma_width=10,
         latex_rendering=False
 ):
-    tre, tre_lo, tre_up = [], [], []
-    dre, dre_lo, dre_up = [], [], []
-    trt, trt_lo, trt_up = [], [], []
-    drt, drt_lo, drt_up = [], [], []
-    for i in range(len(agents)):
-        tre_i, tre_lo_i, tre_up_i = [], [], []
-        dre_i, dre_lo_i, dre_up_i = [], [], []
+    # Extract data
+    n_agents = len(agents)
+    tre, dre, trt, drt = [], [], [], []
+    for i in range(n_agents):
+        tre_i, dre_i = [], []
         for j in range(1, n_episodes + 1):
-            df = dfs[i].loc[dfs[i]['episode'] == j]
-            tre_mci_j = mean_confidence_interval(df['return'], confidence)
-            tre_i.append(tre_mci_j[0])
-            tre_lo_i.append(tre_mci_j[1])
-            tre_up_i.append(tre_mci_j[2])
-            dre_mci_j = mean_confidence_interval(df['discounted_return'], confidence)
-            dre_i.append(dre_mci_j[0])
-            dre_lo_i.append(dre_mci_j[1])
-            dre_up_i.append(dre_mci_j[2])
+            tr_norm, dr_norm = 1., 1.
+            if norm_ag is not None and which_norm_ag in [0, 1]:
+                df = dfs[norm_ag]
+                df = df.loc[df['episode'] >= 1500]  # remove extra episodes
+                df = df.loc[df['episode'] <= n_episodes]  # remove extra episodes
+                df = df.loc[df['task'] <= n_tasks]  # remove extra tasks
+                tr_norm = max(df['return'].mean(), .001)
+                dr_norm = max(df['discounted_return'].mean(), .001)
+
+            df = dfs[i].loc[dfs[i]['episode'] == j]  # data-frame for agent i, episode j
+            df = df.loc[df['task'] <= n_tasks]  # only select tasks <= n_tasks
+
+            tre_i.append(mean_confidence_interval(df['return'] / tr_norm, confidence))
+            dre_i.append(mean_confidence_interval(df['discounted_return'] / dr_norm, confidence))
         tre.append(tre_i)
-        tre_lo.append(tre_lo_i)
-        tre_up.append(tre_up_i)
         dre.append(dre_i)
-        dre_lo.append(dre_lo_i)
-        dre_up.append(dre_up_i)
 
-        trt_i, trt_lo_i, trt_up_i = [], [], []
-        drt_i, drt_lo_i, drt_up_i = [], [], []
+        trt_i, drt_i = [], []
         for j in range(1, n_tasks + 1):
-            df = dfs[i].loc[dfs[i]['task'] == j]
-            trt_mci_j = mean_confidence_interval(df['return'], confidence)
-            trt_i.append(trt_mci_j[0])
-            trt_lo_i.append(trt_mci_j[1])
-            trt_up_i.append(trt_mci_j[2])
-            drt_mci_j = mean_confidence_interval(df['discounted_return'], confidence)
-            drt_i.append(drt_mci_j[0])
-            drt_lo_i.append(drt_mci_j[1])
-            drt_up_i.append(drt_mci_j[2])
-        trt.append(trt_i)
-        trt_lo.append(trt_lo_i)
-        trt_up.append(trt_up_i)
-        drt.append(drt_i)
-        drt_lo.append(drt_lo_i)
-        drt_up.append(drt_up_i)
+            tr_norm, dr_norm = 1., 1.
+            if norm_ag is not None and which_norm_ag in [0, 2]:
+                df = dfs[norm_ag]
+                df = df.loc[df['episode'] <= n_episodes]  # remove extra episodes
+                df = df.loc[df['task'] == n_tasks]  # remove extra tasks
+                tr_norm = max(df['return'].mean(), .001)
+                dr_norm = max(df['discounted_return'].mean(), .001)
 
+            df = dfs[i].loc[dfs[i]['task'] == j]  # data-frame for agent i, task j
+            df = df.loc[df['episode'] <= n_episodes]  # only select episodes <= n_episodes
+
+            trt_i.append(mean_confidence_interval(df['return'] / tr_norm, confidence))
+            drt_i.append(mean_confidence_interval(df['discounted_return'] / dr_norm, confidence))
+        trt.append(trt_i)
+        drt.append(drt_i)
+
+    # x-axis
     x_e = np.array(range(1, n_episodes + 1))
     x_t = np.array(range(1, n_tasks + 1))
+
+    # Unzip everything for confidence intervals
+    tre, tre_lo, tre_up = unzip(tre)
+    dre, dre_lo, dre_up = unzip(dre)
+    trt, trt_lo, trt_up = unzip(trt)
+    drt, drt_lo, drt_up = unzip(drt)
+
+    # Labels
     x_label_e = r'Episode number'
     x_label_t = r'Task number'
+    if norm_ag is None:
+        y_labels = [r'Average Return', r'Average Discounted Return', r'Average Return', r'Average Discounted Return']
+    else:
+        y_labels = [
+            r'\% Average Return relatively to ' + str(agents[norm_ag]) if
+            which_norm_ag in [0, 1] else r'Average Return',
+            r'\% Average Discounted Return relatively to ' + str(agents[norm_ag]) if
+            which_norm_ag in [0, 1] else r'Average Discounted Return',
+            r'\% Average Return relatively to ' + str(agents[norm_ag]) if
+            which_norm_ag in [0, 2] else r'Average Return',
+            r'\% Average Discounted Return relatively to ' + str(agents[norm_ag]) if
+            which_norm_ag in [0, 2] else r'Average Discounted Return'
+        ]
 
     # Plots w.r.t. episodes
-    plot_legend = True if plot_legend == 1 or plot_legend == 3 else False
+    plot_legend = True if plot_legend in [1, 3] else False
     plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
-         x_label=x_label_e, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
+         x_label=x_label_e, y_label=y_labels[0], title_prefix=r'Average Return: ', open_plot=open_plot,
          plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
-         moving_average=episodes_moving_average, ma_width=episodes_ma_width, latex_rendering=latex_rendering,
-         x_cut=None)
+         ma=episodes_moving_average, ma_width=episodes_ma_width, latex_rendering=latex_rendering,
+         x_cut=None, plot_markers=False)
     plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
-         x_label=x_label_e, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
+         x_label=x_label_e, y_label=y_labels[1], title_prefix=r'Average Discounted Return: ',
          open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
-         moving_average=episodes_moving_average, ma_width=episodes_ma_width, latex_rendering=latex_rendering,
-         x_cut=None)
+         ma=episodes_moving_average, ma_width=episodes_ma_width, latex_rendering=latex_rendering,
+         x_cut=None, plot_markers=False)
 
     # Plots w.r.t. tasks
-    plot_legend = True if plot_legend == 2 or plot_legend == 3 else False
+    plot_legend = True if plot_legend in [2, 3] else False
     plot(path, pdf_name='return_vs_task', agents=agents, x=x_t, y=trt, y_lo=trt_lo, y_up=trt_up,
-         x_label=x_label_t, y_label=r'Average Return', title_prefix=r'Average Return: ', open_plot=open_plot,
+         x_label=x_label_t, y_label=y_labels[2], title_prefix=r'Average Return: ', open_plot=open_plot,
          plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
-         moving_average=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
+         ma=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
     plot(path, pdf_name='discounted_return_vs_task', agents=agents, x=x_t, y=drt, y_lo=drt_lo, y_up=drt_up,
-         x_label=x_label_t, y_label=r'Average Discounted Return', title_prefix=r'Average Discounted Return: ',
+         x_label=x_label_t, y_label=y_labels[3], title_prefix=r'Average Discounted Return: ',
          open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
-         moving_average=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
+         ma=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
 
 
 def raw_lifelong_plot(
@@ -142,15 +174,14 @@ def raw_lifelong_plot(
         plot_title=True,
         plot_legend=True,
         legend_at_bottom=False,
-        moving_average=False,
+        ma=False,
         ma_width=10,
         latex_rendering=False
 ):
     # TODO remove
     plot_title = True
     confidence = None
-    n_episodes = 2000
-    n_tasks = 3
+    n_tasks = 15
 
     x = np.array(range(1, n_episodes + 1))
     x_label = r'Episode number'
@@ -182,12 +213,19 @@ def raw_lifelong_plot(
         agent_name = str(agents[i])
         pdf_name = 'lifelong-' + agent_name
         pdf_name = pdf_name.lower()
-        plot_color_bars(path, pdf_name=pdf_name, x=x, y=tr_per_task, y_lo=None, y_up=None, cb_min=1,
+
+        plot_color_bars(path, pdf_name=pdf_name+'-return', x=my_x, y=tr_per_task, y_lo=None, y_up=None, cb_min=1,  # TODO warning my_x
                         cb_max=n_tasks + 1, cb_step=1, x_label=x_label,
-                        y_label='Return', title_prefix='', labels=labels, x_cut=None, decreasing_x_axis=False,
-                        open_plot=open_plot,
-                        title=agent_name, plot_title=plot_title, plot_markers=True, plot_legend=plot_legend,
-                        legend_at_bottom=legend_at_bottom, moving_average=moving_average, ma_width=ma_width,
+                        y_label='Return', title_prefix='', labels=labels, cbar_label='Task number',
+                        title=agent_name, plot_title=plot_title, plot_markers=False, plot_legend=False,
+                        legend_at_bottom=legend_at_bottom, ma=ma, ma_width=ma_width,
+                        latex_rendering=latex_rendering)
+
+        plot_color_bars(path, pdf_name=pdf_name+'-discounted-return', x=x, y=dr_per_task, y_lo=None, y_up=None, cb_min=1,
+                        cb_max=n_tasks + 1, cb_step=1, x_label=x_label,
+                        y_label='Discounted return', title_prefix='', labels=labels, cbar_label='Task number',
+                        title=agent_name, plot_title=plot_title, plot_markers=False, plot_legend=False,
+                        legend_at_bottom=legend_at_bottom, ma=ma, ma_width=ma_width,
                         latex_rendering=latex_rendering)
 
 
@@ -229,29 +267,56 @@ def lifelong_plot(
     :param latex_rendering: (bool)
     :return: None
     """
+    norm_ag = 0
+    which_norm_ag = 2
+
     dfs = []
     for agent in agents:
         agent_path = csv_path_from_agent(path, agent)
         dfs.append(pandas.read_csv(agent_path))
-
+    '''
     raw_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence, open_plot=open_plot, plot_title=plot_title,
                       plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
-                      moving_average=episodes_moving_average, ma_width=episodes_ma_width,
+                      ma=episodes_moving_average, ma_width=episodes_ma_width,
                       latex_rendering=latex_rendering)
-
-    # TODO put back
     '''
     averaged_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title,
-                           plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
+                           plot_legend=plot_legend, legend_at_bottom=legend_at_bottom, norm_ag=norm_ag,
+                           which_norm_ag=which_norm_ag,
                            episodes_moving_average=episodes_moving_average, episodes_ma_width=episodes_ma_width,
                            tasks_moving_average=tasks_moving_average, tasks_ma_width=tasks_ma_width,
                            latex_rendering=latex_rendering)
-    '''
 
 
-def compute_moving_average(w, x, y, y_lo=None, y_up=None):
+def ma(x, w):
+    df = pandas.DataFrame(x)
+    ma_df = df.rolling(window=w, min_periods=1, center=True).mean()
+    return np.array(ma_df[0])
+
+
+def moving_average(w, x, y, y_lo=None, y_up=None):
     """
     Compute the moving average.
+    :param w: (int) width
+    :param x: (array-like)
+    :param y: (array-like)
+    :param y_lo: (array-like)
+    :param y_up: (array-like)
+    :return:
+    """
+    assert w > 1, 'Error: moving average width must be > 1: w = {}'.format(w)
+    assert len(x) == len(y), 'Error: x and y vector should have the same length: len(x) = {}, len(y) = {}'.format(
+        len(x), len(y))
+    x_new = x
+    y_new = ma(y, w)
+    y_lo_new = None if y_lo is None else ma(y_lo, w)
+    y_up_new = None if y_lo is None else ma(y_up, w)
+    return x_new, y_new, y_lo_new, y_up_new
+
+
+def sub_sampling(w, x, y, y_lo=None, y_up=None):
+    """
+    Compute a sub-sampling of the input arrays.
     :param w: (int) width
     :param x: (array-like)
     :param y: (array-like)
@@ -316,7 +381,7 @@ def plot(
         plot_markers=True,
         plot_legend=True,
         legend_at_bottom=False,
-        moving_average=True,
+        ma=False,
         ma_width=10,
         latex_rendering=False
 ):
@@ -341,7 +406,7 @@ def plot(
     :param plot_markers: (bool)
     :param plot_legend: (bool)
     :param legend_at_bottom: (bool)
-    :param moving_average: (bool)
+    :param ma: (bool) Moving average
     :param ma_width: (int)
     :param latex_rendering: (bool)
     :return: None
@@ -377,11 +442,11 @@ def plot(
     ax.set_prop_cycle(cycler('color', colors))
 
     for i in range(n_curves):
-        if moving_average:
+        if ma:
             if y_lo is not None and y_up is not None:
-                _x, y[i], y_lo[i], y_up[i] = compute_moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
+                _x, y[i], y_lo[i], y_up[i] = moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
             else:
-                _x, y[i], _, _ = compute_moving_average(ma_width, x, y[i], None, None)
+                _x, y[i], _, _ = moving_average(ma_width, x, y[i], None, None)
         else:
             _x = x
         if y_lo is not None and y_up is not None:
@@ -447,6 +512,7 @@ def plot_color_bars(
         y_label,
         title_prefix,
         labels,
+        cbar_label=None,
         x_cut=None,
         decreasing_x_axis=False,
         open_plot=False,
@@ -455,7 +521,7 @@ def plot_color_bars(
         plot_markers=True,
         plot_legend=False,
         legend_at_bottom=False,
-        moving_average=True,
+        ma=True,
         ma_width=10,
         latex_rendering=False
 ):
@@ -479,7 +545,7 @@ def plot_color_bars(
     :param plot_markers: (bool)
     :param plot_legend: (bool)
     :param legend_at_bottom: (bool)
-    :param moving_average: (bool)
+    :param ma: (bool)
     :param ma_width: (int)
     :param latex_rendering: (bool)
     :return: None
@@ -509,7 +575,7 @@ def plot_color_bars(
     markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
     cb_parameters = np.array(range(cb_min, cb_max, cb_step))
     norm = matplotlib.colors.Normalize(vmin=np.min(cb_parameters), vmax=np.max(cb_parameters))
-    c_m = matplotlib.cm.cool  # color map
+    c_m = matplotlib.cm.summer  # color map
 
     # create a ScalarMappable and initialize a data structure
     s_m = matplotlib.cm.ScalarMappable(cmap=c_m, norm=norm)
@@ -517,11 +583,11 @@ def plot_color_bars(
 
     for i in range(n_curves):
         color_i = s_m.to_rgba(cb_parameters[i])
-        if moving_average:
+        if ma:
             if y_lo is not None and y_up is not None:
-                _x, y[i], y_lo[i], y_up[i] = compute_moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
+                _x, y[i], y_lo[i], y_up[i] = moving_average(ma_width, x, y[i], y_lo[i], y_up[i])
             else:
-                _x, y[i], _, _ = compute_moving_average(ma_width, x, y[i], None, None)
+                _x, y[i], _, _ = moving_average(ma_width, x, y[i], None, None)
         else:
             _x = x
         if y_lo is not None and y_up is not None:
@@ -550,7 +616,9 @@ def plot_color_bars(
 
     # Grid and color bar
     plt.grid(True, linestyle='--')
-    plt.colorbar(s_m)
+    cbar = plt.colorbar(s_m)
+    if cbar_label is not None:
+        cbar.set_label(cbar_label, rotation=270)
 
     exp_dir_split_list = path.split("/")
     if 'results' in exp_dir_split_list:
