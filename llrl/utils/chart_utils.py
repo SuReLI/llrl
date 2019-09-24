@@ -27,7 +27,7 @@ color_ls = [
     [125, 167, 125]
 ]
 '''
-color_ls = [
+_color_ls = [  # Average
     [153, 194, 255],
 
     [159, 198, 177],
@@ -38,6 +38,15 @@ color_ls = [
 
     [255, 166, 77],
     [255, 102, 102]
+]
+
+color_ls = [  # Custom plot
+    [214, 129, 0],
+
+    [255, 110, 110],
+    [255, 43, 43],
+    [110, 110, 110],
+    [46, 46, 46]
 ]
 
 
@@ -139,28 +148,30 @@ def averaged_lifelong_plot(
         ]
 
     # Plots w.r.t. episodes
-    plot_legend = True if plot_legend in [1, 3] else False
+    _lgd = True if plot_legend in [1, 3] else False
     plot(path, pdf_name='return_vs_episode', agents=agents, x=x_e, y=tre, y_lo=tre_lo, y_up=tre_up,
          x_label=x_label_e, y_label=y_labels[0], title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
+         plot_title=plot_title, plot_legend=_lgd, legend_at_bottom=legend_at_bottom,
          ma=episodes_moving_average, ma_width=episodes_ma_width, latex_rendering=latex_rendering,
          x_cut=None, plot_markers=False)
     plot(path, pdf_name='discounted_return_vs_episode', agents=agents, x=x_e, y=dre, y_lo=dre_lo, y_up=dre_up,
          x_label=x_label_e, y_label=y_labels[1], title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
+         open_plot=open_plot, plot_title=plot_title, plot_legend=_lgd, legend_at_bottom=legend_at_bottom,
          ma=episodes_moving_average, ma_width=episodes_ma_width, latex_rendering=latex_rendering,
          x_cut=None, plot_markers=False)
 
     # Plots w.r.t. tasks
-    plot_legend = True if plot_legend in [2, 3] else False
+    _lgd = True if plot_legend in [2, 3] else False
+    _lgd_btm = True
+    _cst = True
     plot(path, pdf_name='return_vs_task', agents=agents, x=x_t, y=trt, y_lo=trt_lo, y_up=trt_up,
          x_label=x_label_t, y_label=y_labels[2], title_prefix=r'Average Return: ', open_plot=open_plot,
-         plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
-         ma=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
+         plot_title=plot_title, plot_legend=_lgd, legend_at_bottom=_lgd_btm,
+         ma=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering, custom=_cst)
     plot(path, pdf_name='discounted_return_vs_task', agents=agents, x=x_t, y=drt, y_lo=drt_lo, y_up=drt_up,
          x_label=x_label_t, y_label=y_labels[3], title_prefix=r'Average Discounted Return: ',
-         open_plot=open_plot, plot_title=plot_title, plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
-         ma=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering)
+         open_plot=open_plot, plot_title=plot_title, plot_legend=_lgd, legend_at_bottom=_lgd_btm,
+         ma=tasks_moving_average, ma_width=tasks_ma_width, latex_rendering=latex_rendering, custom=_cst)
 
 
 def raw_lifelong_plot(
@@ -178,11 +189,6 @@ def raw_lifelong_plot(
         ma_width=10,
         latex_rendering=False
 ):
-    # TODO remove
-    plot_title = True
-    confidence = None
-    n_tasks = 15
-
     x = np.array(range(1, n_episodes + 1))
     x_label = r'Episode number'
     labels = ['Task ' + str(t) for t in range(1, n_tasks + 1)]
@@ -214,7 +220,7 @@ def raw_lifelong_plot(
         pdf_name = 'lifelong-' + agent_name
         pdf_name = pdf_name.lower()
 
-        plot_color_bars(path, pdf_name=pdf_name+'-return', x=my_x, y=tr_per_task, y_lo=None, y_up=None, cb_min=1,  # TODO warning my_x
+        plot_color_bars(path, pdf_name=pdf_name+'-return', x=x, y=tr_per_task, y_lo=None, y_up=None, cb_min=1,
                         cb_max=n_tasks + 1, cb_step=1, x_label=x_label,
                         y_label='Return', title_prefix='', labels=labels, cbar_label='Task number',
                         title=agent_name, plot_title=plot_title, plot_markers=False, plot_legend=False,
@@ -227,6 +233,44 @@ def raw_lifelong_plot(
                         title=agent_name, plot_title=plot_title, plot_markers=False, plot_legend=False,
                         legend_at_bottom=legend_at_bottom, ma=ma, ma_width=ma_width,
                         latex_rendering=latex_rendering)
+
+
+def custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes):
+    rmax_id = 0
+    lrmax_id = 3
+    maxqinit_id = 4
+    x = np.array((range(1, n_episodes + 1)))
+    y, labels = [], []
+
+    # Select data subset
+    for i in range(len(agents)):
+        dfs[i] = dfs[i].loc[dfs[i]['instance'] == 0]
+        dfs[i] = dfs[i].loc[dfs[i]['task'] <= n_tasks]
+        dfs[i] = dfs[i].loc[dfs[i]['episode'] <= n_episodes]
+
+    # R-Max
+    df = dfs[rmax_id]
+    y.append(df.loc[df['task'] == 1]['discounted_return'].values)
+    labels.append('RMax Task = 1')
+
+    # LR-Max
+    df = dfs[lrmax_id]
+    y.append(df.loc[df['task'] == 1]['discounted_return'].values)
+    labels.append('LRMax Task = 1')
+    y.append(df.loc[df['task'] == 2]['discounted_return'].values)
+    labels.append('LRMax Task = 2')
+
+    # MaxQInit
+    df = dfs[maxqinit_id]
+    y.append(df.loc[df['task'] == 11]['discounted_return'].values)
+    labels.append('MaxQInit Task = 11')
+    y.append(df.loc[df['task'] == 12]['discounted_return'].values)
+    labels.append('MaxQInit Task = 12')
+
+    plot(path, pdf_name='custom_lifelong', agents=None, x=x, y=y, y_lo=None, y_up=None, labels=labels,
+         x_label='Episode number', y_label='Discounted return', open_plot=False, plot_title=False,
+         plot_legend=True, legend_at_bottom=False, title_prefix='', plot_markers=False,
+         ma=True, ma_width=200, latex_rendering=True, custom=False)
 
 
 def lifelong_plot(
@@ -274,21 +318,23 @@ def lifelong_plot(
     for agent in agents:
         agent_path = csv_path_from_agent(path, agent)
         dfs.append(pandas.read_csv(agent_path))
-    '''
-    raw_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence, open_plot=open_plot, plot_title=plot_title,
-                      plot_legend=plot_legend, legend_at_bottom=legend_at_bottom,
-                      ma=episodes_moving_average, ma_width=episodes_ma_width,
-                      latex_rendering=latex_rendering)
-    '''
+
+    custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes)
+    exit()
+
     averaged_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title,
-                           plot_legend=plot_legend, legend_at_bottom=legend_at_bottom, norm_ag=norm_ag,
+                           plot_legend=2, legend_at_bottom=legend_at_bottom, norm_ag=norm_ag,
                            which_norm_ag=which_norm_ag,
                            episodes_moving_average=episodes_moving_average, episodes_ma_width=episodes_ma_width,
                            tasks_moving_average=tasks_moving_average, tasks_ma_width=tasks_ma_width,
                            latex_rendering=latex_rendering)
 
+    raw_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence=None, open_plot=open_plot,
+                      plot_title=plot_title, plot_legend=False, legend_at_bottom=False, ma=episodes_moving_average,
+                      ma_width=episodes_ma_width, latex_rendering=latex_rendering)
 
-def ma(x, w):
+
+def compute_ma(x, w):
     df = pandas.DataFrame(x)
     ma_df = df.rolling(window=w, min_periods=1, center=True).mean()
     return np.array(ma_df[0])
@@ -308,9 +354,9 @@ def moving_average(w, x, y, y_lo=None, y_up=None):
     assert len(x) == len(y), 'Error: x and y vector should have the same length: len(x) = {}, len(y) = {}'.format(
         len(x), len(y))
     x_new = x
-    y_new = ma(y, w)
-    y_lo_new = None if y_lo is None else ma(y_lo, w)
-    y_up_new = None if y_lo is None else ma(y_up, w)
+    y_new = compute_ma(y, w)
+    y_lo_new = None if y_lo is None else compute_ma(y_lo, w)
+    y_up_new = None if y_lo is None else compute_ma(y_up, w)
     return x_new, y_new, y_lo_new, y_up_new
 
 
@@ -383,7 +429,8 @@ def plot(
         legend_at_bottom=False,
         ma=False,
         ma_width=10,
-        latex_rendering=False
+        latex_rendering=False,
+        custom=False
 ):
     """
     Standard plotting routine.
@@ -411,9 +458,18 @@ def plot(
     :param latex_rendering: (bool)
     :return: None
     """
+    # Font size and LaTeX rendering
+    matplotlib.rcParams.update({'font.size': 17})  # default: 10
+    if latex_rendering:
+        rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='serif')
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
+    # Parse labels
     if agents is None:
         n_curves = len(labels)
-        agents = labels
     else:
         n_curves = len(agents)
         labels = []
@@ -426,14 +482,6 @@ def plot(
             y[i] = y[i][:x_cut]
             y_lo[i] = y_lo[i][:x_cut]
             y_up[i] = y_up[i][:x_cut]
-
-    # LaTeX rendering
-    if latex_rendering:
-        rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
-    ax = plt.figure().gca()
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     # Set markers and colors
     markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
@@ -457,11 +505,15 @@ def plot(
         else:
             plt.plot(_x, y[i], label=labels[i])
 
+    # x y labels
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     # plt.ylim(bottom=0)
     if decreasing_x_axis:
         plt.xlim(max(x), min(x))
+
+    if custom:
+        ax.yaxis.set_label_coords(-0.1, 0.1)
 
     if plot_legend:
         if legend_at_bottom:
@@ -550,6 +602,15 @@ def plot_color_bars(
     :param latex_rendering: (bool)
     :return: None
     """
+    # Font size and LaTeX rendering
+    matplotlib.rcParams.update({'font.size': 17})  # default: 10
+    if latex_rendering:
+        rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='serif')
+    ax = plt.figure().gca()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+
     # Labels
     n_curves = len(labels)  # number of curves
     for i in range(len(labels)):
@@ -562,14 +623,6 @@ def plot_color_bars(
             y[i] = y[i][:x_cut]
             y_lo[i] = y_lo[i][:x_cut]
             y_up[i] = y_up[i][:x_cut]
-
-    # LaTeX rendering
-    if latex_rendering:
-        rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
-    ax = plt.figure().gca()
-    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     # Markers and colors
     markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
@@ -590,8 +643,12 @@ def plot_color_bars(
                 _x, y[i], _, _ = moving_average(ma_width, x, y[i], None, None)
         else:
             _x = x
+
+        # Interval plot
         if y_lo is not None and y_up is not None:
             plt.fill_between(_x, y_lo[i], y_up[i], alpha=0.25, facecolor=color_i, edgecolor=color_i)
+
+        # Mean plot
         if plot_markers:
             plt.plot(_x, y[i], '-o', label=labels[i], marker=markers[i % len(markers)], color=color_i)
         else:
