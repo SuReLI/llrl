@@ -1,0 +1,7 @@
+instance_number,run_number,time_step,prior,n_prior_use,n_dista_use,n_rmax,n_lip,ratio_rmax_bound_use,ratio_lip_bound_use,n_time_steps,n_time_steps_cv,avg_ts_l10,avg_ts_l50,discounted_return,total_return
+0,0,110,0.1,130,0,0,0,0.0,0.0,110,0.0,0.0
+0,2,110,1.0,140,0,0,0,0.0,0.0,110,0.0,0.0
+0,1,110,0.2,142,0,0,0,0.0,0.0,110,0.0,0.0
+0,0,110,0.1,126,0,0,0,0.0,0.0,110,0.0,0.0
+0,2,110,1.0,130,0,0,0,0.0,0.0,110,0.0,0.0
+0,1,110,0.2,140,0,0,0,0.0,0.0,110,0.0,0.0

@@ -12,9 +12,10 @@ from llrl.utils.utils import mean_confidence_interval
 from llrl.utils.save import csv_path_from_agent
 
 COLOR_SHIFT = 0
+FONT_SIZE = 17
 
 '''
-color_ls = [
+COLOR_LIST = [
     [118, 167, 125],
     [102, 120, 173],
     [198, 113, 113],
@@ -27,7 +28,7 @@ color_ls = [
     [125, 167, 125]
 ]
 '''
-_color_ls = [  # Average
+_COLOR_LIST = [  # Average
     [153, 194, 255],
 
     [159, 198, 177],
@@ -40,13 +41,14 @@ _color_ls = [  # Average
     [255, 102, 102]
 ]
 
-color_ls = [  # Custom plot
-    [214, 129, 0],
+COLOR_LIST = [  # Custom plot
+    [138, 138, 138],
 
-    [255, 110, 110],
-    [255, 43, 43],
-    [110, 110, 110],
-    [46, 46, 46]
+    [255, 136, 0],
+    [235, 64, 52],
+
+    [113, 201, 147],
+    [51, 158, 92]
 ]
 
 
@@ -235,6 +237,10 @@ def raw_lifelong_plot(
                         latex_rendering=latex_rendering)
 
 
+def custom_label(agent, task):
+    return str(agent) + r' Task = ' + str(task)
+
+
 def custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes):
     rmax_id = 0
     lrmax_id = 3
@@ -248,28 +254,37 @@ def custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes):
         dfs[i] = dfs[i].loc[dfs[i]['task'] <= n_tasks]
         dfs[i] = dfs[i].loc[dfs[i]['episode'] <= n_episodes]
 
+    # Normalizers
+    df = dfs[rmax_id]
+    se = 1500
+    norm_1 = df.loc[df['task'] == 1].loc[df['episode'] >= se]['discounted_return'].mean()
+    norm_2 = df.loc[df['task'] == 2].loc[df['episode'] >= se]['discounted_return'].mean()
+    norm_11 = df.loc[df['task'] == 11].loc[df['episode'] >= se]['discounted_return'].mean()
+    norm_12 = df.loc[df['task'] == 12].loc[df['episode'] >= se]['discounted_return'].mean()
+
     # R-Max
     df = dfs[rmax_id]
-    y.append(df.loc[df['task'] == 1]['discounted_return'].values)
-    labels.append('RMax Task = 1')
+    y.append(df.loc[df['task'] == 1]['discounted_return'].values / norm_1)
+    labels.append(custom_label(agents[rmax_id], 1))
 
     # LR-Max
     df = dfs[lrmax_id]
-    y.append(df.loc[df['task'] == 1]['discounted_return'].values)
-    labels.append('LRMax Task = 1')
-    y.append(df.loc[df['task'] == 2]['discounted_return'].values)
-    labels.append('LRMax Task = 2')
+    y.append(df.loc[df['task'] == 1]['discounted_return'].values / norm_1)
+    labels.append(custom_label(agents[lrmax_id], 1))
+    y.append(df.loc[df['task'] == 2]['discounted_return'].values / norm_2)
+    labels.append(custom_label(agents[lrmax_id], 2))
 
     # MaxQInit
     df = dfs[maxqinit_id]
-    y.append(df.loc[df['task'] == 11]['discounted_return'].values)
-    labels.append('MaxQInit Task = 11')
-    y.append(df.loc[df['task'] == 12]['discounted_return'].values)
-    labels.append('MaxQInit Task = 12')
+    y.append(df.loc[df['task'] == 11]['discounted_return'].values / norm_11)
+    labels.append(custom_label(agents[maxqinit_id], 11))
+    y.append(df.loc[df['task'] == 12]['discounted_return'].values / norm_12)
+    labels.append(custom_label(agents[maxqinit_id], 12))
 
+    y_lab = r'Relative discounted return'
     plot(path, pdf_name='custom_lifelong', agents=None, x=x, y=y, y_lo=None, y_up=None, labels=labels,
-         x_label='Episode number', y_label='Discounted return', open_plot=False, plot_title=False,
-         plot_legend=True, legend_at_bottom=False, title_prefix='', plot_markers=False,
+         x_label='Episode number', y_label=y_lab, open_plot=False, plot_title=False,
+         plot_legend=True, legend_at_bottom=True, title_prefix='', plot_markers=False,
          ma=True, ma_width=200, latex_rendering=True, custom=False)
 
 
@@ -456,10 +471,11 @@ def plot(
     :param ma: (bool) Moving average
     :param ma_width: (int)
     :param latex_rendering: (bool)
+    :param custom: (bool)
     :return: None
     """
     # Font size and LaTeX rendering
-    matplotlib.rcParams.update({'font.size': 17})  # default: 10
+    matplotlib.rcParams.update({'font.size': FONT_SIZE})  # default: 10
     if latex_rendering:
         rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
         plt.rc('text', usetex=True)
@@ -485,7 +501,7 @@ def plot(
 
     # Set markers and colors
     markers = ['o', 's', 'D', '^', '*', 'x', 'p', '+', 'v', '|']
-    colors = [[shade / 255.0 for shade in rgb] for rgb in color_ls]
+    colors = [[shade / 255.0 for shade in rgb] for rgb in COLOR_LIST]
     colors = colors[COLOR_SHIFT:] + colors[:COLOR_SHIFT]
     ax.set_prop_cycle(cycler('color', colors))
 
@@ -521,7 +537,7 @@ def plot(
             p = 0.4
             box = ax.get_position()
             ax.set_position([box.x0, box.y0 + box.height * p, box.width, box.height * (1.0 - p)])
-            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=False, shadow=False, ncol=2)
+            ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), fancybox=False, shadow=False, ncol=2)
         else:
             plt.legend(loc='best')
 
@@ -603,7 +619,7 @@ def plot_color_bars(
     :return: None
     """
     # Font size and LaTeX rendering
-    matplotlib.rcParams.update({'font.size': 17})  # default: 10
+    matplotlib.rcParams.update({'font.size': FONT_SIZE})  # default: 10
     if latex_rendering:
         rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
         plt.rc('text', usetex=True)

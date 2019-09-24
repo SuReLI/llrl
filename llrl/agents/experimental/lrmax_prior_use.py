@@ -41,14 +41,6 @@ class ExpLRMax(LRMax):
 
         self.data = {'n_computation': [0], 'n_prior_use': [0]}
 
-    def _set_distance(self, dsa):
-        self.data['n_computation'][-1] += 1
-        if dsa > self.prior:
-            self.data['n_prior_use'][-1] += 1
-            return self.prior
-        else:
-            return dsa
-
     def get_results(self):
         assert len(self.data['n_computation']) == len(self.data['n_prior_use'])
         result = []
@@ -66,6 +58,14 @@ class ExpLRMax(LRMax):
     def act(self, s, r):
         self.time_step += 1
         return LRMax.act(self, s, r)
+
+    def _set_distance(self, dsa):
+        self.data['n_computation'][-1] += 1
+        if dsa > self.prior:
+            self.data['n_prior_use'][-1] += 1
+            return self.prior
+        else:
+            return dsa
 
     def models_distances(self, u_mem, r_mem, t_mem, s_a_kk, s_a_ku, s_a_uk):
         """

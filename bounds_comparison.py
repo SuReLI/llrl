@@ -305,7 +305,7 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 
     # Parameters
     gamma = 0.9
-    n_instances = 100
+    n_instances = 1
     n_episodes = p['n_episodes']
     n_steps = p['n_steps']
     prior_min = 1.  # (1. + gamma) / (1. - gamma)
