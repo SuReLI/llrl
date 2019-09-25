@@ -12,7 +12,7 @@ from llrl.utils.utils import mean_confidence_interval
 from llrl.utils.save import csv_path_from_agent
 
 COLOR_SHIFT = 0
-FONT_SIZE = 17
+FONT_SIZE = 15
 
 '''
 COLOR_LIST = [
@@ -28,7 +28,7 @@ COLOR_LIST = [
     [125, 167, 125]
 ]
 '''
-_COLOR_LIST = [  # Average
+COLOR_LIST = [  # Average
     [153, 194, 255],
 
     [159, 198, 177],
@@ -41,14 +41,14 @@ _COLOR_LIST = [  # Average
     [255, 102, 102]
 ]
 
-COLOR_LIST = [  # Custom plot
-    [138, 138, 138],
+_COLOR_LIST = [  # Custom plot
+    [153, 194, 255],
 
-    [255, 136, 0],
-    [235, 64, 52],
+    [255, 161, 102],  # [128, 179, 151],
+    [255, 102, 102],  # [96, 160, 126],
 
-    [113, 201, 147],
-    [51, 158, 92]
+    [128, 128, 128],
+    [90, 90, 90]
 ]
 
 
@@ -110,7 +110,8 @@ def averaged_lifelong_plot(
             if norm_ag is not None and which_norm_ag in [0, 2]:
                 df = dfs[norm_ag]
                 df = df.loc[df['episode'] <= n_episodes]  # remove extra episodes
-                df = df.loc[df['task'] == n_tasks]  # remove extra tasks
+                df = df.loc[df['task'] <= n_tasks]  # remove extra tasks
+                df = df.loc[df['task'] == j ]  # remove extra tasks
                 tr_norm = max(df['return'].mean(), .001)
                 dr_norm = max(df['discounted_return'].mean(), .001)
 
@@ -139,13 +140,13 @@ def averaged_lifelong_plot(
         y_labels = [r'Average Return', r'Average Discounted Return', r'Average Return', r'Average Discounted Return']
     else:
         y_labels = [
-            r'\% Average Return relatively to ' + str(agents[norm_ag]) if
+            r'Average Relative Return' if
             which_norm_ag in [0, 1] else r'Average Return',
-            r'\% Average Discounted Return relatively to ' + str(agents[norm_ag]) if
+            r'Average Relative Discounted Return' if
             which_norm_ag in [0, 1] else r'Average Discounted Return',
-            r'\% Average Return relatively to ' + str(agents[norm_ag]) if
+            r'Average Relative Return' if
             which_norm_ag in [0, 2] else r'Average Return',
-            r'\% Average Discounted Return relatively to ' + str(agents[norm_ag]) if
+            r'Average Relative Discounted Return' if
             which_norm_ag in [0, 2] else r'Average Discounted Return'
         ]
 
@@ -285,7 +286,7 @@ def custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes):
     plot(path, pdf_name='custom_lifelong', agents=None, x=x, y=y, y_lo=None, y_up=None, labels=labels,
          x_label='Episode number', y_label=y_lab, open_plot=False, plot_title=False,
          plot_legend=True, legend_at_bottom=True, title_prefix='', plot_markers=False,
-         ma=True, ma_width=200, latex_rendering=True, custom=False)
+         ma=True, ma_width=200, latex_rendering=True, custom=True)
 
 
 def lifelong_plot(
@@ -327,15 +328,12 @@ def lifelong_plot(
     :return: None
     """
     norm_ag = 0
-    which_norm_ag = 2
+    which_norm_ag = 0
 
     dfs = []
     for agent in agents:
         agent_path = csv_path_from_agent(path, agent)
         dfs.append(pandas.read_csv(agent_path))
-
-    custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes)
-    exit()
 
     averaged_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence, open_plot, plot_title,
                            plot_legend=2, legend_at_bottom=legend_at_bottom, norm_ag=norm_ag,
@@ -343,6 +341,9 @@ def lifelong_plot(
                            episodes_moving_average=episodes_moving_average, episodes_ma_width=episodes_ma_width,
                            tasks_moving_average=tasks_moving_average, tasks_ma_width=tasks_ma_width,
                            latex_rendering=latex_rendering)
+    exit()
+
+    custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes)
 
     raw_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence=None, open_plot=open_plot,
                       plot_title=plot_title, plot_legend=False, legend_at_bottom=False, ma=episodes_moving_average,
@@ -475,6 +476,7 @@ def plot(
     :return: None
     """
     # Font size and LaTeX rendering
+    # matplotlib.rcParams["figure.figsize"] = [6.4, 5.5]  # default: [6.4, 4.8]  # TODO remove
     matplotlib.rcParams.update({'font.size': FONT_SIZE})  # default: 10
     if latex_rendering:
         rc('font', **{'family': 'sans-serif', 'sans-serif': ['Helvetica']})
@@ -530,6 +532,7 @@ def plot(
 
     if custom:
         ax.yaxis.set_label_coords(-0.1, 0.1)
+        #plt.figure(figsize=(20, 20))
 
     if plot_legend:
         if legend_at_bottom:
