@@ -38,7 +38,7 @@ def experiment():
     lrmaxprior02 = LRMax(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                          deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                          max_memory_size=max_mem, prior=0.2, estimate_distances_online=False,
-                         min_sampling_probability=p_min, name='LRMax(0.2)')
+                         min_sampling_probability=p_min, name='LRMax(Dmax0.2)')
     maxqinit = MaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                         deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta, n_states=n_states,
                         min_sampling_probability=p_min, name='MaxQInit')
@@ -49,18 +49,12 @@ def experiment():
     lrmaxqinitprior02 = LRMaxQInit(actions=actions, gamma=gamma, r_max=r_max, v_max=v_max, deduce_v_max=False, n_known=n_known,
                                    deduce_n_known=False, epsilon_q=epsilon_q, epsilon_m=epsilon_m, delta=delta,
                                    n_states=n_states, max_memory_size=max_mem, prior=0.2, estimate_distances_online=True,
-                                   min_sampling_probability=p_min, name='LRMaxQInit(0.2)')
+                                   min_sampling_probability=p_min, name='LRMaxQInit(Dmax0.2)')
     agents_pool = [rmax, lrmax, lrmaxprior02, maxqinit, lrmaxqinit, lrmaxqinitprior02]
 
     # Run
     run_agents_lifelong(agents_pool, env_distribution, name_identifier=None, n_instances=1, n_tasks=20, n_episodes=20,
-                        n_steps=11, reset_at_terminal=False, do_run=False, do_plot=True, open_plot=False,
-                        episodes_moving_average=False,
-                        episodes_ma_width=10,
-                        tasks_moving_average=False,
-                        tasks_ma_width=10,
-                        latex_rendering=True,
-                        plot_title=False)
+                        n_steps=11, reset_at_terminal=False, plot_only=True, open_plot=True, plot_title=True)
 
 
 if __name__ == '__main__':

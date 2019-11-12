@@ -1,0 +1,14 @@
+(MDP)
+	lifelong-corridor_h-1_w-20
+(Agents)
+	RMax,0
+	LRMax,1
+	LRMax(0.2),2
+	MaxQInit,3
+	LRMaxQInit,4
+	LRMaxQInit(0.2),5
+(Params)
+	samples : 20
+	episodes : 20
+	steps : 11
+	track_disc_reward : False

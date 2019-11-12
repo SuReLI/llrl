@@ -33,7 +33,7 @@ COLOR_LIST = [  # Average
 
     [159, 198, 177],
     [128, 179, 151],
-    [96, 160, 126],
+    # [96, 160, 126],
 
     [90, 90, 90],
 
@@ -90,7 +90,8 @@ def averaged_lifelong_plot(
             tr_norm, dr_norm = 1., 1.
             if norm_ag is not None and which_norm_ag in [0, 1]:
                 df = dfs[norm_ag]
-                df = df.loc[df['episode'] >= 1500]  # remove extra episodes
+                # TODO set this param (1500 for tight and 12 for corridor)
+                df = df.loc[df['episode'] >= 12]  # remove extra episodes
                 df = df.loc[df['episode'] <= n_episodes]  # remove extra episodes
                 df = df.loc[df['task'] <= n_tasks]  # remove extra tasks
                 tr_norm = max(df['return'].mean(), .001)
@@ -327,6 +328,8 @@ def lifelong_plot(
     :param latex_rendering: (bool)
     :return: None
     """
+    # TODO set those parameters:
+    # norm_ag, which_norm_ag = (0, 0) for tight
     norm_ag = 0
     which_norm_ag = 0
 
@@ -341,13 +344,12 @@ def lifelong_plot(
                            episodes_moving_average=episodes_moving_average, episodes_ma_width=episodes_ma_width,
                            tasks_moving_average=tasks_moving_average, tasks_ma_width=tasks_ma_width,
                            latex_rendering=latex_rendering)
-    exit()
 
-    custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes)
+    # custom_lifelong_plot(dfs, agents, path, n_tasks, n_episodes)
 
-    raw_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence=None, open_plot=open_plot,
-                      plot_title=plot_title, plot_legend=False, legend_at_bottom=False, ma=episodes_moving_average,
-                      ma_width=episodes_ma_width, latex_rendering=latex_rendering)
+    # raw_lifelong_plot(dfs, agents, path, n_tasks, n_episodes, confidence=None, open_plot=open_plot,
+    #                   plot_title=plot_title, plot_legend=False, legend_at_bottom=False, ma=episodes_moving_average,
+    #                   ma_width=episodes_ma_width, latex_rendering=latex_rendering)
 
 
 def compute_ma(x, w):
