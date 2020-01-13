@@ -117,5 +117,8 @@ if __name__ == '__main__':
     experiment_index = int(sys.argv[1])
     tight_version = PARAM[experiment_index]['version']
     experiment_name = 'tight-v' + str(tight_version) + '-' + str(experiment_index)
+    
+    print(PARAM[experiment_index])
+    exit()
 
     experiment(PARAM[experiment_index], experiment_name)

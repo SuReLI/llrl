@@ -371,6 +371,9 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 
 if __name__ == '__main__':
     exp_id = int(sys.argv[1])
+    
+    print(exp_id == -1)
+    exit()
 
     if exp_id == -1:
         for _exp_id in range(len(PARAM)):
