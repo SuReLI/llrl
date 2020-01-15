@@ -21,9 +21,9 @@ To run the experiments of the Lipschitz Lifelong Reinforcement Learning paper, g
 
 Experiment 1:
 
-	python tight.py 11
+	python tight.py
 
 Experiment 2:
 
-	python bounds_comparison.py -1
+	python bounds_comparison.py
 

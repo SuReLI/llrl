@@ -106,13 +106,17 @@ def experiment(p, name):
     # Run
     run_agents_lifelong(agents_pool, env_distribution, n_instances=2, n_tasks=p['n_tasks'], n_episodes=p['n_episodes'],
                         n_steps=p['n_steps'], reset_at_terminal=False, open_plot=False, plot_title=False,
-                        plot_legend=2, do_run=False, do_plot=True, parallel_run=True, n_processes=None,
+                        plot_legend=2, do_run=True, do_plot=True, parallel_run=True, n_processes=None,
                         episodes_moving_average=True, episodes_ma_width=100, tasks_moving_average=False,
                         latex_rendering=True)
 
 
 if __name__ == '__main__':
     # np.random.seed(1993)
+    
+    exp_id = 11  # default
+    if len(sys.argv) == 2:
+        exp_id = int(sys.argv[1])
 
     experiment_index = int(sys.argv[1])
     tight_version = PARAM[experiment_index]['version']
@@ -122,3 +126,4 @@ if __name__ == '__main__':
     exit()
 
     experiment(PARAM[experiment_index], experiment_name)
+

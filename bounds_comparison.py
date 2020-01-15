@@ -49,65 +49,6 @@ PARAM = [
 ]
 
 
-P_PARAM = [
-    {'env': 'tight', 'n_episodes': 500, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 500, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 2000, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 2000, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
-
-    {'env': 'tight', 'n_episodes': 500, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 500, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 2000, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 2000, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01}
-]
-
-
-PP_PARAM = [
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},  #
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},  #
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},  #
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},  #
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},  #
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},  #
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 10, 'w': 11, 'h': 11, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
-    
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 1, 'n_known': 1, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 1, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': True, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 2, 'n_known': 1, 'epsilon_m': 0.00001},
-    {'env': 'tight', 'n_episodes': 100, 'n_steps': 4, 'w': 5, 'h': 5, 'sto': False, 'version': 2, 'n_known': 10, 'epsilon_m': 0.00001},
-
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01},
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.01},
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.01},  #
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 1, 'epsilon_m': 0.00001},
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': True, 'version': 0, 'n_known': 10, 'epsilon_m': 0.00001},
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 1, 'epsilon_m': 0.00001},  #
-    {'env': 'corridor', 'n_episodes': 100, 'n_steps': 11, 'w': 20, 'h': 1, 'sto': False, 'version': 0, 'n_known': 10, 'epsilon_m': 0.00001}
-]
-
-
 def compute_speed_up(m, lo, up, lrmax_df, rmax_df, confidence=0.9, rmax_m_lrmax=True):
     lrmax_data = np.array(lrmax_df)
     rmax_data = np.array(rmax_df)
@@ -175,13 +116,13 @@ def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=0.9, open_plot
         dr_m, dr_lo, dr_up = compute_speed_up(dr_m, dr_lo, dr_up, ldf.discounted_return, rdf.discounted_return, rmax_m_lrmax=False)
 
     label_data_dict = {
-        r'\% use Lipschitz bound': (rlbu_m, rlbu_lo, rlbu_up),
+        r'$\rho_{Lip}$ (\% use Lipschitz bound)': (rlbu_m, rlbu_lo, rlbu_up),
         # r'\% time-steps to convergence gained': (su_m, su_lo, su_up),
         # r'\% average speed-up 2': (su_t2_m, su_t2_lo, su_t2_up),
         # r'\% average speed-up 5': (su_t5_m, su_t5_lo, su_t5_up),
         # r'\% average speed-up 10': (su_t10_m, su_t10_lo, su_t10_up),
-        r'\% convergence speed-up': (su_t50_m, su_t50_lo, su_t50_up),  # r'\% average speed-up 50': (su_t50_m, su_t50_lo, su_t50_up),
-        r'\% total return gain': (tr_m, tr_lo, tr_up),
+        r'$\rho_{Speed-up}$ (\% convergence speed-up)': (su_t50_m, su_t50_lo, su_t50_up),  # r'\% average speed-up 50': (su_t50_m, su_t50_lo, su_t50_up),
+        r'$\rho_{Return}$ (\% total return gain)': (tr_m, tr_lo, tr_up),
         # r'\% discounted return gained': (dr_m, dr_lo, dr_up)
     }
 
@@ -370,13 +311,13 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 
 
 if __name__ == '__main__':
-    exp_id = int(sys.argv[1])
-    
-    print(exp_id == -1)
-    exit()
+    exp_id = 3  # default
+    if len(sys.argv) == 2:
+        exp_id = int(sys.argv[1])
 
-    if exp_id == -1:
+    if exp_id == -1:  # run everything
         for _exp_id in range(len(PARAM)):
-            bounds_comparison_experiment(_exp_id, do_run=False, do_plot=True, open_plot=False)
+            bounds_comparison_experiment(_exp_id, do_run=True, do_plot=True, open_plot=False)
     else:
-        bounds_comparison_experiment(exp_id, do_run=False, do_plot=True, open_plot=True)
+        bounds_comparison_experiment(exp_id, do_run=True, do_plot=True, open_plot=True)
+
