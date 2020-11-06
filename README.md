@@ -26,4 +26,13 @@ Experiment 1:
 Experiment 2:
 
 	python bounds_comparison.py
+	
+## Additional experiments
+
+Additional experiments on the corridor, maze and heat-map environments can be found in the following scripts:
+
+	experiments/lifelong_corridor.py
+	experiments/lifelong_maze_mono.py
+	experiments/lifelong_maze_multi.py
+	experiments/lifelong_heat_map.py
 

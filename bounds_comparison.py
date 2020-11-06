@@ -121,7 +121,7 @@ def plot_bound_use(path, lrmax_path, rmax_path, n_run, confidence=0.9, open_plot
         # r'\% average speed-up 2': (su_t2_m, su_t2_lo, su_t2_up),
         # r'\% average speed-up 5': (su_t5_m, su_t5_lo, su_t5_up),
         # r'\% average speed-up 10': (su_t10_m, su_t10_lo, su_t10_up),
-        r'$\rho_{Speed-up}$ (\% convergence speed-up)': (su_t50_m, su_t50_lo, su_t50_up),  # r'\% average speed-up 50': (su_t50_m, su_t50_lo, su_t50_up),
+        r'$\rho_{Speed\text{-}up}$ (\% convergence speed-up)': (su_t50_m, su_t50_lo, su_t50_up),  # r'\% average speed-up 50': (su_t50_m, su_t50_lo, su_t50_up),
         r'$\rho_{Return}$ (\% total return gain)': (tr_m, tr_lo, tr_up),
         # r'\% discounted return gained': (dr_m, dr_lo, dr_up)
     }
@@ -180,7 +180,7 @@ def my_plot_bound_use(
         i += 1
 
     if latex_rendering:
-        plt.xlabel(r'Prior knowledge (known upper-bound on $\max_{s, a} = D^{M \bar{M}}_{\gamma V^*_{\bar{M}}}(s, a)$)')
+        plt.xlabel(r'Prior knowledge (known upper-bound on $\max_{s, a} = D_{s a} ( M \| \bar{M} )$)')
     else:
         plt.xlabel(r'Prior knowledge')
     plt.ylabel(r'\%')
@@ -285,7 +285,6 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 
         lrmax.write(init=True)
         rmax.write(init=True)
-
         if multi_thread:
             n_processes = multiprocessing.cpu_count() if n_threads is None else n_threads
             print('Using', n_processes, 'threads.')
@@ -312,6 +311,10 @@ def bounds_comparison_experiment(index, do_run=False, do_plot=True, multi_thread
 
 if __name__ == '__main__':
     exp_id = 3  # default
+
+    bounds_comparison_experiment(exp_id, do_run=False, do_plot=True, open_plot=True)
+    exit()
+
     if len(sys.argv) == 2:
         exp_id = int(sys.argv[1])
 
